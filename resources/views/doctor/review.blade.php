@@ -2,18 +2,23 @@
 @extends('layouts.default')
 @section('content')
 <section class="vbox">
-            <header class="header bg-white b-b b-light">
-                    <p><span class="label label-success">{{ $visit_details->consultation_type }} - {{ $visit_details->referal_doctor }}</span></p> 
-                    <p class="block"><a href="#" class=""></a> <span class="label label-warning btn-rounded">{{ $visit_details->visit_type }}</span></p>
-                     <p class="block"><a href="#" class=""></a> <span class="label label-success btn-rounded">{{ $visit_details->opd_number }}</span></p>
-                     <p class="block"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Created : {{ Carbon\Carbon::parse($visit_details->created_on)->diffForHumans() }}</span></p>
+           <header class="header bg-white b-b b-light">
+                    
 
-                     <div class="btn-group pull-right">
-                    <p>
-        <a href="#" class="btn btn-rounded btn-sm btn-info"><i class="fa fa-fw fa-user"></i> {{ $visit_details->payercode }}</a>
-        <a href="#" class="btn btn-rounded btn-sm btn-primary"><i class="fa fa-fw fa-home"></i> {{ $visit_details->care_provider }} </a>
-                    </p>
-              </div>
+                     
+
+                      <a href="#" class="btn btn-warning btn-s-md btn-lg pull-right">Total Charge : GHS {{ $payables }}</a>
+                      <a href="#" class="btn btn-success btn-s-md btn-lg pull-right">Paid : GHS {{ $receivables }}</a>
+                      <a href="#" class="btn btn-danger btn-s-md btn-lg pull-right">Outstanding : GHS {{ number_format($outstanding, 1, '.', ',') }}</a>
+
+                      ||
+
+                   
+                      
+                     <a href="#"  class="btn btn-info btn-s-md btn-lg btn-rounded">{{ $visit_details->care_provider }}</a> ||
+                     <a href="#"  class="btn btn-info btn-s-md btn-lg btn-rounded">{{ $patients[0]->company }}</span></a>
+                   
+           
             </header>
             <section class="scrollable">
               <section class="hbox stretch">
@@ -30,7 +35,10 @@
                             <br>
                             <div>
                           
-                           <p class="block"><a href="#" class="">ID # </a> <span class="label label-default">{{ $patients[0]->patient_id }}</span></p>
+                           <p class="block"><a href="#" class="">ID # </a> <span class="label label-default">{{ $patients[0]->patient_id }}</span></p><br>
+                           <p><span class="label label-success">{{ $visit_details->consultation_type }} </span></p> <br>
+                            <p class="block"><a href="#" class=""></a> <span class="label label-success btn-rounded">{{ $visit_details->opd_number }}</span></p><br>
+                     <p class="block"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Created : {{ Carbon\Carbon::parse($visit_details->created_on)->diffForHumans() }}</span></p>
                             </div>
                           </div>                
                         </div>
@@ -99,8 +107,11 @@
                                 @if($vital->temperature == '') @else <li> Temperature <label class="badge bg-info"> {{$vital->temperature}} ° </label>{{ $vital->temp_status }}</li> @endif
                                 @if($vital->pulse_rate == '') @else <li> Pulse Rate <label class="badge bg-info"> {{$vital->pulse_rate}}  </label></li> @endif
                                 @if($vital->bp_status == '') @else <li> Blood Pressure <label class="badge bg-info"> {{$vital->sbp }} / {{ $vital->dbp  }} </label>{{$vital->bp_status}}</li> @endif
+                                 @if($vital->spo2 == '') @else <li> SPO2 <label class="badge bg-info"> {{$vital->spo2}}  </label></li> @endif
                                  @if($vital->waist_circumference == '') @else <li> Waist Circumference <label class="badge bg-info"> {{$vital->waist_circumference }} </label></li> @endif
                                   @if($vital->hip_circumference == '') @else <li> Hip Circumference <label class="badge bg-info"> {{$vital->hip_circumference }} </label></li> @endif
+
+                                  @if($vital->remarks == '') @else <li> Remarks <label class="badge bg-info"> {{$vital->remarks}}  </label></li> @endif
                                  </ul>
                                  <div class="line"></div>
                                @endforeach
@@ -110,7 +121,7 @@
                           <br>
                      
                           
-                          <img src="/images/188062.svg"> 
+                          <img src="/images/188062.svg" width="100%"> 
                         </div>
                       </div>
                     </section>
@@ -131,11 +142,20 @@
                          <li class=""><a href="#review-investigation" data-toggle="tab"><i class="fa fa-film text-default"></i> Lab / Investigations </a></li>
                         <li class=""><a href="#review-procedure" data-toggle="tab"><i class="fa fa-gears (alias) text-default"></i> Procedures </a></li>
                         <li class=""><a href="#review-medication" data-toggle="tab"><i class="fa fa-flask text-default"></i> Medication </a></li>
-                         <li class=""><a href="#review-discharge" data-toggle="tab"><i class="fa fa-bars text-default"></i> Visit Summary </a></li>
+                        
                          <li class=""><a href="#review-documents" data-toggle="tab"><i class="fa fa-folder text-default"></i> Documents </a></li> 
-                         <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa fa-folder text-default"></i> Notes Summary </a></li> 
+                         <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa  fa-code-fork text-default"></i> Notes Summary </a></li> 
                          <li class=""><a href="#history-summary" data-toggle="tab"><i class="fa fa-archive text-default"></i> Notes History (Old Visits) </a></li> 
                          <li class=""><a href="#review-referal" data-toggle="tab"><i class="fa fa-briefcase text-default"></i> Referal Note </a></li> 
+                         <li class=""><a href="#review-continuation" data-toggle="tab"><i class="fa fa-file text-default"></i> Continuation Note for Ward Review </a></li> 
+
+                          <li class=""><a href="#review-vitals" data-toggle="tab"><i class="fa fa-tint text-default"></i> Intake / Output Chart </a></li>  
+
+                           <li class=""><a href="#nurse-plan" data-toggle="tab"><i class="fa fa-folder-o text-default"></i> Nurse Notes </a></li>  
+
+
+                         <li class=""><a href="#review-discharge" data-toggle="tab"><i class="fa fa-bars text-default"></i> Visit Summary </a></li>
+                         <li class=""><a href="#review-appointment" data-toggle="tab"><i class="fa fa-calendar text-default"></i> Book & View Appointments </a></li>
                         
                       </ul>
                     </header>
@@ -146,13 +166,15 @@
                      <div class="tab-content"> 
 
 
+
+
                         <div class="tab-pane" id="review-investigation">
                           <section class="panel panel-default">
                       <div class="panel-body">
                  
                        <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
-                           <select id="investigation" name="investigation" rows="3" tabindex="1" data-placeholder="Search investigation ..." style="width:100%">
+                           <select id="investigation" name="investigation" onchange="getDiagnosisState();" rows="3" tabindex="1" data-placeholder="Search investigation ..." style="width:100%">
                            <option value="">-- Select Investigation --</option>
                            @foreach($investigations as $investigation)
                         <option value="{{ $investigation->type }}">{{ $investigation->type }}</option>
@@ -208,6 +230,33 @@
                     </div>
                     </section>
                   </div>
+
+
+                   <div class="tab-pane" id="nurse-plan">
+                         
+                        <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Nurse Notes</header>
+                                <div class="panel-body">
+                                      <div class="panel-body text-sm">
+                          <div class="col-sm-12">
+                      
+                        
+                       <textarea id="continuation_sheet" name="continuation_sheet"> 
+                                 {!!$mynursenotes->content!!}
+                               </textarea>
+                       
+                      </div>
+                      </div>
+
+                                </div>
+                                </section>
+
+                        <footer class="panel-footer text-right bg-light lter">
+                      <button type="button" onclick="addNurseNote()" class="btn btn-success btn-s-xs">Add Note</button>
+                         
+                      </footer>
+                     
+                  </div> 
 
                      <div class="tab-pane" id="review-discharge">
                           <section class="panel panel-default">
@@ -398,8 +447,8 @@
                             <a class="btn btn-default btn-sm" data-edit="redo" title="" data-original-title="Redo (Ctrl/Cmd+Y)"><i class="fa fa-repeat"></i></a>
                           </div>
                         </div>
-                        <div id="myreferal" name="myreferal" class="form-control" style="overflow:scroll;height:300px;max-height:300px" contenteditable="true"> @foreach($myplan as $plan)
-                                 <a>{!!$plan->assessment!!}</a>
+                        <div id="myreferal" name="myreferal" class="form-control" style="overflow:scroll;height:300px;max-height:300px" contenteditable="true"> @foreach($referals as $note)
+                                 <a>{!!$note->content!!}</a>
                                @endforeach</div>
 
 
@@ -476,19 +525,19 @@
                               <span class="timeline-date">History</span>
                               <h5>
                                 <span>History</span>
-                                @foreach($myhistories as $history)
+                                
                                 <ul>
-                                @if($history->medical_history == '') @else <li>Past Medical History <label class="badge bg-default"> {{$history->medical_history}}  </label></li> @endif
-                                @if($history->family_history == '') @else <li>Family History <label class="badge bg-info"> {{$history->family_history}}  </label></li> @endif
-                                @if($history->social_history == '') @else <li> Social History <label class="badge bg-primary"> {{$history->social_history}}  </label></li> @endif
-                                 @if($history->drug_history == '') @else <li> Drug History <label class="badge bg-success">Takes {{$history->drug_history}}  </label></li> @endif
-                                @if($history->surgical_history == '') @else <li>Surgical History <label class="badge bg-warning"> {{$history->surgical_history}}  </label></li> @endif
-                                @if($history->reproductive_history == '') @else <li> Reproductive History <label class="badge bg-danger"> {{$history->reproductive_history}}  </label></li> @endif
-                                @if($history->vaccinations_history == '') @else <li>Vacinnations <label class="badge bg-default"> {{$history->vaccinations_history}}  </label></li> @endif
-                                @if($history->allergy == '') @else <li> Allergies <label class="badge bg-danger"> {{$history->allergy}}  </label></li> 
+                                @if($myhistories->medical_history == '') @else <li>Past Medical History <label class="badge bg-default"> {{$myhistories->medical_history}}  </label></li> @endif
+                                @if($myhistories->family_history == '') @else <li>Family History <label class="badge bg-info"> {{$myhistories->family_history}}  </label></li> @endif
+                                @if($myhistories->social_history == '') @else <li> Social History <label class="badge bg-primary"> {{$myhistories->social_history}}  </label></li> @endif
+                                 @if($myhistories->drug_history == '') @else <li> Drug History <label class="badge bg-success">Takes {{$myhistories->drug_history}}  </label></li> @endif
+                                @if($myhistories->surgical_history == '') @else <li>Surgical History <label class="badge bg-warning"> {{$myhistories->surgical_history}}  </label></li> @endif
+                                @if($myhistories->reproductive_history == '') @else <li> Reproductive History <label class="badge bg-danger"> {{$myhistories->reproductive_history}}  </label></li> @endif
+                                @if($myhistories->vaccinations_history == '') @else <li>Vacinnations <label class="badge bg-default"> {{$myhistories->vaccinations_history}}  </label></li> @endif
+                                @if($myhistories->allergy == '') @else <li> Allergies <label class="badge bg-danger"> {{$myhistories->allergy}}  </label></li> 
                                 @endif
                                 </ul>
-                               @endforeach
+                               
                               </h5>
                               <p></p>
                             </div>
@@ -684,6 +733,18 @@
                
                        <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
+                           <select id="diagnosis_type" name="diagnosis_type" rows="3" tabindex="1" data-placeholder="Search diagnosis ..." class="form-control m-b">
+                           <option value="">-- Select Diagnosis Type --</option>
+                            <option value="Differential Diagnosis">Differential Diagnosis</option>
+                             <option value="Provisional Diagnosis">Provisional Diagnosis</option>
+                             <option value="Final Diagnosis">Final Diagnosis</option>
+                        </select>         
+                          </div>
+                        </div>
+
+
+                       <div class="form-group pull-in clearfix">
+                          <div class="col-sm-12">
                            <select id="diagnosis" name="diagnosis[]" multiple rows="3" tabindex="1" data-placeholder="Search diagnosis ..." style="width:100%">
                            <option value="">-- Select Diagnosis --</option>
                            @foreach($diagnosis as $diagnosis)
@@ -697,7 +758,7 @@
                           <div class="col-sm-12">
                             <label>Remarks</label> 
                             <div class="form-group{{ $errors->has('diagnosis_remark') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="3" class="form-control" id="diagnosis_remark" name="investigation_remark" value="{{ Request::old('diagnosis_remark') ?: '' }}"></textarea>   
+                            <textarea type="text" rows="3" class="form-control" id="diagnosis_remark" name="diagnosis_remark" value="{{ Request::old('diagnosis_remark') ?: '' }}"></textarea>   
                            @if ($errors->has('diagnosis_remark'))
                           <span class="help-block">{{ $errors->first('diagnosis_remark') }}</span>
                            @endif    
@@ -720,8 +781,9 @@
                       <table id="diagnosisTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
                           <thead>
                             <tr>
-                          
+                              <th>Type</th>
                               <th>Diagnosis</th>
+                              <th> Remark </th>
                               <th> By</th>
                               <th>Date</th>
                               <th></th>
@@ -737,6 +799,30 @@
                   </div>
 
 
+
+                                   <div class="tab-pane active" id="review-vitals">
+                         
+                    <img src="/images/139328.svg" width="7%" align="right"> 
+                        <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Vital Signs Chart</header>
+                                
+                      <div class="col-lg-12">
+                  <section class="panel panel-default">
+                    <header class="panel-heading">
+                      Vital Chart Graph
+                    </header>
+                    <div class="panel-body text-center">
+                      
+                      <small class="text-muted block"></small>
+                      <div class="inline">
+                          @include('charts/vitals') 
+                      </div>                      
+                    </div>
+                    <div class="panel-footer"><small><a href="#" > % of change</a></small></div>
+                  </section>
+                </div>
+                    </section>
+                  </div>
                   
                    <div class="tab-pane" id="review-history">
                           <section class="panel panel-default">
@@ -917,7 +1003,7 @@
                              <label class="badge bg-primary">Past Medical History</label> 
                         <select name="medical_history[]" id="medical_history" style="width:100%" multiple data-placeholder="PMHx"  >
 
-                         <option value="@foreach($myhistories as $val) {{ $val->medical_history }}@endforeach" selected > @foreach($myhistories as $val) {{ $val->medical_history }} @endforeach </option>
+                         <option value="{{ $myhistories->medical_history }}" selected > {{ $myhistories->medical_history }} </option>
 
                           @foreach($pastmedicalhx as $pastmedicalhx)
                         <option  value="{{ $pastmedicalhx->type }}">{{ $pastmedicalhx->type }}</option>
@@ -928,7 +1014,8 @@
                            <label class="badge bg-warning" data-toggle="tooltip" data-placement="right" title="" data-original-title="Indicate ages and state of health of family members. For deceased family members, note age at the time of death and cause, if known. Specifically mention diabetes, hypetention, coronary artery disease, cancer, arthritis, alcoholism or known genetic illnesses.">Family History</label> 
                         <select name="family_history[]" id="family_history" style="width:100%" multiple data-placeholder="FMHx">
 
-                          <option value="@foreach($myhistories as $val) {{ $val->family_history }}@endforeach" selected > @foreach($myhistories as $val) {{ $val->family_history }}@endforeach </option>
+                          <option value="{{ $myhistories->family_history }}" selected > {{ $myhistories->family_history }}</option>
+                          
                           @foreach($familyhx as $familyhx)
                         <option  value="{{ $familyhx->type }}">{{ $familyhx->type }}</option>
                           @endforeach
@@ -938,7 +1025,7 @@
                            <label class="badge bg-success" data-toggle="tooltip" data-placement="right" title="" data-original-title="Born, raised, resides, living situation, relationship, support system, dialy activities, leisure, cultural/spiritual beliefs, alternative health care practises, health habits, tobacco, alcohol, sexual risk.">Phychosocial History</label> 
                         <select name="social_history[]" id="social_history" style="width:100%" multiple data-placeholder="SHx"  >
 
-                        <option value="@foreach($myhistories as $val) {{ $val->social_history }}@endforeach" selected > @foreach($myhistories as $val) {{ $val->social_history }}@endforeach </option>
+                        <option value="{{ $myhistories->social_history }}" selected >  {{ $myhistories->social_history }} </option>
 
                           @foreach($socialhx as $socialhx)
                         <option  value="{{ $socialhx->type }}">{{ $socialhx->type }}</option>
@@ -950,7 +1037,7 @@
                            <label class="badge bg-danger">Vaccinations</label> 
                         <select name="vaccinations_history[]" id="vaccinations_history" style="width:100%" multiple data-placeholder=""  >
 
-                        <option value="@foreach($myhistories as $val) {{ $val->vaccinations_history }}@endforeach" selected > @foreach($myhistories as $val) {{ $val->vaccinations_history }}@endforeach </option>
+                        <option value="{{ $myhistories->vaccinations_history }}" selected > {{ $myhistories->vaccinations_history }} </option>
 
                           @foreach($vacinnationhx as $vacinnationhx)
                         <option  value="{{ $vacinnationhx->type }}">{{ $vacinnationhx->type }}</option>
@@ -965,10 +1052,10 @@
 
                             <div class="form-group pull-in clearfix ">
                            <div class="col-sm-3">
-                           <label class="badge bg-danger">Current Medications</label> 
+                           <label class="badge bg-danger">Past Medications</label> 
                         <select name="drug_history[]" id="drug_history" style="width:100%" multiple data-placeholder="Meds"  >
 
-                        <option value="@foreach($myhistories as $val) {{ $val->drug_history }}@endforeach" selected > @foreach($myhistories as $val) {{ $val->drug_history }}@endforeach </option>
+                        <option value="{{ $myhistories->drug_history }}" selected > {{ $myhistories->drug_history }} </option>
 
                           @foreach($medicationhx as $medicationhx)
                         <option  value="{{ $medicationhx->type }}">{{ $medicationhx->type }}</option>
@@ -979,7 +1066,7 @@
                            <div class="col-sm-3">
                            <label class="badge bg-info">Surgical History</label> 
                         <select name="surgical_history[]" id="surgical_history" style="width:100%" multiple data-placeholder="PSHx"  >
-                        <option value="@foreach($myhistories as $val) {{ $val->surgical_history }}@endforeach" selected > @foreach($myhistories as $val) {{ $val->surgical_history }}@endforeach </option>
+                        <option value="{{ $myhistories->surgical_history }}" selected > {{ $myhistories->surgical_history }}</option>
 
                           @foreach($surgicalhx as $surgicalhx)
                         <option  value="{{ $surgicalhx->type }}">{{ $surgicalhx->type }}</option>
@@ -990,7 +1077,7 @@
                            <div class="col-sm-3">
                            <label class="badge bg-warning">Reproductive/Prenatal History</label> 
                         <select name="reproductive_history[]" id="reproductive_history" style="width:100%" multiple data-placeholder="RHx"  >
-                        <option value="@foreach($myhistories as $val) {{ $val->reproductive_history }}@endforeach" selected > @foreach($myhistories as $val) {{ $val->reproductive_history }}@endforeach </option>
+                        <option value="{{ $myhistories->reproductive_history }}" selected > {{ $myhistories->reproductive_history }} </option>
 
                           @foreach($reproductivehx as $reproductivehx)
                         <option  value="{{ $reproductivehx->type }}">{{ $reproductivehx->type }}</option>
@@ -1002,10 +1089,26 @@
                            <div class="col-sm-3">
                            <label class="badge bg-default"> Allergies</label> 
                         <select name="allergy[]" id="allergy" style="width:100%" multiple data-placeholder="Allergy"  >
-                        <option value="@foreach($myhistories as $val) {{ $val->allergy }}@endforeach" selected > @foreach($myhistories as $val) {{ $val->allergy }}@endforeach </option>
+                        <option value="{{ $myhistories->allergy }}" selected > {{ $myhistories->allergy }} </option>
                           @foreach($allergichx as $allergichx)
                         <option  value="{{ $allergichx->type }}">{{ $allergichx->type }}</option>
                           @endforeach
+                            </select>    
+                          </div>
+                          </div>
+
+
+
+                          <div class="form-group pull-in clearfix ">
+                           <div class="col-sm-3">
+                           <label class="badge bg-danger">Present Medications</label> 
+                        <select name="drug_history_recent[]" id="drug_history_recent" style="width:100%" multiple data-placeholder="Meds"  >
+
+                        <option value="{{ $myhistories->drug_history_recent }}" selected > {{ $myhistories->drug_history_recent }} </option>
+
+                         {{--  @foreach($medicationhx as $medicationhx)
+                        <option  value="{{ $medicationhx->type }}">{{ $medicationhx->type }}</option>
+                          @endforeach --}}
                             </select>    
                           </div>
                           </div>
@@ -1524,7 +1627,7 @@
                       <div id="collapseSeven" class="panel-collapse collapse">
                         <div class="panel-body text-sm">
                           <textarea type="text" rows="3" class="form-control" id="perspective_comment_doctor" name="perspective_comment_doctor" value="{{ Request::old('perspective_comment_doctor') ?: '' }}">@foreach($mycomplaints as $complaint)
-                                 <a>{!!$complaint->doctors_note!!}</a>
+                                 {!!$complaint->doctors_note!!}
                                @endforeach</textarea>
                         </div>
                       </div>
@@ -1687,6 +1790,33 @@
                     </div>
                     </section>
 
+
+                    <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Drug Administration Notes</header>
+                                <div class="panel-body">
+                                      <div class="table-responsive">
+                       <table id="treatmentTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
+                          <thead>
+                            <tr>
+                            
+                              <th>Drug</th>
+                              <th>Time</th>
+                              <th>Remark</th>
+                             <th>Created By</th>
+                             <th></th>
+                             {{--  <th>Unit Cost</th>
+                              <th>Total Cost</th> --}}
+                             
+                            </tr>
+                          </thead>
+                          <tbody>
+                            
+                          </tbody>
+                        </table>
+                    </div>
+                    </div>
+                    </section>
+
                        <div class="line"></div>
                  <div>
                  <a href="/print-prescription/{{ $visit_details->opd_number }}"  class="btn btn-sm btn-dark pull-right" name="visitid" id="visitid" > <i class="fa fa-file"></i>  Print Prescription </a>
@@ -1796,14 +1926,20 @@
                   </div>
 
 
-                  <div class="tab-pane" id="review-assessment">
+                 {{--  <div class="tab-pane" id="review-assessment">
                           <section class="panel panel-default">
                       <div class="panel-body">
+                       
                          <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
                             <label class="badge bg-default">Plan</label> 
                             <div class="form-group{{ $errors->has('assessment') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="10" class="form-control" id="assessment" name="assessment" value="{{ Request::old('assessment') ?: '' }}"></textarea>   
+                           <div id="assessment" name="assessment" class="form-control" style="overflow:scroll;height:500px;max-height:500px" contenteditable="true"> @foreach($myplan as $plan)
+
+                                 <a>{!!$plan->assessment!!}</a>
+                                 <br>
+                                <br>
+                               @endforeach</div>   
                            @if ($errors->has('assessment'))
                           <span class="help-block">{{ $errors->first('assessment') }}</span>
                            @endif    
@@ -1814,14 +1950,14 @@
                       </div>
                       <footer class="panel-footer text-right bg-light lter">
                         @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
-                        <button type="button" onclick="addAssessment()" class="btn btn-success btn-s-xs">Add Plan</button>
+                        <button type="button" onclick="addAssessment()" class="btn btn-success btn-s-xs">Save Plan</button>
                         @else
                         @endif
                       </footer>
                     </section>
-
-                    <img src="/images/439190.svg" width="10%" align="right"> 
-                        <section class="panel panel-info">
+                      <img src="/images/439190.svg" width="10%" align="right"> 
+                   
+                      {{--   <section class="panel panel-info">
                                 <header class="panel-heading font-bold">Plan History</header>
                                 <div class="panel-body">
                                       <div class="table-responsive">
@@ -1841,70 +1977,137 @@
                         </table>
                     </div>
                     </div>
-                    </section>
+                    </section>  
                   </div>
 
-                  {{-- <div class="tab-pane" id="review-plan">
+ --}}
+                    <div class="tab-pane" id="review-assessment">
+                         
+                        <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Doctor's Plan</header>
+                                <div class="panel-body">
+                                      <div class="panel-body text-sm">
+                          <div class="col-sm-12">
+                      
+                        
+                       <textarea id="assessment" name="assessment"> 
+                                 {!!$mydoctorplan->assessment!!}
+                               </textarea>
+                       
+                      </div>
+                      </div>
+
+                                </div>
+                                </section>
+
+                        <footer class="panel-footer text-right bg-light lter">
+                         <button type="button" onclick="addAssessment()" class="btn btn-success btn-s-xs">Save Plan</button>
+                         
+                      </footer>
+                     
+                  </div>
+
+
+
+                    <div class="tab-pane" id="review-appointment">
+                         <section class="hbox stretch">          
+            <!-- .aside -->
+            <aside>
+              <section class="vbox">
+                <section class="scrollable wrapper">
+                  <section class="panel panel-default">
+                    <header class="panel-heading bg-light clearfix">
+                      <div class="btn-group pull-right" data-toggle="buttons">
+                        <label class="btn btn-sm btn-bg btn-default active" id="monthview">
+                          <input type="radio" name="options">Month
+                        </label>
+                        <label class="btn btn-sm btn-bg btn-default" id="weekview">
+                          <input type="radio" name="options">Week
+                        </label>
+                        <label class="btn btn-sm btn-bg btn-default" id="dayview">
+                          <input type="radio" name="options">Day
+                        </label>
+                      </div>
+                      <span class="m-t-xs inline">
+                        Fullcalendar - {{ $visit_details->referal_doctor }}
+                      </span>
+                    </header>
+                    <div class="calendar" id="calendar">
+
+                    </div>
+                  </section>
+                </section>
+              </section>
+            </aside>
+            <!-- /.aside -->
+            <!-- .aside -->
+         <aside class="aside-lg b-l">
+              <div class="padder">
+                <h5>Dragable events</h5>
+                <div class="line"></div>
+
+
+                 <div>
+                <a href="#new-appointment-request"  data-toggle="modal" class="btn btn-sm btn-info bootstrap-modal-form-open"> <i class="fa fa-plus"></i> Create An Appointment</a>
+                </div>
+
+                {{-- <div class="line"></div>
+                 <p class="text-muted">By Consultation </p>
+                <div>
+                 @foreach($servicetype as $servicetype)
+                <a href="/consultation-calendar/{{ 1 }}"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open"> <i class="fa fa-home"></i>  {{ $servicetype->description }} </a>
+                @endforeach
+                </div> --}}
+                <div class="line"></div>
+                <div>  
+               <input type="hidden" id="doctor" name="doctor" value="{{ $visit_details->referal_doctor }}">
+                </div>
+                <p class="text-muted">By Doctor </p>
+                <div>
+                @foreach($doctors as $doctor)
+                <a href="/doctor-appointments/{{ $doctor->name }}"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open"> <i class="fa fa-user-md"></i>  {{ $doctor->name }} </a>
+                @endforeach
+                </div>
+              </div>
+            </aside>
+            <!-- /.aside -->
+          </section>
+                       
+                     
+                  </div>
+
+
+                   <div class="tab-pane" id="review-continuation">
                           <section class="panel panel-default">
                       <div class="panel-body">
-                 
-                
-
                          <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
-                            <label class="badge bg-default">Plan</label> 
-                            <div class="form-group{{ $errors->has('treament_plan') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="10" class="form-control" id="treament_plan" name="treament_plan" value="{{ Request::old('treament_plan') ?: '' }}"></textarea>   
-                           @if ($errors->has('treament_plan'))
-                          <span class="help-block">{{ $errors->first('treament_plan') }}</span>
+                            <label class="badge bg-default">Continuation Sheet / SOAP Notes</label> 
+                            <div class="form-group{{ $errors->has('assessment') ? ' has-error' : ''}}">
+                            
+                       <textarea id="continuation_sheet" name="continuation_sheet">
+                                 {!!$continuation->content!!}
+                               </textarea> 
+
+                           @if ($errors->has('continuation_sheet'))
+                          <span class="help-block">{{ $errors->first('continuation_sheet') }}</span>
+
                            @endif    
                           </div>
                           </div>
                         </div>
 
-                         <div class="form-group pull-in clearfix">
-                          <div class="col-sm-12">
-                            <label class="badge bg-default">Action</label> 
-                            <div class="form-group{{ $errors->has('treament_plan_action') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="10" class="form-control" id="treament_plan_action" name="treament_plan_action" value="{{ Request::old('treament_plan_action') ?: '' }}"></textarea>   
-                           @if ($errors->has('treament_plan_action'))
-                          <span class="help-block">{{ $errors->first('treament_plan_action') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-                        </div>
                       </div>
                       <footer class="panel-footer text-right bg-light lter">
                         @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
-                        <button type="button" onclick="addPlan()" class="btn btn-success btn-s-xs">Add Plan</button>
+                        <button type="button" onclick="addContinuation()" class="btn btn-success btn-s-xs">Add Note</button>
                         @else
                         @endif
                       </footer>
                     </section>
-                    <img src="/images/432215.svg" width="10%" align="right"> 
-                        <section class="panel panel-info">
-                                <header class="panel-heading font-bold">Plan History</header>
-                                <div class="panel-body">
-                                      <div class="table-responsive">
-                       <table id="planTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
-                          <thead>
-                            <tr>
-                              <th>Plan</th>
-                              <th>Action</th>
-                              <th>Date</th>
-                              <th>Status</th>
-                              <th></th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            
-                          </tbody>
-                        </table>
-                    </div>
-                    </div>
-                    </section>
-                  </div> --}}
+                  </div>
+
+
 
                   <div class="tab-pane" id="review-documents">
                          <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
@@ -1959,26 +2162,138 @@
 
   @stop
 
+  <script src="{{ asset('/js/jquery.min.js')}}"></script>
+   <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
+  <script src="{{ asset('/event_components/bootstrap.min.js')}}"></script>
+  <script src="{{ asset('/event_components/fullcalendar.min.js')}}"></script>
+  <script src="{{ asset('/event_components/moment.min.js')}}"></script>
 
-  <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
+  
+<script type="text/javascript">
+  $(document).ready(function() {
+
+  
+       
+    var base_url = '{{ url('/') }}';
+     var doctor = $('#doctor').val();
+
+   $('#calendar').fullCalendar({
+      weekends: false,
+      slotMinutes: 15,
+      theme: false,
+    header: false,
+       minTime: 7,
+    maxTime: 20,
+    height: 800,
+    slotEventOverlap: true,
+
+      header: {
+        left: 'prev,next today,prevYear,nextYear',
+        center: 'title',
+        right: 'listDay,month,agendaWeek,agendaDay'
+      },
+      //weekends : false,
+     defaultView: 'month',
+      weekNumberTitle : "Week",
+      allDayDefault: false,
+      weekNumbers : true,
+      editable: false,
+      eventLimit: true, // allow "more" link when too many events
+      events: {
+         url: '/doctor-calendar/'+doctor+'' ,
+        error: function() {
+          alert("cannot load json");
+        }
+      }
+    });
+
+
+
+  
+  $('#new-appointment-request select[name="title"]').select2();
+  $('#new-appointment-request select[name="name"]').select2();
+  $('#new-appointment-request select[name="referal_doctor"]').select2();
+
+  //$('#new-appointment-request select[name="name"]').select2();
+
+  });
+</script>
+
+<script src="{{ asset('/js/tinymce/tinymce.min.js')}}"></script>
+ 
+ <script>tinymce.init({
+  selector: '#assessment',
+  height: 500,
+  menubar: true,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor textcolor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table contextmenu paste code help wordcount',
+    'template'
+  ],
+  toolbar: 'insert | undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help'  
+
+});
+ </script>
+
+ <script>tinymce.init({
+  selector: '#continuation_sheet',
+  height: 500,
+  menubar: true,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor textcolor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table contextmenu paste code help wordcount',
+    'template'
+  ],
+  toolbar: 'insert | undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help'
+
+  
+
+});
+ </script>
+
+
+
+
+
+ <script type="text/javascript">
+        $(window).on("beforeunload", function() {
+          //swal ("Are you sure? You didn't finish the form!");
+            return "Are you sure? You didn't finish the form!";
+
+        });
+        
+        $(document).ready(function() {
+            $("#masterform").on("submit", function(e) {
+                //check form to make sure it is kosher
+                //remove the ev
+                $(window).off("beforeunload");
+                return true;
+            });
+        });
+</script> 
 
 
 <script type="text/javascript">
 $(function () {
-   $('#time').daterangepicker({
-    "minDate": moment('2016-06-14 0'),
-     "singleDatePicker":true,
+  $('#new-appointment-request input[name="time"]').daterangepicker({
+     "daysOfWeek": ['Mo', 'Tu', 'We', 'Th', 'Fr'],
+    "singleDatePicker":true,
+    "autoApply": true,
+    "showISOWeekNumbers": true,
+    "showDropdowns": true,
     "timePicker": true,
     "timePicker24Hour": true,
     "timePickerIncrement": 15,
-    "autoApply": true,
     "locale": {
-      "format": "DD/MM/YYYY HH:mm:ss",
+     "format": "DD/MM/YYYY HH:mm:ss",
       "separator": " - ",
     }
   });
 });
 </script>
+
 
 
 <script type="text/javascript">
@@ -1993,6 +2308,7 @@ $(document).ready(function () {
                 loadVitals();
                 loadAssessment();
                 loadPlan();
+                //loadTreatmentPlan();
 
     $('#investigation').select2();  
      $('#procedure').select2();
@@ -2005,6 +2321,8 @@ $(document).ready(function () {
      $('#directquestion').select2({
       tags: true
       });
+
+
 
     $('#drug_application').select2({
       tags: true
@@ -2030,6 +2348,10 @@ $(document).ready(function () {
       tags: true
       });
     $('#drug_history').select2({
+      tags: true
+      });
+
+     $('#drug_history_recent').select2({
       tags: true
       });
     $('#surgical_history').select2({
@@ -2229,6 +2551,7 @@ if($('#weight').val()!= "" && $('#height').val()!="")
           function(json)
           {
                  getDrugAvailable();
+                 getDiagnosisState();
             
                 $('#drug_dosage').val(json['drug_dosage']);
                 $('#drug_form').val(json['drug_form']);
@@ -2320,6 +2643,7 @@ if($('#complaint').val()!= "")
           "social_history":  $('#social_history').val(),
           "vaccinations_history":  $('#vaccinations_history').val(),
           "drug_history":  $('#drug_history').val(),
+          "drug_history_recent":  $('#drug_history_recent').val(),
           "surgical_history":  $('#surgical_history').val(),
           "reproductive_history":  $('#reproductive_history').val(),
           "allergy":  $('#allergy').val(),
@@ -2471,10 +2795,11 @@ if($('#myreferal').html()!= "")
 {
 
   //alert($('#complaint').val());
-    $.get('/add-assessment',
+    $.get('/add-doctor-referal',
         {
           "opd_number": $('#opd_number').val(),
-          "assessment": $('#myreferal').html()
+          "patient_id": $('#patient_id').val(),
+          "referal_note": $('#myreferal').html()
                          
         },
         function(data)
@@ -2484,6 +2809,7 @@ if($('#myreferal').html()!= "")
         if(data["OK"])
         {
           
+           sweetAlert("Note saved successfully!");
           loadAssessment();
         }
         else
@@ -2505,9 +2831,12 @@ if($('#assessment').val()!= "")
 {
 
   //alert($('#complaint').val());
+
+  tinyMCE.triggerSave();
     $.get('/add-assessment',
         {
           "opd_number": $('#opd_number').val(),
+          "patient_id": $('#patient_id').val(),
           "assessment": $('#assessment').val()
                          
         },
@@ -2517,7 +2846,7 @@ if($('#assessment').val()!= "")
           $.each(data, function (key, value) {
         if(data["OK"])
         {
-          
+          sweetAlert("Plan saved successfully!");
           loadAssessment();
         }
         else
@@ -2531,6 +2860,44 @@ if($('#assessment').val()!= "")
   else
     {sweetAlert("Please add an assessment!");}
 }
+
+function addContinuation()
+{
+if($('#continuation_sheet').val()!= "")
+{
+
+  //alert($('#complaint').val());
+  tinyMCE.triggerSave();
+    $.get('/add-continuation',
+        {
+          "opd_number": $('#opd_number').val(),
+          "patient_id": $('#patient_id').val(),
+          "continuation_sheet": $('#continuation_sheet').val()
+                         
+        },
+        function(data)
+        { 
+          
+          $.each(data, function (key, value) {
+        if(data["OK"])
+        {
+          
+          sweetAlert("Note saved successfully!");
+          //loadContinuation();
+        }
+        else
+        {
+          sweetAlert("Note failed to be added!");
+        }
+      });
+                                        
+        },'json');
+  }
+  else
+    {sweetAlert("Please add a Note!");}
+}
+
+
 
 function getDrugAvailable()
 {
@@ -2547,6 +2914,38 @@ function getDrugAvailable()
         if(data["OK"])
         {
           sweetAlert("Drug is out of stock!");
+         
+        }
+        else
+        {
+          //sweetAlert("Drug failed to be added!");
+        }
+      });
+                                        
+        },'json');
+
+}
+
+function getDiagnosisState()
+{
+
+     $.get('/get-diagnosis-state',
+        {
+           "opd_number": $('#opd_number').val()    
+
+        },
+        function(data)
+        { 
+          
+          $.each(data, function (key, value) {
+        if(data["OK"])
+        {
+          sweetAlert("No Diagnosis has been added");
+
+          $('#medication').val('');
+          $('#investigation').val('');
+
+
          
         }
         else
@@ -2679,7 +3078,7 @@ if($('#procedure').val()!= "" && $('#procedure_quantity').val()!= "")
 
 function addDiagnosis()
 {
-if($('#diagnosis').val()!= "")
+if($('#diagnosis').val()!= "" && $('#diagnosis_type').val()!= "")
 {
 
     $.get('/add-diagnosis',
@@ -2687,7 +3086,8 @@ if($('#diagnosis').val()!= "")
           "patient_id": $('#patient_id').val(),
           "opd_number": $('#opd_number').val(),
           "diagnosis":  $('#diagnosis').val(),
-          "code":       $('#diagnosis_remark').val(),
+          "diagnosis_type":  $('#diagnosis_type').val(),
+          "diagnosis_remark":       $('#diagnosis_remark').val(),
           "fullname":  $('#fullname').val()                      
         },
         function(data)
@@ -2708,7 +3108,7 @@ if($('#diagnosis').val()!= "")
         },'json');
   }
   else
-    {sweetAlert("Please select a Diagnosis!");}
+    {sweetAlert("Please select a diagnosis type / Key in a diagnosis!");}
 }
 
  function loadDiagnosisDescription()
@@ -2930,25 +3330,6 @@ function loadComplaints()
     }
 
 
- function loadVitals()
-   {
-         
-        
-        $.get('/patient-vitals',
-          {
-            "opd_number": $('#opd_number').val()
-          },
-          function(data)
-          { 
-
-            $('#vitalTable tbody').empty();
-            $.each(data, function (key, value) 
-            {           
-            $('#vitalTable tbody').append('<tr><td>'+ value['created_on'] +'</td><td>'+ value['weight'] +'</td><td>'+ value['height'] +'</td><td>'+ value['bmi']  + (value['bmi_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bmi_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bmi_status'] +'</span>' ) +'</td><td>'+ value['temperature'] + (value['temp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['temp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['temp_status'] +'</span>' ) +'</td><td>'+ value['sbp'] + '/' + value['dbp'] + (value['bp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bp_status'] +'</span>' ) +'</td><td>'+ value['pulse_rate'] +'</td><td>'+ value['respiration'] +'</td><td>'+ value['waist_circumference'] +'</td><td>'+ value['hip_circumference'] +'</td><td><a a href="#"><i onclick="removeVital('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
-            });
-                                          
-         },'json');      
-    }
 
 function loadInvestigation()
    {
@@ -3020,7 +3401,7 @@ function loadDiagnosis()
             $('#diagnosisTable tbody').empty();
             $.each(data, function (key, value) 
             {           
-            $('#diagnosisTable tbody').append('<tr><td>'+ value['diagnosis'] +'</td><td>'+ value['created_by'] +'</td><td>'+ value['date'] +'</td><td><a a href="#"><i onclick="removediagnosis('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+            $('#diagnosisTable tbody').append('<tr><td>'+ value['diagnosis_type'] +'</td><td>'+ value['diagnosis'] +'</td><td>'+ value['remark'] +'</td><td>'+ value['created_by'] +'</td><td>'+ value['date'] +'</td><td><a a href="#"><i onclick="removediagnosis('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
             });
                                           
          },'json');      
@@ -3046,6 +3427,28 @@ function loadDiagnosis()
                                           
          },'json');      
     }
+
+
+function loadVitals()
+   {
+         
+        
+        $.get('/patient-vitals',
+          {
+            "opd_number": $('#opd_number').val()
+          },
+          function(data)
+          { 
+
+            $('#vitalTable tbody').empty();
+            $.each(data, function (key, value) 
+            {           
+            $('#vitalTable tbody').append('<tr><td>'+ value['created_on'] +'</td><td>'+ value['weight'] +'</td><td>'+ value['height'] +'</td><td>'+ value['bmi']  + (value['bmi_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bmi_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bmi_status'] +'</span>' ) +'</td><td>'+ value['temperature'] + (value['temp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['temp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['temp_status'] +'</span>' ) +'</td><td>'+ value['sbp'] + '/' + value['dbp'] + (value['bp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bp_status'] +'</span>' ) +'</td><td>'+ value['pulse_rate'] +'</td><td>'+ value['respiration'] +'</td><td>'+ value['waist_circumference'] +'</td><td>'+ value['hip_circumference'] +'</td><td><a a href="#"><i onclick="removeVital('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+            });
+                                          
+         },'json');      
+    }
+
 
 
     function loadProcedure()
@@ -3109,6 +3512,26 @@ function loadDiagnosis()
          },'json');      
     }
 
+     function loadTreatmentPlan()
+   {
+         
+        
+        $.get('/patient-nurse-treatment',
+          {
+            "opd_number": $('#opd_number').val()
+          },
+          function(data)
+          { 
+
+            $('#treatmentTable tbody').empty();
+            $.each(data, function (key, value) 
+            {           
+            $('#treatmentTable tbody').append('<tr><td>'+ value['treatment_name'] +'</td><td>'+ value['time_given'] +'</td><td>'+ value['remark'] +'</td><td>'+ value['created_by'] +'</td><td><a a href="#"><i onclick="removeTreatment('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+            });
+                                          
+         },'json');      
+    }
+
 
 
   @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
@@ -3141,6 +3564,9 @@ function loadDiagnosis()
           },'json');    
            
    }
+
+
+   
 
 
     function removeHistory(id)
@@ -3673,6 +4099,39 @@ $(function () {
                </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
     </div>
+
+
+    <div class="modal fade" id="new-appointment-request" size="600">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">New Appointment</h4>
+        </div>
+        <div class="modal-body">
+          <p></p>
+                      <section class="vbox">
+                    
+                    <section class="scrollable">
+                      <div class="tab-content">
+                        <div class="tab-pane active" id="individual">
+                           <form  class="bootstrap-modal-form" data-validate="parsley" method="post" action="/create-event" class="panel-body wrapper-lg">
+                          @include('event/create')
+                        <input type="hidden" name="_token" value="{{ Session::token() }}">
+                      </form>
+                        </div>
+                  
+                  
+                        </div>
+                      </div>
+                    </section>
+                  </section>
+        </div>
+        
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div>
+
 
 
 @endrole

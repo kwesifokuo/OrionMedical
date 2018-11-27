@@ -164,6 +164,7 @@
                             <th>#</th>
                             <th>Dispensed Date</th>
                             <th>Medication</th>
+                            <th>Remark</th>
                             <th>Quantity Dispensed</th>
                             <th>Quantity To Return</th>
                             <th>Unit Cost</th>
@@ -180,7 +181,7 @@
                     </div>
                      <footer class="panel-footer text-right bg-light lter">
                        <a href="/print-prescription/{{$visit_details->opd_number}}"> <button type="button" class="btn btn-default btn-s-xs"> Print   </button></a>
-                       @role(['System Admin','Pharmacist'])
+                       @role(['System Admin','Pharmacist','Special Admin'])
                         <button type="submit" class="btn btn-success btn-s-xs">Return</button>
                         @endrole
                          <input type="hidden" name="_token" value="{{ Session::token() }}">
@@ -263,6 +264,10 @@
                             <div class="clear">
 
                               <a href="https://reference.medscape.com/drug-interactionchecker" target="_new" class="btn btn-s-md btn-info btn-rounded m-t-xs"> <i class="fa fa-print"></i>Drug Interactions</a>
+
+                              <a href="http://apps.who.int/medicinedocs/documents/s18014en/s18014en.pdf" target="_new" class="btn btn-s-md btn-success btn-rounded m-t-xs"> <i class="fa fa-print"></i>Ghana Medicine List</a>
+
+
                               <a href="" class="btn btn-s-md btn-warning btn-rounded m-t-xs"> <i class="fa fa-mail"></i> Drug Exclusion List </a>
                             </div>
                           </div>
@@ -390,7 +395,7 @@ $(document).ready(function () {
             $('#dispenseTable tbody').empty();
             $.each(data, function (key, value) 
             {           
-            $('#dispenseTable tbody').append('<tr><td><input type="checkbox" name="drug['+value['id']+']" id="'+value['id']+'" value="'+value['id']+'"></td><td>1</td><td>'+ value['created_on'] +'</td><td>'+ value['drug_name'] +'</td><td><input type="text" readonly style="width:40px; border: 1px solid #ABADB3; text-align: center;" value="'+ value['drug_quantity'] +'" onchange="change_count(this);"></td><td><input type="text" style="width:40px; border: 1px solid #ABADB3; text-align: center;" item_code="'+ value['id'] +'" value="0" onchange="return_stock(this);"></td><td>'+ value['drug_cost'] +'</td><td>'+ value['drug_cost']*value['drug_quantity'] +'</td><td><a a href="#"><i onclick="removeMedication(\''+value['id']+'\',\''+value['drug_name']+'\')" class="fa fa-trash-o"></i></a></td></tr>');
+            $('#dispenseTable tbody').append('<tr><td><input type="checkbox" name="drug['+value['id']+']" id="'+value['id']+'" value="'+value['id']+'"></td><td>1</td><td>'+ value['created_on'] +'</td><td>'+ value['drug_name'] +'</td><td>'+ value['drug_application'] +'</td><td><input type="text" readonly style="width:40px; border: 1px solid #ABADB3; text-align: center;" value="'+ value['drug_quantity'] +'" onchange="change_count(this);"></td><td><input type="text" style="width:40px; border: 1px solid #ABADB3; text-align: center;" item_code="'+ value['id'] +'" value="0" onchange="return_stock(this);"></td><td>'+ value['drug_cost'] +'</td><td>'+ value['drug_cost']*value['drug_quantity'] +'</td><td><a a href="#"><i onclick="removeMedication(\''+value['id']+'\',\''+value['drug_name']+'\')" class="fa fa-trash-o"></i></a></td></tr>');
             
 
             // 

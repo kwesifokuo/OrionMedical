@@ -30,7 +30,8 @@ use OrionMedical\Models\PatientInvestigation;
 use OrionMedical\Models\AdmissionStatus;
 use OrionMedical\Models\AdmissionLocation;
 use OrionMedical\Models\PatientHistory;
-
+use OrionMedical\Models\Branch;
+use OrionMedical\Models\Payments;
 use OrionMedical\Models\PatientStatement;
 use OrionMedical\Http\Requests;
 use OrionMedical\Http\Controllers\Controller;
@@ -81,6 +82,8 @@ class OPDController extends Controller
         $checkedin       = Customer::where('created_at', 'like', $today)->count();
         $reviewing       = OPD::where('created_on', 'like', $today)->count();
         $billingaccounts = AccountType::orderby('id','desc')->get();
+
+         $branches = Branch::get();
          $walkins  = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD-Walk In')->get();
         //$newadmissions   = OPD::where('status','Review')->count();
 
@@ -91,7 +94,7 @@ class OPDController extends Controller
         $visittypes      = VisitType::get();
         $today           = Carbon::now()->format('Y-m-d').'%';
         $patients        = Customer::where('status','Active')->where('created_at', 'like', $today)->orderBy('created_at', 'asc')->paginate(30);
-        return view('opd.index', compact('patients','walkins','billingaccounts','visittypes','generalservices','discharged','checkedin','reviewing'))
+        return view('opd.index', compact('patients','walkins','billingaccounts','visittypes','branches','generalservices','discharged','checkedin','reviewing'))
         ->with('doctors',$doctors)
         ->with('servicetype',$servicetype)
         ->with('departments',$departments);
@@ -100,8 +103,9 @@ class OPDController extends Controller
 
     public function getPatientProfileOPD($id)
    {
-    $servicetype   = ServiceCharge::orderBy('type', 'ASC')->get();          
+    $servicetype   = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();          
     $departments   = Department::get();
+    $accounttype = AccountType::get();
     $doctors       = Doctor::get();  
     $visittypes    = VisitType::get();
     $medications   = Prescription::where('patientid','=',$id)->orderBy('created_on', 'DESC')->get();    
@@ -113,14 +117,36 @@ class OPDController extends Controller
     $procedures    = PatientProcedure::where('patientid' ,'=', $id)->orderBy('created_on', 'DESC')->get();
     $investigations = PatientInvestigation::where('patientid' ,'=', $id)->orderBy('created_on', 'DESC')->get();
     $allergies     = PatientHistory::where('patientid' ,'=', $id)->orderBy('created_on', 'DESC')->get();
-    $bills          = PatientStatement::where('patient_id' ,'=', $id)->orderBy('visit_id', 'asc')->get();
+    $statement          = PatientStatement::where('patient_id' ,'=', $id)->orderBy('visit_id', 'asc')->get();
+    $branches = Branch::get();
 
     $billingaccounts = AccountType::get();
-    //dd($allergies);
+
+
+    $bills              = Bill::where('patient_id', $id)->orderBy('date', 'desc')->get();
+    $paiditems          = Payments::where('PatientID', $id)->get();
+    
+        $payables = 0;
+        $receivables = 0;
+        $outstanding=0;
+
+        foreach($bills as $bill)
+       {
+            $payables += ($bill->rate * $bill->quantity);
+       }
+
+       foreach($paiditems as $paiditem)
+       {
+            $receivables += ($paiditem->AmountReceived);
+       }
+
+       $outstanding = ($payables - $receivables);
+
+    //dd($receivables);
        //Vital Chart Graph
         
 
-    return view('patient.profile', compact('patients','billingaccounts','allergies','diagnosis','procedures','investigations','bills','visittypes','consultations','images','departments','doctors','insurers','servicetype','medications'));
+    return view('patient.profile', compact('patients','statement','payables','receivables','outstanding','branches','accounttype','billingaccounts','allergies','diagnosis','procedures','investigations','bills','visittypes','consultations','images','departments','doctors','insurers','servicetype','medications'));
 
    }
 
@@ -132,6 +158,7 @@ class OPDController extends Controller
         $checkedin       = Customer::where('created_at', 'like', $today)->count();
         $reviewing       = OPD::where('created_on', 'like', $today)->count();
         $billingaccounts = AccountType::orderby('id','desc')->get();
+         $branches = Branch::get();
 
          $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Specialist')->orwhere('department','Radiology')->orwhere('department','Laboratory')->get();
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Specialist')->orwhere('department','IPD')->get();
@@ -158,7 +185,7 @@ class OPDController extends Controller
             ->appends(['search' => $search])
         ;
         
-        return view('opd.index', compact('patients','walkins','billingaccounts','visittypes','generalservices','discharged','checkedin','reviewing'))
+        return view('opd.index', compact('patients','branches','walkins','billingaccounts','visittypes','generalservices','discharged','checkedin','reviewing'))
         ->with('doctors',$doctors)
         ->with('servicetype',$servicetype)
         ->with('departments',$departments);
@@ -187,6 +214,7 @@ class OPDController extends Controller
         $doctors         = Doctor::get();
         $visittypes      = VisitType::get();
         $billingaccounts = AccountType::get();
+        $branches = Branch::get();
 
         // $this->validate($request, [
         //     'search' => 'required'
@@ -215,7 +243,7 @@ class OPDController extends Controller
 
             //dd($from);
 
-            $patients = OPD::whereBetween('updated_on',array($from,$to))
+            $patients = OPD::whereBetween('updated_on',array($from." 00:00:00",$to." 23:59:59"))
             ->orderBy('created_on','desc')
             ->paginate(150)
             ->appends(['search' => $search])
@@ -223,7 +251,7 @@ class OPDController extends Controller
         }
 
         
-        return view('opd.checkedin', compact('patients','billingaccounts','visittypes','generalservices','discharged','checkedin','reviewing'))
+        return view('opd.checkedin', compact('patients','branches','billingaccounts','visittypes','generalservices','discharged','checkedin','reviewing'))
         ->with('doctors',$doctors)
         ->with('servicetype',$servicetype)
         ->with('departments',$departments);
@@ -237,6 +265,7 @@ class OPDController extends Controller
         $discharged      = OPD::where('created_on', 'like', $today)->count();
         $checkedin       = Customer::where('created_at', 'like', $today)->count();
         $reviewing       = OPD::where('created_on', 'like', $today)->count();
+        $branches = Branch::get();
 
          $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Specialist')->orwhere('department','Radiology')->orwhere('department','Laboratory')->get();
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Specialist')->orwhere('department','IPD')->get();
@@ -274,7 +303,7 @@ class OPDController extends Controller
 
             //dd($from);
 
-            $patients = OPD::whereBetween('updated_on',array($from,$to))
+            $patients = OPD::whereBetween('updated_on',array($from." 00:00:00",$to." 23:59:59"))
             ->where('consultation_type','<>', "Pharmacy Walk In")
             ->orderBy('created_on','desc')
             ->paginate(150)
@@ -283,7 +312,7 @@ class OPDController extends Controller
         }
 
         
-        return view('nurse.index', compact('patients','statuses','locations','visittypes','generalservices','discharged','checkedin','reviewing'))
+        return view('nurse.index', compact('patients','branches','statuses','locations','visittypes','generalservices','discharged','checkedin','reviewing'))
         ->with('doctors',$doctors)
         ->with('servicetype',$servicetype)
         ->with('departments',$departments);
@@ -299,7 +328,7 @@ class OPDController extends Controller
         $discharged      = OPD::where('created_on', 'like', $today)->count();
         $checkedin       = Customer::where('created_at', 'like', $today)->count();
         $reviewing       = OPD::where('created_on', 'like', $today)->count();
-
+        $branches = Branch::get();
 
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Specialist')->orwhere('department','IPD')->get();
         $departments    = Department::get();
@@ -310,7 +339,7 @@ class OPDController extends Controller
        
         $patients         = OPD::where('created_on', 'like', $today)->orderBy('created_on', 'DESC')->paginate(30);
        
-        return view('opd.checkedin', compact('patients','billingaccounts','visittypes','discharged','checkedin','reviewing'))
+        return view('opd.checkedin', compact('patients','branches','billingaccounts','visittypes','discharged','checkedin','reviewing'))
         ->with('doctors',$doctors)
         ->with('servicetype',$servicetype)
         ->with('departments',$departments);
@@ -321,13 +350,13 @@ class OPDController extends Controller
          $discharged      = OPD::where('status','Discharged')->count();
         $checkedin       = OPD::where('status','Checked-In')->count();
         $reviewing       = OPD::where('status','Review')->count();
-
+        $branches = Branch::get();
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Specialist')->orwhere('department','IPD')->get();
         $departments    = Department::get();
         $doctors        = Doctor::get();
          $visittypes      = VisitType::get();
         $patients       = OPD::where('status','Review')->orderBy('created_on', 'asc')->paginate(30);
-        return view('opd.checkedin', compact('patients','visittypes','discharged','checkedin','reviewing'))
+        return view('opd.checkedin', compact('patients','branches','visittypes','discharged','checkedin','reviewing'))
         ->with('doctors',$doctors)
         ->with('servicetype',$servicetype)
         ->with('departments',$departments);
@@ -338,13 +367,14 @@ class OPDController extends Controller
          $discharged      = OPD::where('status','Discharged')->count();
         $checkedin       = OPD::where('status','Checked-In')->count();
         $reviewing       = OPD::where('status','Review')->count();
+        $branches = Branch::get();
 
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Specialist')->orwhere('department','IPD')->get();
         $departments    = Department::get();
         $doctors        = Doctor::get();
          $visittypes      = VisitType::get();
         $patients       = OPD::where('status','Discharged')->orderBy('created_on', 'asc')->paginate(30);
-        return view('opd.checkedin', compact('patients','visittypes','discharged','checkedin','reviewing'))
+        return view('opd.checkedin', compact('patients','branches','visittypes','discharged','checkedin','reviewing'))
         ->with('doctors',$doctors)
         ->with('servicetype',$servicetype)
         ->with('departments',$departments);
@@ -353,10 +383,25 @@ class OPDController extends Controller
 
     public function generateStaffID()
 {
+
+    $prefix = '';
+    if(Input::get('location') == 'Kanda (House of Balm)' )
+    {
+        $prefix = 'GMK';
+    }
+    elseif(Input::get('location') == 'Avenor (City of God)' )
+    {
+        $prefix = 'GMA';
+    }
+    else
+    {
+         $prefix = 'GMK';
+    }
+
     $number = Serial::where('name','=','visit')->first();
     $number = $number->counter;
     $account = str_pad($number,5, '0', STR_PAD_LEFT);
-    $myaccount= 'GM'.date('ymd').$account;
+    $myaccount=  $prefix.date('ymd').$account;
     Serial::where('name','=','visit')->increment('counter',1);
     return  $myaccount;
 }
@@ -367,22 +412,34 @@ class OPDController extends Controller
         $provider = Customer::where('patient_id',$request->input('patient_id'))->first();
         
         $care_provider = '';
+        $myaccounttype = 'Private';
 
         if($request->input('accounttype')=='Corporate') 
         {
           $care_provider = $provider->company; 
+          $myaccounttype = 'Corporate';
         }
         if($request->input('accounttype')=='Health Insurance') 
         {
-          $care_provider = $provider->insurance_company; 
+          $care_provider = $provider->insurance_company;
+          $myaccounttype = 'Health Insurance'; 
         }
         if($request->input('accounttype')=='Private') 
         {
           $care_provider = 'Private'; 
+          $myaccounttype = 'Private';
         }
+
+        if($request->input('accounttype')=='Walkin') 
+        {
+          $care_provider = 'Private';
+          $myaccounttype = 'Private'; 
+        }
+
         if($request->input('accounttype')=='Gratis') 
         {
-          $care_provider = 'Gratis'; 
+          $care_provider = 'Gratis';
+          $myaccounttype = 'Gratis'; 
         }
        
        //dd($request->input('accounttype'));
@@ -392,6 +449,9 @@ class OPDController extends Controller
         {
           $visit_id = $this->generateStaffID(10);
           $transactionid = uniqid(20);
+         
+
+
 
            $patient                    = new OPD;
            $patient->opd_number        = $visit_id;
@@ -401,13 +461,15 @@ class OPDController extends Controller
            $patient->department        = 'OPD';
            $patient->visit_type        = $request->input('visit_type');
            $patient->consultation_type = $request->input('consultation_type');
-           $patient->payercode         = $request->input('accounttype');
+           $patient->payercode         = $myaccounttype;
            $patient->care_provider     =  $care_provider;
            $patient->created_on        =  Carbon::now();
            $patient->created_by        =  Auth::user()->getNameOrUsername();
            $patient->updated_on        =  Carbon::now();
            $patient->updated_by        =  Auth::user()->getNameOrUsername();
            $patient->uuid              =  $transactionid;
+           $patient->branch            =  $request->input('location');
+           $patient->authorization_code =  $request->input('authorization_code');
     
 
            if($patient->save()) 
@@ -432,11 +494,18 @@ class OPDController extends Controller
                          
                        }
 
+                     elseif($care_provider=='Glico Tpa Barclays')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('glico');
+                         
+                       }
+
                     elseif($care_provider=='Cosmopolitan Health Insurance')
                        {
                          $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('cosmopolitan');
                          
                        }
+
 
                      elseif($care_provider=='Premier Mutual Health')
                        {
@@ -457,9 +526,28 @@ class OPDController extends Controller
                          
                        }
 
-                        elseif($care_provider=='Metropolitan Health Insurance')
+                      elseif($care_provider=='Metropolitan Health Insurance')
                        {
                          $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('metropolitan');
+                         
+                       }
+
+                       elseif($care_provider=='Nationwide Mutual Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('nationwide');
+                         
+                       }
+
+                        elseif($care_provider=='Universal Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('universal');
+                         
+                       }
+
+
+                       elseif($care_provider=='Phoenix Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('phoenix');
                          
                        }
 
@@ -469,20 +557,29 @@ class OPDController extends Controller
                           
                        }
 
-                       $savecopayer =  $mycopayer->insurance_company;
+                       $savecopayer  =  $mycopayer->insurance_company;
+                       
                       
                     break;
+                
                 case 'Corporate':
-                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('corporate');
-                      $savecopayer =  $mycopayer->company;
+                     $service_charge  = ServiceCharge::where('type',$request->input('consultation_type'))->value('corporate');
+                      $savecopayer    =  $mycopayer->company;
+                      
                     break;
                 case 'Private':
                      $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
                       $savecopayer =  'Private';
+                       
                     break;
+                case 'Walkin':
+                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
+                      $savecopayer =  'Private';
+                      
                 case 'Non-Ghanaian':
                      $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('charge');
                       $savecopayer =  'Private';
+                    
                     break;
            }
 
@@ -502,7 +599,7 @@ class OPDController extends Controller
            $bill->note                 = 'Unpaid';
            $bill->uuid                 = $transactionid;
            $bill->copayer              = $savecopayer;
-           $bill->payercode            = $request->input('accounttype');
+           $bill->payercode            = $myaccounttype;
            $bill->created_by           = Auth::user()->getNameOrUsername();
            $bill->date                 = Carbon::now();
            $bill->save(); 
@@ -511,16 +608,49 @@ class OPDController extends Controller
            $affectedRows2 = Bill::where('patient_id',Input::get('patient_id'))->where('item_name','REGISTRATION OF PATIENT')->where('visit_id','0')->update(array('visit_id' => $visit_id));
             OneSignal::sendNotificationToAll($request->input('fullname')." has been checked in for ".$request->input('consultation_type'), $url = null, $data = null, $buttons = null, $schedule = null);
            
-           return redirect()
-           ->back()
+
+           if($request->input('consultation_type')=="WALK-IN PHARMACY")
+           {
+             return redirect()
+           ->route('walkin-service',$visit_id)
            ->with('info','Patient has successfully been added to OPD !');
+           }
+            
+           elseif($request->input('consultation_type')=="WALK-IN LAB")
+           {
+             return redirect()
+           ->route('walkin-service',$visit_id)
+           ->with('info','Patient has successfully been added to OPD !');
+           }
+
+           elseif($request->input('consultation_type')=="WALK-IN DIAGNOSTIC")
+           {
+             return redirect()
+           ->route('walkin-service',$visit_id)
+           ->with('info','Patient has successfully been added to OPD !');
+           }
+
+           if($request->input('consultation_type')=="WALK-IN SCAN")
+           {
+             return redirect()
+           ->route('walkin-service',$visit_id)
+           ->with('info','Patient has successfully been added to OPD !');
+           }
+
+           else
+           {
+           return redirect()
+           ->route('waiting-opd')
+           ->with('info','Patient has successfully been added to OPD !');
+           }
+
          }
          
          else
          {
            return redirect()
            ->back()
-           ->with('error','OPD registration failed! Ensure account details have been correctly filled, *Company name/ Insurance details');
+           ->with('error','OPD registration failed! Ensure Company name or Insurance details details have been correctly filled');
 
          }
        }
@@ -529,7 +659,7 @@ class OPDController extends Controller
          {
            return redirect()
            ->back()
-           ->with('error','OPD registration failed! Ensure account details have been correctly filled, *Company name/ Insurance details' );
+           ->with('error','OPD registration failed! Ensure Company name or Insurance details details have been correctly filled' );
 
          }
      }
@@ -541,24 +671,37 @@ class OPDController extends Controller
         
         $provider = Customer::where('patient_id',$request->input('patient_id'))->first();
         
-        $care_provider = '';
+       $care_provider = '';
+        $myaccounttype = 'Private';
 
         if($request->input('accounttype')=='Corporate') 
         {
           $care_provider = $provider->company; 
+          $myaccounttype = 'Corporate';
         }
         if($request->input('accounttype')=='Health Insurance') 
         {
-          $care_provider = $provider->insurance_company; 
+          $care_provider = $provider->insurance_company;
+          $myaccounttype = 'Health Insurance'; 
         }
         if($request->input('accounttype')=='Private') 
         {
           $care_provider = 'Private'; 
+          $myaccounttype = 'Private';
         }
+
+        if($request->input('accounttype')=='Walkin') 
+        {
+          $care_provider = 'Private';
+          $myaccounttype = 'Private'; 
+        }
+
         if($request->input('accounttype')=='Gratis') 
         {
-          $care_provider = 'Gratis'; 
+          $care_provider = 'Gratis';
+          $myaccounttype = 'Gratis'; 
         }
+       
        
        //dd($request->input('accounttype'));
 
@@ -607,11 +750,18 @@ class OPDController extends Controller
                          
                        }
 
+                     elseif($care_provider=='Glico Tpa Barclays')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('glico');
+                         
+                       }
+
                     elseif($care_provider=='Cosmopolitan Health Insurance')
                        {
                          $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('cosmopolitan');
                          
                        }
+
 
                      elseif($care_provider=='Premier Mutual Health')
                        {
@@ -632,15 +782,34 @@ class OPDController extends Controller
                          
                        }
 
-                        elseif($care_provider=='Metropolitan Health Insurance')
+                      elseif($care_provider=='Metropolitan Health Insurance')
                        {
                          $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('metropolitan');
                          
                        }
 
+                       elseif($care_provider=='Nationwide Mutual Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('nationwide');
+                         
+                       }
+
+                        elseif($care_provider=='Universal Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('universal');
+                         
+                       }
+
+
+                       elseif($care_provider=='Phoenix Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('phoenix');
+                         
+                       }
+
                        else
                        {
-                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type2'))->value('insurance');
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('insurance');
                           
                        }
 
@@ -648,15 +817,15 @@ class OPDController extends Controller
                       
                     break;
                 case 'Corporate':
-                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type2'))->value('corporate');
+                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('corporate');
                       $savecopayer =  $mycopayer->company;
                     break;
                 case 'Private':
-                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type2'))->value('walkin');
+                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
                       $savecopayer =  'Private';
                     break;
                 case 'Non-Ghanaian':
-                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type2'))->value('charge');
+                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('charge');
                       $savecopayer =  'Private';
                     break;
            }
@@ -711,9 +880,7 @@ class OPDController extends Controller
 
          }
      }
-
-
-
+     
      
 
     
@@ -725,23 +892,36 @@ class OPDController extends Controller
             $provider = Customer::where('patient_id',$request->input('patient_id'))->first();
         
             $care_provider = '';
+        $myaccounttype = 'Private';
 
-            if($request->input('accounttype')=='Corporate') 
-            {
-              $care_provider = $provider->company; 
-            }
-            if($request->input('accounttype')=='Health Insurance') 
-            {
-              $care_provider = $provider->insurance_company; 
-            }
-            if($request->input('accounttype')=='Private') 
-            {
-              $care_provider = 'Private'; 
-            }
-            if($request->input('accounttype')=='Gratis') 
-            {
-              $care_provider = 'Gratis'; 
-            }
+        if($request->input('accounttype')=='Corporate') 
+        {
+          $care_provider = $provider->company; 
+          $myaccounttype = 'Corporate';
+        }
+        if($request->input('accounttype')=='Health Insurance') 
+        {
+          $care_provider = $provider->insurance_company;
+          $myaccounttype = 'Health Insurance'; 
+        }
+        if($request->input('accounttype')=='Private') 
+        {
+          $care_provider = 'Private'; 
+          $myaccounttype = 'Private';
+        }
+
+        if($request->input('accounttype')=='Walkin') 
+        {
+          $care_provider = 'Private';
+          $myaccounttype = 'Private'; 
+        }
+
+        if($request->input('accounttype')=='Gratis') 
+        {
+          $care_provider = 'Gratis';
+          $myaccounttype = 'Gratis'; 
+        }
+       
        
 
              if(!empty($care_provider))
@@ -750,6 +930,7 @@ class OPDController extends Controller
             $affectedRows = OPD::where('opd_number',  $request->input('opd_number'))
             ->update(array(
 
+           'name'                => $request->input('fullname'),
            'referal_doctor'      => $request->input('referal_doctor'),
            'visit_type'          => $request->input('visit_type'),
            'consultation_type'   => $request->input('consultation_type'),
@@ -773,11 +954,18 @@ class OPDController extends Controller
                          
                        }
 
+                     elseif($care_provider=='Glico Tpa Barclays')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('glico');
+                         
+                       }
+
                     elseif($care_provider=='Cosmopolitan Health Insurance')
                        {
                          $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('cosmopolitan');
                          
                        }
+
 
                      elseif($care_provider=='Premier Mutual Health')
                        {
@@ -798,12 +986,29 @@ class OPDController extends Controller
                          
                        }
 
-                        elseif($care_provider=='Metropolitan Health Insurance')
+                      elseif($care_provider=='Metropolitan Health Insurance')
                        {
                          $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('metropolitan');
                          
                        }
 
+                       elseif($care_provider=='Nationwide Mutual Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('nationwide');
+                         
+                       }
+
+                        elseif($care_provider=='Universal Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('universal');
+                         
+                       }
+
+                       elseif($care_provider=='Phoenix Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('phoenix');
+                         
+                       }
 
                        else
                        {
@@ -819,6 +1024,10 @@ class OPDController extends Controller
                       $savecopayer =  $mycopayer->company;
                     break;
                 case 'Private':
+                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
+                      $savecopayer =  'Private';
+                    break;
+                case 'Walkin':
                      $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
                       $savecopayer =  'Private';
                     break;
@@ -1266,6 +1475,7 @@ public function deleteOPD()
                 'consultation_type'   =>$user->consultation_type,
                 'accounttype'       =>$user->payercode,
                 'image'             =>$user->image,
+                'branch'             =>$user->branch,
                  'uuid'       =>$user->uuid,
        
             );

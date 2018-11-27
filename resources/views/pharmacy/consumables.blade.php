@@ -73,7 +73,7 @@
                             <th>Item Name</th>
                              <th>Supplier</th>
                              <th>Stock Level</th>
-                             @role(['Pharmacist','System Admin'])
+                             @role(['Pharmacist','System Admin','Pharmacy Technician'])
                             <th>Current Pack Price</th>
                             <th>Current Unit Price</th>
                             <th>Expiry Date</th>
@@ -93,7 +93,7 @@
                             <td>{{ $drug->name }}</td>
                             <td>{{ $drug->supplier }}</td>
                             <td>{{ $drug->stock }}</td>
-                             @role(['Pharmacist','System Admin'])
+                             @role(['Pharmacist','System Admin','Pharmacy Technician'])
                             <td>{{ $drug->sale_price }}</td>
                             <td>{{ $drug->unit_price }}</td>
                         

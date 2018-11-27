@@ -25,6 +25,14 @@ use Carbon\Carbon;
 use Auth;
 use PDF;
 
+use Smsgh;
+use BasicAuth;
+use ApiHost;
+use MessagingApi;
+use Message;
+
+require 'Smsgh/Api.php';
+
 
 
 class BillController extends Controller
@@ -196,23 +204,49 @@ class BillController extends Controller
    
    
     $company = Company::get()->first();
-    $from    =  Carbon::createFromFormat('d/m/Y', $request->input('datefrom'))->format('Y-m-d');
-    $to      =  Carbon::createFromFormat('d/m/Y', $request->input('dateto'))->format('Y-m-d');
+    $from    =  Carbon::createFromFormat('d/m/Y',  Input::get('datefrom'))->format('Y-m-d ');
+    $to      =  Carbon::createFromFormat('d/m/Y', Input::get('dateto'))->format('Y-m-d');
 
     $visits  =  OPD::with('patient')
     ->with('diagonsis')
     ->with('bills')
     ->with('payments')
-    ->whereBetween('created_on',array($from,$to))
+    ->whereBetween('created_on',array($from." 00:00:00",$to." 23:59:59"))
     ->where('care_provider',Input::get('care_provider'))
     ->where('payercode','<>','Private')->get();
 
     
+
+    $totalbill = 0;
+
+    foreach($visits as $visit)
+    {
+      foreach ($visit->bills as $item) 
+      {
+         $totalbill += $item->amount * $item->quantity;
+      }
+     
+    }
+
+
+     $totalpayments = 0;
+
+    foreach($visits as $visit)
+    {
+      foreach ($visit->payments as $item) 
+      {
+         $totalpayments += $item->total_price ;
+      }
+     
+    }
+
+    //dd($totalpayments);
     
-  //dd($visits);
+   
+   
+ //dd($total);
 
-
-    return view('claims.claimformbulk', compact('visits'));
+    return view('claims.claimformbulk', compact('visits','totalbill','totalpayments','from','to'));
 
     }
 
@@ -233,7 +267,7 @@ public function index()
     $company = Company::get()->first();
     //$bills   = Bill::where('note', 'Unpaid')->orderBy('date', 'DESC')->paginate(30);
     $bills = Ledger::with('payments')
-    ->where('payercode','=','Private')->whereNull('deleted_at')
+    ->where('payercode','=','Private')
     ->orderBy('date','desc')
     ->paginate(30);
     //dd($bills);
@@ -279,7 +313,7 @@ public function index()
         $datefrom = $from;
         $dateto   = $to;
 
-       $bills = Ledger::with('payments')->whereBetween('date',array($from,$to))
+       $bills = Ledger::with('payments')->whereBetween('date',array($from." 00:00:00",$to." 23:59:59"))
                      ->where('claimstatus','<>','Vetted')
                       ->where('copayer',Input::get('care_provider'))
                      ->where('payercode','<>','Private')
@@ -406,7 +440,7 @@ public function index()
         $datefrom = $from;
         $dateto   = $to;
 
-        $bills = Payments::with('invoices')->whereBetween('createdate',array($from,$to))
+        $bills = Payments::with('invoices')->whereBetween('createdate',array($from." 00:00:00",$to." 23:59:59"))
                      ->groupBy('paymentid')
                      ->orderBy('createdate','desc')
                     ->get();
@@ -634,6 +668,8 @@ public function dashboard()
     {
 
 
+//ZOLMITRIPTAN 2.5MG  2.5 MG STAT AT THE ONSET OF THE HEADACHE, REPEAT AFTER 2HRS IF THE HEADACHE DOES NOT SUBSIDE. NOT TO
+
       if($request->input('amountreceived') != 0)
 
       {
@@ -712,8 +748,12 @@ public function dashboard()
               }
             }
 
+            //“Your lab tests have just come in. You will be seeing the doctor soon. We wish you the best of health, *Gilead*”
 
-           
+
+            $sms = 'Dear '.$request->input('yourname').', we received an amount of GHS '.$request->input('amountreceived').' as payment of your bill. Thank You. We wish you the best of health. Gilead!';
+            $this->SendSMS($sms,$request->input('yourphone'));
+
              return redirect()
             ->route('receipt', $paymentid)
             ->with('info','Payment has successfully been processed!');
@@ -753,7 +793,7 @@ public function dashboard()
 
             $id = Input::get("ID");
 
-            $affectedRows = Bill::where('id', $id)->update(array('is_billable' => 'False','rate'=>0,'amount'=>0,'note' => 'Excluded from bill','updated_by'=>Auth::user()->getNameOrUsername(),'updated_on'=>Carbon::now()));
+            $affectedRows = Bill::where('id', $id)->delete();
 
             if($affectedRows > 0)
             {
@@ -800,9 +840,13 @@ public function dashboard()
            $bills = Ledger::with('payments')->where('fullname', 'like', "%$search%")
                      ->orWhere('patient_id', 'like', "%$search%")
                       ->orWhere('copayer', 'like', "%$search%")
+                      ->orWhere('note', 'like', "%$search%")
+                      ->Where('payercode', 'Private')
+                      ->Where('total_cost', '>', 0)
                      ->groupBy('visit_id')
                      ->orderBy('date','desc')
-                      ->paginate(30);
+                      ->paginate(30)
+                      ->appends(['search' => $search]);
    
  
         }
@@ -817,7 +861,7 @@ public function dashboard()
            
 
             $bills = Ledger::with('payments')->where('fullname', 'like', "%$search%")
-            ->whereBetween('date',array($from,$to))
+            ->whereBetween('date',array($from." 00:00:00",$to." 23:59:59"))
             ->where('note', 'Unpaid')
             ->groupBy('visit_id')
             ->orderBy('date','desc')
@@ -831,6 +875,10 @@ public function dashboard()
 
     
     }
+
+
+
+    
 
 
     public function getSearchPayments(Request $request)
@@ -869,7 +917,7 @@ public function dashboard()
 
           // dd($from);
 
-           $bills = Payments::whereBetween('CreateDate',array($from,$to))
+           $bills = Payments::whereBetween('CreateDate',array($from." 00:00:00",$to." 23:59:59"))
                      ->paginate(200)
                     ->appends(['search' => $search]);
 
@@ -902,7 +950,7 @@ public function dashboard()
 
         if(!$search=="")
         {
-         $bills = Ledger::with('payments')->where('note','Unpaid')->where('fullname', 'like', "%$search%")
+         $bills = Ledger::with('payments')->where('fullname', 'like', "%$search%")
                   ->orWhere('patient_id', 'like', "%$search%")
                   ->orWhere('copayer', 'like', "%$search%")
                      ->orderBy('date','desc')
@@ -921,7 +969,7 @@ public function dashboard()
            
 
              $bills = Ledger::with('payments')->where('note','Unpaid')->where('fullname', 'like', "%$search%")
-             ->whereBetween('date',array($from,$to))
+             ->whereBetween('date',array($from." 00:00:00",$to." 23:59:59"))
              ->where('note', 'Unpaid')
              ->where('payercode' ,'<>', 'Private')
             ->orderBy('date','desc')
@@ -960,6 +1008,41 @@ public function dashboard()
             return view('billing.index', compact('bills','receiptmodes'));
     
     }
+
+    public function SendSMS($content,$phone)
+    {
+
+    $messages = $content;
+
+    // Here we assume the user is using the combination of his clientId and clientSecret as credentials
+    $auth = new BasicAuth("ciiihqvu", "vjhfjgrv");
+
+    // instance of ApiHost
+    $apiHost = new ApiHost($auth);
+    $enableConsoleLog = TRUE;
+    $messagingApi = new MessagingApi($apiHost, $enableConsoleLog);
+
+  
+    try 
+    {
+        // Default Approach
+        $mesg = new Message();
+        $mesg->setContent($messages);
+        $mesg->setTo($phone);
+        $mesg->setFrom("Gilead");
+        $mesg->setRegisteredDelivery(true);
+
+        $messageResponse = $messagingApi->sendMessage($mesg);
+
+        //$response_code = SMS::where('id', '=', $message->id)->update(array('status' => 'Sent'));
+
+    
+    } 
+    catch (Exception $ex) 
+    {
+        //echo $ex->getTraceAsString();
+    }
+}
 
 
 

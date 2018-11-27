@@ -173,6 +173,7 @@ return [
         Vsmoraes\Pdf\PdfServiceProvider::class,
         Jenssegers\Agent\AgentServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
+        HipsterJazzbo\Landlord\LandlordServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -186,6 +187,7 @@ return [
         // OrionMedical\Providers\BroadcastServiceProvider::class,
         OrionMedical\Providers\EventServiceProvider::class,
         OrionMedical\Providers\RouteServiceProvider::class,
+        Reportico\Reportico\ReporticoServiceProvider::class,
 
     ],
 
@@ -246,6 +248,7 @@ return [
         'PDF'       => 'Vsmoraes\Pdf\PdfFacade',
         'Agent' => Jenssegers\Agent\Facades\Agent::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'Landlord'   => HipsterJazzbo\Landlord\Facades\Landlord::class,
 
 
        

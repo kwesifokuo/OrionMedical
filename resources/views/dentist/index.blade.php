@@ -118,8 +118,7 @@
                               @else
                               <td><a href="/dental-review/{{ $patient->opd_number }}" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
                               @endif
-                                <td><a href="/patient-profile/{{ $patient->patient_id }}"  class="btn btn-rounded btn-sm btn-warning" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-folder-open" data-toggle="tooltip" data-placement="top" title="" data-original-title="View History"> </i> History </a>
-                               </td>
+                                
 
                             @endrole
 

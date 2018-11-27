@@ -34,8 +34,7 @@
 <script src="{{ asset('/js/jquery.ui.touch-punch.min.js')}}"></script>
 <script src="{{ asset('/js/fullcalendar/fullcalendar.min.js')}}"></script>
 <script src="{{ asset('/js/toastr/toastr.js')}}"></script> 
-<script src="{{ asset('/js/tinymce/js/tinymce/jquery.tinymce.min.js')}}"></script>
-<script src="{{ asset('/js/tinymce/js/tinymce/tinymce.min.js')}}"></script>
+
 {{-- <script src="{{ asset('/js/wysiwyg/jquery.hotkeys.js')}}"></script>
 <script src="{{ asset('/js/wysiwyg/bootstrap-wysiwyg.js')}}"></script>
 <script src="{{ asset('/js/wysiwyg/demo.js')}}"></script> --}}
@@ -45,19 +44,15 @@
 <script src="{{ asset('/js/grid/jquery.grid-a-licious.min.js')}}"></script>
 
 
-<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async='async'></script>
-  <script>
-    var OneSignal = window.OneSignal || [];
-    OneSignal.push(["init", {
-      appId: "ebc42abc-0813-4bbd-a585-136954b2fd12",
-
-      // appId: "0dcbae09-c79c-4b73-bbd4-bb162b8dcff8",
-      autoRegister: false, /* Set to true to automatically prompt visitors */
-      notifyButton: {
-          enable: true /* Set to false to hide */
-      }
-    }]);
-  </script>
+<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+<script>
+  var OneSignal = window.OneSignal || [];
+  OneSignal.push(function() {
+    OneSignal.init({
+      appId: "0967f400-cc3b-4e46-9621-d901a8b5ff53",
+    });
+  });
+</script>
    
 
 <script>

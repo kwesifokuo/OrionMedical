@@ -90,7 +90,7 @@
                              <th>Practioner</th>
                              <th>Care Provider</th>
                             <th width="30"></th>
-                            <th width="30"></th>
+                            
                             
                           </tr>
                         </thead>
@@ -138,6 +138,11 @@
                               @elseif($patient->consultation_type=='ANTENATAL CONSULTATION')
                               <td><a href="/antenatal-review/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
 
+                              @elseif($patient->consultation_type=='ANTENATAL CONSULTATION REVIEW')
+                              <td><a href="/antenatal-review/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+                              
+
                               @elseif($patient->consultation_type=='GYNAE CONSULTATION')
                               <td><a href="/antenatal-review/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
 
@@ -157,8 +162,7 @@
                               <td><a href="/consultation/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
                               @endif
 
-                               <td><a href="/patient-profile/{{ $patient->patient_id }}"  class="btn btn-rounded btn-sm btn-warning" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-folder-open" data-toggle="tooltip" data-placement="top" title="" data-original-title="View History"> </i> History </a>
-                               </td>
+                              
 
                             @endrole
 
@@ -204,6 +208,12 @@
 
 <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
 
+<script type="text/javascript">
+  
+setTimeout(function() {
+  location.reload();
+}, 30000);
+</script>
 <script type="text/javascript">
 $(function() {
 

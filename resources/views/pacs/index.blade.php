@@ -95,7 +95,7 @@
             </section>
              <footer class="footer bg-white b-t">
                   
-                                    <a href="#image-request" class="bootstrap-modal-form-open float" data-toggle="modal">
+                                    <a href="/register-start" class="bootstrap-modal-form-open float" data-toggle="modal">
 <i class="fa fa-plus my-float"></i><i class="fa fa-file my-float"></i>
 </a>
 

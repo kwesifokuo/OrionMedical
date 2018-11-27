@@ -132,7 +132,7 @@
               </div>
 
 
-              <div class="row">
+           {{--    <div class="row">
 
             <div class="col-lg-12">
                   <section class="panel panel-default">
@@ -144,6 +144,25 @@
                       <small class="text-muted block"></small>
                       <div class="inline">
                           @include('charts/service_trend') 
+                      </div>                      
+                    </div>
+                    <div class="panel-footer"><small><a href="#" > % of Bills</a></small></div>
+                  </section>
+                </div>  
+              </div> --}}
+
+               <div class="row">
+
+            <div class="col-lg-12">
+                  <section class="panel panel-default">
+                    <header class="panel-heading">
+                      Department revenue - monthly trend
+                    </header>
+                    <div class="panel-body text-center">
+                      
+                      <small class="text-muted block"></small>
+                      <div class="inline">
+                          @include('charts/utilization') 
                       </div>                      
                     </div>
                     <div class="panel-footer"><small><a href="#" > % of Bills</a></small></div>

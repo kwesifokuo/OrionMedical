@@ -235,12 +235,18 @@
                     <section class="scrollable">
                       <div class="wrapper">
                        
-                        <section class="panel clearfix bg-default lter">
+                         <section class="panel clearfix bg-default lter">
                           <div class="panel-body">
                           
                             <div class="clear">
                            <p>
-                       <a href="#" class="btn btn-danger btn-lg pull-right">Amount Due : GHS 0</a>
+                       <a href="#" class="btn btn-warning btn-s-md btn-lg pull-right"> Bill : GHS {{ $payables }}</a>
+                      </p>
+                      <p>
+                       <a href="#" class="btn btn-success btn-s-md btn-lg pull-right"> Paid : GHS {{ $receivables }}</a>
+                      </p>
+                      <p>
+                       <a href="#" class="btn btn-danger btn-s-md btn-lg pull-right"> Outstanding. : GHS {{ $outstanding }}</a>
                       </p>
                             </div>
                           </div>

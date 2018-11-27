@@ -108,7 +108,7 @@
 
                           
                             
-                            <td><a href="#" class="text-danger">IN-{{ $bill->visit_id }}</a></td>
+                            <td><a href="/consultation/{{ $bill->visit_id }}" class="text-danger">IN-{{ $bill->visit_id }}</a></td>
                             <td>{{ ucwords(strtolower($bill->fullname)) }}</td>
                             <td>{{ $bill->copayer }}</td>
                             <td>{{ $bill->item_name }} ...</td>

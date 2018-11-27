@@ -20,7 +20,7 @@
                         </label>
                       </div>
                       <span class="m-t-xs inline">
-                        Fullcalendar
+                        Fullcalendar - {{ $result }}
                       </span>
                     </header>
                     <div class="calendar" id="calendar">
@@ -101,7 +101,7 @@
      var doctor = $('#doctor').val();
 
    $('#calendar').fullCalendar({
-      weekends: false,
+      weekends: true,
       slotMinutes: 15,
       theme: false,
     header: false,
@@ -145,7 +145,7 @@
 <script type="text/javascript">
 $(function () {
   $('#time').daterangepicker({
-     "daysOfWeek": ['Mo', 'Tu', 'We', 'Th', 'Fr'],
+     "daysOfWeek": ['Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
     "singleDatePicker":true,
     "autoApply": true,
     "showISOWeekNumbers": true,

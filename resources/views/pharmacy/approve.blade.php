@@ -80,8 +80,8 @@
                             <td>{{ $drug->sale_price }}</td>
                             <td>{{ $drug->unit_price }}</td>
                               @endrole
-                             <td>{{ $drug->unit_price * 1.45 }}</td>
-                             <td>{{ $drug->unit_price * 1.50 }}</td>
+                             <td>{{ $drug->unit_price * $drug->walk_margin }}</td>
+                             <td>{{ $drug->unit_price * $drug->insurance_margin }}</td>
                           
                             <td>{{ $drug->expiry_date->diffForHumans() }}</td>
                             <td>

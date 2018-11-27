@@ -8,6 +8,7 @@ use OrionMedical\Models\ImagingRequest;
 use OrionMedical\Models\Images;
 use OrionMedical\Models\Company;
 use OrionMedical\Models\Bill;
+use OrionMedical\Models\Payments;
 use OrionMedical\Http\Requests;
 use OrionMedical\Http\Controllers\Controller;
 use OrionMedical\Models\Doctor;
@@ -53,7 +54,27 @@ class PacsController extends Controller
          $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
          $tests         = PatientInvestigation::where('type','Radiology')->where('visitid' ,'=', $id)->get();
 
-        return view('pacs.gallery',compact('patients','visitdetails','images','myvitals','tests'));
+
+          $bills              = Bill::where('visit_id', $id)->orderBy('date', 'desc')->get();
+        $paiditems          = Payments::where('EventID', $id)->get();
+    
+        $payables = 0;
+        $receivables = 0;
+        $outstanding=0;
+
+        foreach($bills as $bill)
+       {
+            $payables += ($bill->rate * $bill->quantity);
+       }
+
+       foreach($paiditems as $paiditem)
+       {
+            $receivables += ($paiditem->AmountReceived);
+       }
+
+        $outstanding = ($payables - $receivables);
+
+        return view('pacs.gallery',compact('patients','visitdetails','images','myvitals','tests','payables','receivables','outstanding'));
     }
 
     public function getImagingRequest(Request $request)

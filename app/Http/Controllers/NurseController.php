@@ -18,11 +18,22 @@ use OrionMedical\Models\Drug;
 use OrionMedical\Models\Treatment;
 use OrionMedical\Models\SocialFamilyHistory;
 use OrionMedical\Models\PatientComplaint;
+use OrionMedical\Models\ROS;
+use OrionMedical\Models\PatientPE;
+use OrionMedical\Models\PatientInvestigation;      
+use OrionMedical\Models\PatientAssessment;
+        
+use OrionMedical\Models\PatientDiagnosis;
+use OrionMedical\Models\PatientHistory;
 use OrionMedical\Models\Diagnosis;
 use OrionMedical\Models\Doctor;
 use OrionMedical\Models\Prescription;
 use OrionMedical\Models\PatientVitals;
 use OrionMedical\Models\PatientTreatmentSheet;
+
+use OrionMedical\Models\NursePlan;
+use OrionMedical\Models\NurseNote;
+
 use OrionMedical\Http\Requests;
 use OrionMedical\Http\Controllers\Controller;
 use OrionMedical\Models\LabDocs;
@@ -40,7 +51,7 @@ class NurseController extends Controller
     {
         $this->middleware('auth');
 
-         $this->middleware('role:System Admin|Nurse|Dental Nurse|Nurse Assistant');
+         $this->middleware('role:System Admin|Nurse|Dental Nurse|Nurse Assistant|Special Admin');
         
     }
 
@@ -74,6 +85,7 @@ class NurseController extends Controller
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
         $drugs            = Prescription::where('visitid', $id)->get();
+        $availabledrugs   = Drug::orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','Nursing Procedure')->orwhere('department','Consumables')->orwhere('department','Procedures')->orderBy('type', 'ASC')->get();
         $histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
         $diagnosis        = Diagnosis::orderBy('type', 'ASC')->get();
@@ -81,6 +93,21 @@ class NurseController extends Controller
         $triage           = PatientVitals::where('patient_id' ,'=', $visit_details->patient_id)->first();
         $complaintperiods = range( date("D") , 30 );
 
+        
+        $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
+        $myhistories = PatientHistory::where('visitid' ,'=', $id)->get();
+        $myros = ROS::where('visit_id' ,'=', $id)->get();
+        $mype = PatientPE::where('visit_id' ,'=', $id)->get();
+        $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
+        $mylabs = PatientInvestigation::where('visitid' ,'=', $id)->get();
+        $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
+        $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
+
+        $mynursenotes = NurseNote::where('visit_id' ,'=', $id)->first() ?: new NurseNote;
+        $mynurseplan = NursePlan::where('visit_id' ,'=', $id)->first() ?: new NursePlan;
+
+        $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
 
         $defaultheight = 0;
         if ($triage) 
@@ -113,7 +140,15 @@ class NurseController extends Controller
             array_push($temperature, $view->temperature);
             array_push($pulse_rate, $view->pulse_rate);
             array_push($respiration, $view->respiration);
-            array_push($sbp, $view->sbp);
+            array_push($sbp, $view->sbp);$mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
+        $myhistories = PatientHistory::where('visitid' ,'=', $id)->get();
+        $myros = ROS::where('visit_id' ,'=', $id)->get();
+        $mype = PatientPE::where('visit_id' ,'=', $id)->get();
+        $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
+        $mylabs = PatientInvestigation::where('visitid' ,'=', $id)->get();
+        $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
+        $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
+        $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
             array_push($dbp, $view->dbp);
         }
         //dd($commentDataset);
@@ -194,7 +229,7 @@ class NurseController extends Controller
 
 
 
-       return view('nurse.review', compact('patients','defaultheight','triage','complaintperiods','vitalcharts','review_skin','review_neuro','review_gynae','review_nutrition','review_cardio','review_gastro','visit_details','review_ent','review_respiratory'))
+       return view('nurse.review', compact('patients','availabledrugs','mynurseplan','mynursenotes','myplan','oldvisits','mype','mycomplaints','defaultheight','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','vitalcharts','review_skin','review_neuro','review_gynae','review_nutrition','review_cardio','review_gastro','visit_details','review_ent','review_respiratory'))
         ->with('doctors',$doctors)
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
@@ -264,6 +299,69 @@ class NurseController extends Controller
 }
 
 
+
+   public function addNurseNote()
+    {     
+         
+          $ID = Input::get("opd_number");
+          $affectedRows = NurseNote::where('visit_id', '=', $ID)->delete();
+
+           $assessment                  = new NurseNote;
+           $assessment->visit_id        = Input::get("opd_number");
+           $assessment->patient_id      = Input::get("patient_id");
+           $assessment->content         = Input::get("nurse_note");
+           $assessment->created_on      = Carbon::now();
+           $assessment->created_by      = Auth::user()->getNameOrUsername();
+
+
+            
+
+            if($assessment->save())
+            {
+    
+              $added_response = array('OK'=>'OK');
+                return  Response::json($added_response);
+
+            }
+            else
+            {
+                $added_response = array('No Data'=>'No Data');
+                return  Response::json($added_response);
+            }
+
+    }
+
+
+       public function addNursePlan()
+    {     
+         
+          $ID = Input::get("opd_number");
+          $affectedRows = NursePlan::where('visit_id', '=', $ID)->delete();
+
+           $assessment                  = new NursePlan;
+           $assessment->visit_id        = Input::get("opd_number");
+           $assessment->patient_id      = Input::get("patient_id");
+           $assessment->content         = Input::get("nurse_plan");
+           $assessment->created_on      = Carbon::now();
+           $assessment->created_by      = Auth::user()->getNameOrUsername();
+
+
+            
+
+            if($assessment->save())
+            {
+    
+              $added_response = array('OK'=>'OK');
+                return  Response::json($added_response);
+
+            }
+            else
+            {
+                $added_response = array('No Data'=>'No Data');
+                return  Response::json($added_response);
+            }
+
+    }
 
      public function excludeTreatment()
    {

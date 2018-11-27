@@ -3,6 +3,17 @@
 <section class="vbox">
             <header class="header bg-white b-b b-light">
               <p>{{ $patients->fullname }}'s Facesheet</p>
+
+              @if($patients->accounttype=='Private')
+             {{--  <a href="#" class="btn btn-warning btn-s-md btn-lg pull-right">Total Charge : GHS {{ $payables }}</a>
+                      <a href="#" class="btn btn-success btn-s-md btn-lg pull-right">Paid : GHS {{ $receivables }}</a> --}}
+                      <a href="#" class="btn btn-danger btn-s-md btn-lg pull-right">Outstanding : GHS {{ number_format($outstanding, 1, '.', ',') }}</a>
+                @else
+                @endif
+
+                    
+                   
+                    
             </header>
             <section class="scrollable">
               <section class="hbox stretch">
@@ -85,11 +96,11 @@
                       <ul class="nav nav-tabs nav-white">
                       <li class=""><a href="#information" data-toggle="tab">Basic Information</a></li>
                         <li class="active"><a href="#consultations" data-toggle="tab">Encounters</a></li>
-                        @role(['System Admin','Medical Records Manager'])
-                        <li class=""><a href="#procedures" data-toggle="tab">Vitals</a></li>
-                        <li class=""><a href="#allergy" data-toggle="tab">Allergy</a></li>
+                        
+                        {{-- <li class=""><a href="#procedures" data-toggle="tab">Vitals</a></li>
+                        <li class=""><a href="#allergy" data-toggle="tab">Allergy</a></li> --}}
                          <li class=""><a href="#statement" data-toggle="tab">Statement</a></li>
-                         @endrole
+                       
                         <li class=""><a href="#documents" data-toggle="tab">Documents</a></li>
                        
                         {{-- <li class=""><a href="#images" data-toggle="tab">Images</a></li> --}}
@@ -109,7 +120,7 @@
                 <div class="panel-body">
                   <form class="form-horizontal" method="get">
                     <div class="form-group">
-                      <label class="col-sm-2 control-label">Place of birth</label>
+                      {{-- <label class="col-sm-2 control-label">Place of birth</label>
                       <div class="col-sm-10">
                         <input type="text" readonly="true" value="{{ $patients->place_of_birth }}" class="form-control rounded">                        
                       </div>
@@ -120,7 +131,7 @@
                       <div class="col-sm-10">
                         <input type="text" readonly="true" value="{{ $patients->blood_group }}" class="form-control rounded">                        
                       </div>
-                    </div>
+                    </div> --}}
                     <div class="line line-dashed line-lg pull-in"></div>
                    <div class="form-group">
                       <label class="col-sm-2 control-label">Account Type</label>
@@ -143,7 +154,7 @@
                       </div>
                     </div>
                     <div class="line line-dashed line-lg pull-in"></div>
-                     <div class="form-group">
+                     {{-- <div class="form-group">
                       <label class="col-sm-2 control-label">ID Type</label>
                       <div class="col-sm-10">
                         <input type="text" readonly="true" value="{{ $patients->id_type }}" class="form-control rounded">                        
@@ -156,7 +167,7 @@
                         <input type="text" readonly="true" value="{{ $patients->id_number }}" class="form-control rounded">                        
                       </div>
                     </div>
-                    <div class="line line-dashed line-lg pull-in"></div>
+                    <div class="line line-dashed line-lg pull-in"></div> --}}
                      <div class="form-group">
                       <label class="col-sm-2 control-label">Occupation</label>
                       <div class="col-sm-10">
@@ -202,6 +213,142 @@
 
 
                         <div class="tab-pane active" id="consultations">
+                        
+                        <section class="panel panel-default">
+                      <form  class="bootstrap-modal-form" method="post" data-validate="parsley" action="/create-opd" class="panel-body wrapper-lg">
+
+                    <header class="panel-heading bg-light">
+                      <ul class="nav nav-tabs pull-left">
+                        
+                        <li><a href="#profile-1" data-toggle="tab"><i class="fa  fa-folder-open-o text-default"></i> General Information</a></li>
+                        
+                      </ul>
+                      <span class="hidden-sm">.</span>
+                    </header>
+                    <div class="panel-body">
+                      <div class="tab-content">              
+                       
+                        <div class="tab-pane active" id="profile-1">
+
+
+                        <div class="form-group pull-in clearfix">
+                          <div class="col-sm-6">
+                            <div class="form-group{{ $errors->has('accounttype') ? ' has-error' : ''}}">
+                            <label>Billing Account</label>
+                            <select id="accounttype" name="accounttype" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                           <option value="{{ $patients->accounttype }}">{{ $patients->accounttype }}</option>
+                          @foreach($accounttype as $accounttype)
+                        <option value="{{ $accounttype->type }}">{{ $accounttype->type }}</option>
+                          @endforeach 
+                        </select>         
+                           @if ($errors->has('accounttype'))
+                          <span class="help-block">{{ $errors->first('accounttype') }}</span>
+                           @endif    
+                          </div>   
+                          </div> 
+
+                          <div class="col-sm-6">
+                            <label>Authorization Code</label> 
+                            <div class="form-group{{ $errors->has('authorization_code') ? ' has-error' : ''}}">
+                            <input type="text" rows="3" class="form-control" id="authorization_code" name="authorization_code" value="{{ Request::old('authorization_code') ?: '' }}">   
+                           @if ($errors->has('authorization_code'))
+                          <span class="help-block">{{ $errors->first('authorization_code') }}</span>
+                           @endif    
+                          </div>
+                          </div>
+                        </div>
+
+
+                         <div class="form-group pull-in clearfix">
+                          <div class="col-sm-6">
+                            <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">
+                            <label>Visit Type</label>
+                            <select id="visit_type" name="visit_type" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                          @foreach($visittypes as $visittypes)
+                        <option value="{{ $visittypes->type }}">{{ $visittypes->type }}</option>
+                          @endforeach  
+                        </select>         
+                           @if ($errors->has('visit_type'))
+                          <span class="help-block">{{ $errors->first('visit_type') }}</span>
+                           @endif    
+                          </div>   
+                          </div>
+
+
+                          <div class="col-sm-6">
+                          <div class="form-group{{ $errors->has('consultation_type') ? ' has-error' : ''}}">
+                            <label>Consultation Type</label>
+                            <select id="consultation_type" name="consultation_type" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                            <option value=""> -- Select Consultation -- </option>
+                          @foreach($servicetype as $servicetype)
+                        <option value="{{ $servicetype->type }}">{{ $servicetype->type }} </option>
+                          @endforeach 
+                        </select>         
+                           @if ($errors->has('consultation_type'))
+                          <span class="help-block">{{ $errors->first('consultation_type') }}</span>
+                           @endif    
+                          </div>   
+                        </div>  
+                        </div>
+
+
+                        <div class="form-group pull-in clearfix">
+                          <div class="col-sm-6">
+                            <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">
+                            <label>Location</label>
+                            <select id="location" name="location" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                          @foreach($branches as $branch)
+                        <option value="{{ $branch->location }}">{{ $branch->location }}</option>
+                          @endforeach  
+                        </select>         
+                           @if ($errors->has('visit_type'))
+                          <span class="help-block">{{ $errors->first('visit_type') }}</span>
+                           @endif    
+                          </div>   
+                          </div>
+
+
+                          <div class="col-sm-6">
+                               <div class="form-group{{ $errors->has('referal_doctor') ? ' has-error' : ''}}">
+                            <label>Doctor</label>
+                            <select id="referal_doctor" name="referal_doctor" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%" >
+                          <option value="Non Assigned">Non Assigned</option>
+                          @foreach($doctors as $doctor)
+                        <option value="{{ $doctor->name }}">{{ $doctor->name }}</option>
+                          @endforeach 
+                        </select>         
+                           @if ($errors->has('referal_doctor'))
+                          <span class="help-block">{{ $errors->first('referal_doctor') }}</span>
+                           @endif    
+                          </div> 
+                          </div>   
+                        </div>
+
+                       
+
+                      
+
+
+                       
+
+                        </div>
+
+                    </div>
+
+                    <input type="hidden" id="fullname" name="fullname" value="{{ $patients->fullname }}">
+                     <input type="hidden" id="patient_id" name="patient_id" value="{{ $patients->patient_id }}">
+                     <input type="hidden" name="_token" value="{{ Session::token() }}">
+
+
+
+                      <footer class="panel-footer text-right bg-light lter">
+                        <button type="submit" class="btn btn-success btn-s-xs">Create New Visit</button>
+                        
+                      </footer>
+                      </form>
+                  </section>
+
+
                           <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
                           @foreach($consultations as $consult)
                             @if($consult->referal_doctor != null)
@@ -477,7 +624,7 @@
                             </tr>
                           </thead>
                           <tbody>
-                          @foreach($bills as $keys => $bill)
+                          @foreach($statement as $keys => $bill)
    
                         @if($bill->note  == 'Unpaid')
                           <tr bgcolor="#F5B7B1">
@@ -518,14 +665,28 @@
 
   @stop
 
+
 <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
 
 <script type="text/javascript">
 $(document).ready(function () {
 
-                loadVitals();
+$('#referal_doctor').select2();    
+$('#consultation_type').select2();
+$('#location').select2();
+$('#visit_type').select2();
+$('#accounttype').select2();
+
+loadVitals();
+
+
   });
 </script>
+
+
+
+
+
 
 <script>
 
@@ -667,7 +828,7 @@ function getDetails(acct_no)
       </div>
       </div>
 
-
+{{-- 
 <div class="modal fade" id="modal_check_in" size="600">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -702,6 +863,6 @@ function getDetails(acct_no)
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 
-
+ --}}
 
 

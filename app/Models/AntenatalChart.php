@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class AntenatalChart extends Model
 {
     protected $table = 'antenatal_chart';
+    protected $date = ['lmp'];
     public $timestamps = false;
 }

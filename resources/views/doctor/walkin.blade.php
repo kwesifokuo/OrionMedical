@@ -34,27 +34,29 @@
                             </div>
                           </div>                
                         </div>
+                       
+
                         <div class="panel wrapper panel-success">
                           <div class="row">
                             <div class="col-xs-4">
                               <a href="#">
-                                <span class="m-b-xs h4 block">NA</span>
-                                 <input type="hidden" id="accounttype" name="accounttype" value="{{ $visit_details->payercode }}">
-                                    <input type="hidden" id="opd_number" name="opd_number" value="{{ $visit_details->opd_number }}">
-                                   <input type="hidden" id="fullname" name="fullname" value="{{ $visit_details->name }}">
-                                    <input type="hidden" id="patient_id" name="patient_id" value="{{ $visit_details->patient_id }}">
+                                <span class="m-b-xs h4 block">{{ $patients->gender }}</span>
                                 <small class="text-muted">Gender</small>
                               </a>
                             </div>
                             <div class="col-xs-4">
                               <a href="#">
-                                0
+                                <span class="m-b-xs h4 block">{{ $patients->date_of_birth->age }}</span>
                                 <small class="text-muted">Age</small>
                               </a>
                             </div>
+                             <input type="hidden" id="accounttype" name="accounttype" value="{{ $visit_details->payercode }}">
+                                    <input type="hidden" id="opd_number" name="opd_number" value="{{ $visit_details->opd_number }}">
+                                   <input type="hidden" id="fullname" name="fullname" value="{{ $visit_details->name }}">
+                                    <input type="hidden" id="patient_id" name="patient_id" value="{{ $visit_details->patient_id }}">
                             <div class="col-xs-4">
                               <a href="#">
-                                <span class="m-b-xs h5 block">NA</span>
+                                <span class="m-b-xs h4 block">{{ $patients->civil_status }}</span>
                                 <small class="text-muted">Status</small>
                               </a>
                             </div>
@@ -90,7 +92,7 @@
                           <br>
                      
                           
-                          <img src="/images/188062.svg"> 
+                          <img src="/images/119064.svg"> 
                         </div>
                       </div>
                     </section>
@@ -105,9 +107,17 @@
                       <ul class="nav nav-tabs nav-white">
                     
                      
-                        @if($visit_details->consultation_type == "WALK-IN DIAGNOSTIC")
+                        @if($visit_details->consultation_type == "WALK-IN LAB")
                          <li class=""><a href="#review-investigation" data-toggle="tab"><i class="fa fa-film text-default"></i> Lab / Investigations </a></li>
                         
+
+                        @elseif($visit_details->consultation_type == "WALK-IN SCAN")
+                         <li class=""><a href="#review-investigation" data-toggle="tab"><i class="fa fa-film text-default"></i> Scan </a></li>
+
+                          @elseif($visit_details->consultation_type == "WALK-IN DIAGNOSTIC")
+                         <li class=""><a href="#review-investigation" data-toggle="tab"><i class="fa fa-film text-default"></i> Scan </a></li>
+
+
                         @elseif($visit_details->consultation_type == "WALK-IN PHARMACY")
                         <li class=""><a href="#review-medication" data-toggle="tab"><i class="fa fa-flask text-default"></i> Medication </a></li>
 
@@ -123,7 +133,7 @@
                      <div class="tab-content"> 
 
 
-                         @if($visit_details->consultation_type == "WALK-IN DIAGNOSTIC")
+                         @if($visit_details->consultation_type == "WALK-IN LAB")
                         <div class="tab-pane active" id="review-investigation">
                           <section class="panel panel-default">
                       <div class="panel-body">
@@ -192,20 +202,145 @@
 
 
 
-               
 
-              
-
+                  @if($visit_details->consultation_type == "WALK-IN SCAN")
+                        <div class="tab-pane active" id="review-investigation">
+                          <section class="panel panel-default">
+                      <div class="panel-body">
                  
+                       <div class="form-group pull-in clearfix">
+                          <div class="col-sm-12">
+                           <select id="investigation" name="investigation" rows="3" tabindex="1" data-placeholder="Search investigation ..." style="width:100%">
+                           <option value="">-- Select Investigation --</option>
+                           @foreach($investigations as $investigation)
+                        <option value="{{ $investigation->type }}">{{ $investigation->type }}</option>
+                          @endforeach
+                        </select>         
+                          </div>
+                        </div>
 
-                  
+                         <div class="form-group pull-in clearfix">
+                          <div class="col-sm-12">
+                            <label>Remarks</label> 
+                            <div class="form-group{{ $errors->has('investigation_remark') ? ' has-error' : ''}}">
+                            <textarea type="text" rows="3" class="form-control" id="investigation_remark" name="investigation_remark" value="{{ Request::old('investigation_remark') ?: '' }}"></textarea>   
+                           @if ($errors->has('investigation_remark'))
+                          <span class="help-block">{{ $errors->first('investigation_remark') }}</span>
+                           @endif    
+                          </div>
+                          </div>
+                        </div>
+                        <footer class="panel-footer text-right bg-light lter">
+                        
+                        <button type="button" onclick="addInvestigation()" class="btn btn-success btn-s-xs">Add Investigation</button>
+                        
+                      </footer>
+                      </div>
+                      
+                    </section>
+                     <img src="/images/212327.svg" width="10%" align="right"> 
+                        <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Investigation History</header>
+                                <div class="panel-body">
+                                      <div class="table-responsive">
+                       <table id="investigationsTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
+                          <thead>
+                            <tr>
+                              <th>Investigation</th>
+                              <th>Cost</th>
+                              <th>Date</th>
+                              <th>Status</th>
+                              <th>Requested By</th>
+                               <th>Remarks</th>
+                              <th></th>
+                              <th></th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            
+                          </tbody>
+                        </table>
+                    </div>
+                    </div>
+                    </section>
+                  </div>
+
+                  @else
+
+                  @endif
 
 
-                  
+
+                  @if($visit_details->consultation_type == "WALK-IN DIAGNOSTIC")
+                        <div class="tab-pane active" id="review-investigation">
+                          <section class="panel panel-default">
+                      <div class="panel-body">
                  
+                       <div class="form-group pull-in clearfix">
+                          <div class="col-sm-12">
+                           <select id="investigation" name="investigation" rows="3" tabindex="1" data-placeholder="Search investigation ..." style="width:100%">
+                           <option value="">-- Select Investigation --</option>
+                           @foreach($investigations as $investigation)
+                        <option value="{{ $investigation->type }}">{{ $investigation->type }}</option>
+                          @endforeach
+                        </select>         
+                          </div>
+                        </div>
 
-                   
- 
+                         <div class="form-group pull-in clearfix">
+                          <div class="col-sm-12">
+                            <label>Remarks</label> 
+                            <div class="form-group{{ $errors->has('investigation_remark') ? ' has-error' : ''}}">
+                            <textarea type="text" rows="3" class="form-control" id="investigation_remark" name="investigation_remark" value="{{ Request::old('investigation_remark') ?: '' }}"></textarea>   
+                           @if ($errors->has('investigation_remark'))
+                          <span class="help-block">{{ $errors->first('investigation_remark') }}</span>
+                           @endif    
+                          </div>
+                          </div>
+                        </div>
+                        <footer class="panel-footer text-right bg-light lter">
+                        
+                        <button type="button" onclick="addInvestigation()" class="btn btn-success btn-s-xs">Add Investigation</button>
+                        
+                      </footer>
+                      </div>
+                      
+                    </section>
+                     <img src="/images/212327.svg" width="10%" align="right"> 
+                        <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Investigation History</header>
+                                <div class="panel-body">
+                                      <div class="table-responsive">
+                       <table id="investigationsTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
+                          <thead>
+                            <tr>
+                              <th>Investigation</th>
+                              <th>Cost</th>
+                              <th>Date</th>
+                              <th>Status</th>
+                              <th>Requested By</th>
+                               <th>Remarks</th>
+                              <th></th>
+                              <th></th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            
+                          </tbody>
+                        </table>
+                    </div>
+                    </div>
+                    </section>
+                  </div>
+
+                  @else
+
+                  @endif
+
+
+
  
 
                    

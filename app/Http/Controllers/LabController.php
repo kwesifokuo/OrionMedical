@@ -8,6 +8,7 @@ use OrionMedical\Models\Labs;
 use OrionMedical\Models\LabDocs;
 use OrionMedical\Models\AccountType;
 use OrionMedical\Models\Bill;
+use OrionMedical\Models\Payments;
 use OrionMedical\Models\Customer;
 use OrionMedical\Models\Images;
 use OrionMedical\Models\Company;
@@ -70,19 +71,29 @@ class LabController extends Controller
          $images       =    Images::where('visit_number' ,$visitdetails->opd_number)->where('source','Laboratory')->get();
          $tests         = PatientInvestigation::where('type','Laboratory')->where('visitid' ,'=', $id)->get();
 
-          $bills              = Bill::where('visit_id' ,'=', $id)->where('note', 'Unpaid')->where('category','Laboratory')->orderBy('date', 'ASC')->get();
-          $payables = 0;
-
+         $bills              = Bill::where('visit_id', $id)->orderBy('date', 'desc')->get();
+        $paiditems          = Payments::where('EventID', $id)->get();
+    
+        $payables = 0;
+        $receivables = 0;
+        $outstanding=0;
 
         foreach($bills as $bill)
        {
             $payables += ($bill->rate * $bill->quantity);
        }
+
+       foreach($paiditems as $paiditem)
+       {
+            $receivables += ($paiditem->AmountReceived);
+       }
+
+        $outstanding = ($payables - $receivables);
         //dd($payables);
 
         $patients   =   Customer::where('patient_id' ,'=', $visitdetails->patient_id)->first();
 
-        return view('laboratory.test',compact('patients','images','bodyfluid','resultselector','payables','visitdetails','parameters','tests','drugalchohol','haematology','hormonal','microbiology','microscopy'));
+        return view('laboratory.test',compact('patients','receivables','outstanding','images','bodyfluid','resultselector','payables','visitdetails','parameters','tests','drugalchohol','haematology','hormonal','microbiology','microscopy'));
     }
 
 

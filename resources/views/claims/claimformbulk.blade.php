@@ -1,16 +1,168 @@
 @extends('layouts.print')
 @section('content')
 
-
           <section class="vbox bg-white">
             <header class="header b-b b-light hidden-print">
               <button href="#" class="btn btn-sm btn-info pull-right" onClick="window.print();">Print</button>
-              <p>Claim Form  - {{ $visits->sum('total_price') }}</p>
+              <p>Claim Form  - {{ 0  }}</p>
             </header>
+
+
+
+             
+
+       
 
             
              <section class="scrollable wrapper">
+
+             <div class="page">
+              <img src="/images/{{ $company->logo }}" width="15%">
+               <div class="row">
+                <div class="col-xs-6">
+                  <h4>{{$company->legal_name }}</h4>
+                  <p><a href="#">{{ $company->email }}</a></p>
+                   <p><a href="#">{{ $company->address }}</a></p>
+                   <p><a href="#">{{ $company->phone }}</a></p>
+                   <p><a href="#">{{ $company->website }}</a></p>
+                  <br>
+                  
+                     
+                  </div>
+
+
+                  
+                  <div class="col-xs-6 text-right">
+                  <p class="h4 badge bg-default">Reference number #{{ uniqid() }}</p>
+                  <h5>{{ date('Y-m-d') }}</h5>   
+                     <img src="data:image/png;base64,{{DNS2D::getBarcodePNG($visits[0]->care_provider, 'QRCODE')}}" alt="barcode" /> 
+                  </div>
+                </div>  
+
+               <div class="line"></div>
+               <p style="font-size:18px"> {{ date("jS M Y", strtotime(date('Y-m-d')))  }} </p>
+               <br>
+               <br>
+               <br>
+               <br>
+               <p style="font-size:18px"> Dear {{ $visits[0]->care_provider }}, </p>
+                <p class="big" style="font-size:18px">
+                We sumbit herewith Medical bill for the period {{ date("jS M Y", strtotime($from))  }} to {{ date("jS M Y", strtotime($to))  }}. We appreciate your clients visit and hope the experience met their expectations. </p>
+                <br>
+                 
+                 <p class="big" style="font-size:18px">
+                Total amount for the bill is GHS {{  number_format($totalbill - $totalpayments, 2, '.', ',') }} <br>
+
+
+                 Total number of claims are {{ $visits->count() }}
+
+                <br>
+
+                Enclosed, please find the details of summary of your clients visit to  our facility.  </p>
+                <br>
+                
+                <p class="big" style="font-size:18px">
+                We are most interested in your feedback about ways we can improve our services, and be grateful for any comments you might provide. 
+
+               </p>
+
+               <p style="font-size:18px"> Best wishes</p>
+
+               <br>
+
+               <p style="font-size:18px">Warmest Regards,</p>
+               <br>
+               <br>
+
+               <p style="font-size:18px"> ...................................................................<br>
+               Claims Director
+               </p>
+              </div>
+
+
+               <div class="page">
+              <img src="/images/{{ $company->logo }}" width="15%">
+               <div class="row">
+                <div class="col-xs-6">
+                  <h4>{{$company->legal_name }}</h4>
+                  <p><a href="#">{{ $company->email }}</a></p>
+                   <p><a href="#">{{ $company->address }}</a></p>
+                   <p><a href="#">{{ $company->phone }}</a></p>
+                   <p><a href="#">{{ $company->website }}</a></p>
+                  <br>
+                  
+                     
+                  </div>
+
+
+                  
+                  <div class="col-xs-6 text-right">
+                  <p class="h4 badge bg-default">Reference number #{{ uniqid() }}</p>
+                  <h5>{{ date('Y-m-d') }}</h5>   
+                     <img src="data:image/png;base64,{{DNS2D::getBarcodePNG($visits[0]->care_provider, 'QRCODE')}}" alt="barcode" /> 
+                  </div>
+                </div>  
+
+               <div class="line"></div>
+               <p style="font-size:18px"> {{ date("jS M Y", strtotime(date('Y-m-d')))  }} </p>
+               <br>
+               <br>
+               <br>
+               <br>
+
+
+              <div class="line"></div>
+              
+           
+              
+              <table class="table table-striped m-b-none text-sm" width="100%">
+                <thead>
+                  <tr>
+                  <th width="30" style="font-size:12px">#</th>
+                  <th width="30" style="font-size:12px">Date</th>
+                    <th width="30" style="font-size:12px">Hospital #</th>
+                     <th width="30" style="font-size:12px">Name</th>
+                    <th width="30" style="font-size:12px">Claim #</th>
+                    <th width="30" style="font-size:12px">Insurance #</th>
+                    <th width="30" style="font-size:12px">Total</th>
+                    <th width="30" style="font-size:12px">Diagnosis</th>
+                  </tr>
+                </thead>
+                <tbody>
+                 @foreach($visits as $keys => $visit )
+
+                
+                  <tr>
+                    <td>{{ ++$keys }}</td>
+                    <td>{{ $visit->created_on }}</td>
+                    <td>{{ $visit->patient_id }}</td>
+                    <td>{{ strtoupper($visit->name) }}</td>
+                     <td><a href="/vet-claim/{{ $visit->opd_number }}" >{{ $visit->opd_number }} </a> </td>
+                    <td>{{ $visit->patient->insurance_id }}</td>
+                    <td>{{ $visit->bills->sum('total_price') - $visit->payments->sum('total_price') }}</td>
+                    <td>@foreach($visit->diagonsis as $val) {{ strtoupper($val->diagnosis) }}@endforeach</td>
+                  </tr>
+                 @endforeach
+                  <tr>
+                    
+                    <td colspan="6" class="text-right"><strong>Grand Total</strong></td>
+                    <td>GHS {{ number_format($totalbill - $totalpayments, 2, '.', ',') }}  </td>
+                    
+                  </tr>
+
+
+
+                </tbody>
+              </table> 
+               
+                
+              </div>
+
+
+
               @foreach($visits as $visit)
+
+
             
             <div class="page">
              <img src="/images/{{ $company->logo }}" width="15%">
@@ -33,7 +185,7 @@
                   <p>   <strong> Claim # : </strong> {{ $visit->opd_number }}</p>
                    <p>  <strong> Patient # : </strong> {{ $visit->patient_id }}</p>
                   <p>  <strong> Date : </strong> {{ date("jS M Y", strtotime(date('Y-m-d')))  }}</p>  
-                  <img src="data:image/png;base64,{{DNS2D::getBarcodePNG('222', 'QRCODE')}}" alt="barcode" />        
+                  <img src="data:image/png;base64,{{DNS2D::getBarcodePNG($visit->opd_number, 'QRCODE')}}" alt="barcode" />        
                 </div>
               </div>       
            
@@ -70,15 +222,15 @@
 
                   <tr>
                     <td colspan="4" class="text-right"><strong>Subtotal</strong></td>
-                    <td>GHS {{ $visit->bills->sum('total_price') }}  </td>
+                    <td>GHS {{ number_format($visit->bills->sum('total_price'), 2, '.', ',') }}  </td>
                   </tr>
                   <tr>
                     <td colspan="4" class="text-right no-border"><strong>Paid</strong></td>
-                    <td>GHS {{  $visit->payments->sum('total_price') }}</td>
+                    <td>GHS {{  number_format($visit->payments->sum('total_price'), 2, '.', ',') }}</td>
                   </tr>
                   <tr>
                     <td colspan="4" class="text-right no-border"><strong>Total</strong></td>
-                    <td><strong>GHS {{ $visit->bills->sum('total_price') - $visit->payments->sum('total_price') }}</strong></td>
+                    <td><strong>GHS {{ number_format($visit->bills->sum('total_price') - $visit->payments->sum('total_price'), 2, '.', ',') }}</strong></td>
                   </tr> 
                    
 

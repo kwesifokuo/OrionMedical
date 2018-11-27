@@ -74,6 +74,7 @@
                             <th>Birthday</th>
                             <th>Phone</th>
                             <th>Address</th>
+                             <th>Account Type</th>
 {{--                             <th>Date Registered</th> --}}
                             <th>Copayer</th>
                              <th width="30"></th>
@@ -91,6 +92,7 @@
                               <td>{{ $customerlist->date_of_birth->format('Y-m-d')  }} <span class="badge badge-info"> {{$customerlist->date_of_birth->age}} year(s) </span></td>
                             <td>{{ $customerlist->mobile_number }}</td>
                              <td>{{  ucwords(strtolower(str_limit($customerlist->residential_address,15))) }}</td>
+                             <td>{{  ucwords(strtolower(str_limit($customerlist->accounttype,15))) }}</td>
  {{--                            {{ Carbon\Carbon::parse($customerlist->created_at)->diffForHumans() }}</td> --}}
                              <td>@if($customerlist->accounttype=='Corporate')  {{ str_limit($customerlist->company,15) }}
                               @elseif($customerlist->accounttype=='Health Insurance') {{ str_limit($customerlist->insurance_company,15) }} 
@@ -135,7 +137,7 @@
             </section>
              <footer class="footer bg-white b-t">
                   
-                 <a href="#new-patient" class="bootstrap-modal-form-open float" data-toggle="modal">
+                 <a href="/register-start" class="bootstrap-modal-form-open float" data-toggle="modal">
 <i class="fa fa-plus my-float"></i><i class="fa fa-user my-float"></i>
 </a> 
 
@@ -286,11 +288,11 @@ function setAccountNo(acct_no)
 
                 $('#edit-patient select[name="insurance_eligibility"]').val(json.insurance_eligibility);
                 $('#edit-patient input[name="expiry_date"]').val(json.expiry_date);
-                $('#edit-patient select[name="insurance_cover"]').val(json.insurance_cover);
-                 //alert('jason');
-                 $('#edit-patient insurance_cover').select2({
+                $('#edit-patient select[name="insurance_cover"]').val(json.insurance_cover).select2({
                   tags: true
                   });
+                 //alert('jason');
+                
 
                  if(json.accounttype == 'Corporate')
                  {

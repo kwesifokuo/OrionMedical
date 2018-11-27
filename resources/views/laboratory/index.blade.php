@@ -130,7 +130,7 @@
             </section>
              <footer class="footer bg-white b-t">
                   
-                                    <a href="#new-lab-request" class="bootstrap-modal-form-open float" data-toggle="modal">
+                                    <a href="/register-start" class="bootstrap-modal-form-open float" data-toggle="modal">
 <i class="fa fa-plus my-float"></i><i class="fa fa-flask my-float"></i>
 </a>
 
@@ -160,6 +160,13 @@
 
 
 <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
+
+<script type="text/javascript">
+setTimeout(function() {
+  location.reload();
+}, 30000);
+</script>
+
 <script type="text/javascript">
 $(document).ready(function () {
    

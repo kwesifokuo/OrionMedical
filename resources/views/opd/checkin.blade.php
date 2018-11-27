@@ -83,6 +83,7 @@
                           </div> 
                           </div>   
                         </div>
+
                         <div class="form-group pull-in clearfix">
                           <div class="col-sm-6">
                             <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">
@@ -144,6 +145,26 @@
                       </div>
                       </div>  
                         </div>
+
+
+                        <div class="form-group pull-in clearfix">
+                          <div class="col-sm-6">
+                            <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">
+                            <label>Location</label>
+                            <select id="location" name="location" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:430px">
+                           @foreach($branches as $branch)
+                        <option value="{{ $branch->location }}">{{ $branch->location }}</option>
+                          @endforeach 
+                        </select>         
+                           @if ($errors->has('visit_type'))
+                          <span class="help-block">{{ $errors->first('visit_type') }}</span>
+                           @endif    
+                          </div>   
+                          </div>
+ 
+                        </div>
+
+
                         </div>
 
                     </div>

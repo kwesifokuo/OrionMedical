@@ -336,7 +336,7 @@
                               <div class="col-sm-6">
                                 <div class="form-group{{ $errors->has('insurance_cover') ? ' has-error' : ''}}">
                               <label>Group Plan</label>
-                               <select id="insurance_cover" name="insurance_cover" rows="3" tabindex="1" data-placeholder="Select here.." class="form-control sm-3">
+                               <select id="insurance_cover" name="insurance_cover" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
                                <option value=""> -- Not Set -- </option>
                                <option value="Comprehensive"> Comprehensive </option>
                                <option value="Standard"> Standard </option>   

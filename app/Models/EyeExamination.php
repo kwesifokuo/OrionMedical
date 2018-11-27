@@ -8,4 +8,6 @@ class EyeExamination extends Model
 {
     protected $table = 'eye_examinations';
     public $timestamps = false;
+
+    protected $dates = ['created_on'];
 }

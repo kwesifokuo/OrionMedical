@@ -1,7 +1,6 @@
 <?php
 
 namespace OrionMedical\Http\Controllers;
-
 use Illuminate\Http\Request;
 use OrionMedical\Models\Customer;
 use OrionMedical\Models\OPD;
@@ -57,6 +56,12 @@ use OrionMedical\Models\OcularExamination;
 use OrionMedical\Models\PatientPE;
 use OrionMedical\Models\Payments;
 use OrionMedical\Models\Company;
+
+use OrionMedical\Models\ContinuationSheet;
+use OrionMedical\Models\NursePlan;
+use OrionMedical\Models\NurseNote;
+use OrionMedical\Models\ReferalNote;
+
 use OrionMedical\Http\Controllers\Controller;
 use Carbon\Carbon;
 use DB;
@@ -116,9 +121,26 @@ class DoctorController extends Controller
     $procedures    = PatientProcedure::where('patientid' ,'=', $id)->orderBy('created_on', 'DESC')->get();
     $investigations = PatientInvestigation::where('patientid' ,'=', $id)->orderBy('created_on', 'DESC')->get();
     $allergies     = PatientHistory::where('patientid' ,'=', $id)->orderBy('created_on', 'DESC')->get();
-
     $billingaccounts = AccountType::get();
 
+    $bills              = Bill::where('visit_id', $id)->orderBy('date', 'desc')->get();
+        $paiditems          = Payments::where('EventID', $id)->get();
+    
+        $payables = 0;
+        $receivables = 0;
+        $outstanding=0;
+
+        foreach($bills as $bill)
+       {
+            $payables += ($bill->rate * $bill->quantity);
+       }
+
+       foreach($paiditems as $paiditem)
+       {
+            $receivables += ($paiditem->AmountReceived);
+       }
+
+       $outstanding = ($payables - $receivables);
     //dd($allergies);
        //Vital Chart Graph
         $views = DB::table('patient_vitals')
@@ -192,7 +214,10 @@ class DoctorController extends Controller
         ])
         ->options([]);
 
-    return view('patient.profile', compact('patients','billingaccounts','allergies','vitalcharts','diagnosis','procedures','investigations','visittypes','consultations','images','departments','doctors','insurers','servicetype','medications'));
+        
+
+
+    return view('patient.profile', compact('patients','payables','receivables','outstanding','billingaccounts','allergies','vitalcharts','diagnosis','procedures','investigations','visittypes','consultations','images','departments','doctors','insurers','servicetype','medications'));
 
    }
 
@@ -232,7 +257,7 @@ class DoctorController extends Controller
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         $histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
         //$diagnosis        = Diagnosis::orderBy('category', 'ASC')->distinct()->get(['category']);
@@ -241,20 +266,8 @@ class DoctorController extends Controller
         $doctors          = Doctor::get();
         $complaintperiods = range( date("D") , 30 );
 
-
-
-        // $this->validate($request, [
-        //     'search' => 'required'
-        // ]);
-
         $search = $request->get('search');
         $time   = explode(" - ", Input::get('review_period')); 
-        
-        //dd($time,$search);
-        //$from = $this->change_date_format($time[0]);
-        //$to   = $this->change_date_format($time[1]);
-
-        //dd($time[0]);
 
         if(!$search=="")
         {
@@ -288,18 +301,6 @@ class DoctorController extends Controller
             ->paginate(30)
             ->appends(['search' => $search]);
             
-            
-            // $patients = OPD::where('name', 'like', "%$search%")
-            // ->where('consultation_type','<>', "DENTAL CONSULTATION")
-            // ->where('consultation_type','<>', "Pharmacy Walk In")
-            // ->where('referal_doctor', 'like', "%".Auth::user()->getNameOrUsername()."%")
-            // ->orWhere('consultation_type', 'like', "%$search%")
-            // ->orWhere('opd_number', 'like', "%$search%")
-            // ->orWhere('visit_type', 'like', "%$search%")
-            // ->orderBy('created_on','desc')
-            // ->paginate(30)
-            // ->appends(['search' => $search]);
-            
                
             }
         }
@@ -314,7 +315,7 @@ class DoctorController extends Controller
             //dd($from);
             if(Auth::user()->getRole()=="System Admin")
             {
-            $patients = OPD::whereBetween('updated_on',array($from,$to))
+            $patients = OPD::whereBetween('updated_on',array($from." 00:00:00",$to." 23:59:59"))
              ->where('consultation_type','<>', "Pharmacy Walk In")
              ->where('consultation_type','<>', "DENTAL CONSULTATION")
             ->orderBy('created_on','desc')
@@ -324,10 +325,10 @@ class DoctorController extends Controller
              
              else
              {
-                 $patients = OPD::whereBetween('updated_on',array($from,$to))
-                  ->Where('referal_doctor', 'like', "%".Auth::user()->getNameOrUsername()."%")
-                   ->where('consultation_type','<>', "Pharmacy Walk In")
-                   ->where('consultation_type','not like', "%DENTAL CONSULTATION%")
+            $patients = OPD::whereBetween('updated_on',array($from." 00:00:00",$to." 23:59:59"))
+            ->Where('referal_doctor', 'like', "%".Auth::user()->getNameOrUsername()."%")
+            ->where('consultation_type','<>', "Pharmacy Walk In")
+            ->where('consultation_type','not like', "%DENTAL CONSULTATION%")
             ->orderBy('created_on','desc')
             ->paginate(200)
             ->appends(['search' => $search]);
@@ -368,7 +369,7 @@ class DoctorController extends Controller
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         $histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
         //$diagnosis        = Diagnosis::orderBy('category', 'ASC')->distinct()->get(['category']);
@@ -415,7 +416,7 @@ class DoctorController extends Controller
             //dd($from,$to);
             if(Auth::user()->getRole()=="System Admin")
             {
-                $patients = OPD::whereBetween('updated_on',array($from,$to))
+                $patients = OPD::whereBetween('updated_on',array($from." 00:00:00",$to." 23:59:59"))
             ->where('consultation_type','like', "%DENTAL%")
             ->orderBy('created_on','desc')
             ->paginate(150)
@@ -424,7 +425,7 @@ class DoctorController extends Controller
              
              else
              {
-                 $patients = OPD::whereBetween('updated_on',array($from,$to))
+                 $patients = OPD::whereBetween('updated_on',array($from." 00:00:00",$to." 23:59:59"))
             ->where('consultation_type','like', "%DENTAL%")
             ->orderBy('created_on','desc')
             ->paginate(150)
@@ -453,7 +454,7 @@ class DoctorController extends Controller
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         $histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
         //$diagnosis        = Diagnosis::orderBy('category', 'ASC')->distinct()->get(['category']);
@@ -497,7 +498,7 @@ class DoctorController extends Controller
             //dd($from,$to);
             if(Auth::user()->getRole()=="System Admin")
             {
-                $patients = OPD::whereBetween('updated_on',array($from,$to))
+                $patients = OPD::whereBetween('updated_on',array($from." 00:00:00",$to." 23:59:59"))
             ->where('consultation_type','like', "%EYE%")
             ->orderBy('created_on','desc')
             ->paginate(150)
@@ -506,7 +507,7 @@ class DoctorController extends Controller
              
              else
              {
-                 $patients = OPD::whereBetween('updated_on',array($from,$to))
+                 $patients = OPD::whereBetween('updated_on',array($from." 00:00:00",$to." 23:59:59"))
             ->where('consultation_type','like', "%EYE%")
             ->orderBy('created_on','desc')
             ->paginate(150)
@@ -522,16 +523,16 @@ class DoctorController extends Controller
 
     public function dietianConsultation($id)
     {   
-       $visit_details     = OPD::where('opd_number' ,'=', $id)->first();
-        $patients         = Customer::where('patient_id' ,'=', $visit_details->patient_id)->get();
+        $visit_details  =   OPD::where('opd_number' ,'=', $id)->first();
+        $patients        =   Customer::where('patient_id' ,'=', $visit_details->patient_id)->get();
         $periods          = DrugPeriod::orderBy('type', 'ASC')->get();
-        $images           = Images::where('accountnumber' , $visit_details->patient_id)->where('source','<>','null')->get();
+        $images           = Images::where('accountnumber' , $visit_details->patient_id)->get();
         $investigations   = ServiceCharge::where('department','Laboratory')->orwhere('department','Radiology')->orderBy('type', 'ASC')->get();
         $complaints       = Complaint::where('speciality','General')->orderBy('type', 'ASC')->get();
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         //$histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
 
@@ -554,7 +555,7 @@ class DoctorController extends Controller
          //Review of systems
         $ros_constitutional      = SystemReview::where('system','General')->where('description','Review of System')->get();
         $ros_skin                = SystemReview::where('system','Skin')->where('description','Review of System')->get();
-        $ros_head         = SystemReview::where('system','Head')->where('description','Review of System')->get();
+        $ros_head       = SystemReview::where('system','Head')->where('description','Review of System')->get();
         $ros_throat       = SystemReview::where('system','Throat')->where('description','Review of System')->get();
         $ros_nose         = SystemReview::where('system','Nose')->where('description','Review of System')->get();
         $ros_ears         = SystemReview::where('system','Ears')->where('description','Review of System')->get();
@@ -583,37 +584,142 @@ class DoctorController extends Controller
         $pe_psychological      = SystemReview::where('system','Psychological')->where('description','Physical Examination')->get();
         $pe_extremities        = SystemReview::where('system','Extremities')->where('description','Physical Examination')->get();
         $pe_neuropsychiatric   = SystemReview::where('system','Neuropsychiatric')->where('description','Physical Examination')->get();
-
+        $pe_breast      = SystemReview::where('system','Breast')->where('description','Physical Examination')->get();
         //pe_constitutional,pe_neck,pe_head,ros_throat
 
         //Timeline
         $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
-        $myhistories = PatientHistory::where('visitid' ,'=', $id)->get();
+        $myhistories = PatientHistory::where('patientid' ,'=', $visit_details->patient_id)->first() ?: new PatientHistory;
         $myros = ROS::where('visit_id' ,'=', $id)->get();
         $mype = PatientPE::where('visit_id' ,'=', $id)->get();
         $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
         $mylabs = PatientInvestigation::where('visitid' ,'=', $id)->get();
         $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
+        $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
         $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
-        
+        $referals = ReferalNote::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $mydoctorplan = PatientAssessment::where('visit_id' ,'=', $id)->first() ?: new PatientAssessment;
+        $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->orderby('created_on','desc')->first() ?: new ContinuationSheet;
 
+       // dd($expcomplaints);
+
+        $views = DB::table('patient_vitals')
+             ->select(DB::raw("DATE_FORMAT(created_on,'%H:%i, %d-%M-%Y') as period"),DB::raw("visit_id,temperature,pulse_rate,respiration,sbp,dbp"))
+             ->where('visit_id',$id)
+             //->groupBy('period')
+             ->get();
+
+           // dd($views); 
+        
+        $labels      = array();
+        $temperature = array();
+        $pulse_rate  = array();
+        $respiration  = array();
+        $sbp  = array();
+        $dbp  = array();
+
+        foreach ($views as $view) {
+
+            array_push($labels, $view->period);
+            array_push($temperature, $view->temperature);
+            array_push($pulse_rate, $view->pulse_rate);
+            array_push($respiration, $view->respiration);
+            array_push($sbp, $view->sbp);
+            array_push($dbp, $view->dbp);
+        }
+        //dd($commentDataset);
+    
+        $vitalcharts = app()->chartjs
+        ->name('vitals')
+        ->type('line')
+        ->size(['width' => 1000, 'height' => 300])
+        ->labels($labels)
+        ->datasets([
+            [
+                "label" => "Temperature",
+                'beginAtZero' => "true",
+                 "fill" => false,
+                'backgroundColor' => "rgba(38, 185, 154, 0.31)",
+                'borderColor' => "rgba(38, 185, 154, 0.7)",
+                'strokeColor' => "#f56954",
+                'pointColor' => "#A62121",
+                'pointStrokeColor' => "#741F1F",
+                "pointBorderColor" => "rgba(38, 185, 154, 0.7)",
+                "pointBackgroundColor" => "rgba(38, 185, 154, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $temperature,
+            ],
+            [
+                "label" => "Pulse Rate",
+                 "fill" => false,
+                'backgroundColor' => "rgba(255, 99, 132, 0.31)",
+                'borderColor' => "rgba(255, 99, 132, 0.7)",
+                "pointBorderColor" => "rgba(255, 99, 132, 0.7)",
+                "pointBackgroundColor" => "rgba(255, 99, 132, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $pulse_rate,
+            ],
+            [
+                "label" => "Respiration",
+                "fill" => false,
+                'backgroundColor' => "rgba(153, 102, 255, 0.31)",
+                'borderColor' => "rgba(153, 102, 255, 0.7)",
+                "pointBorderColor" => "rgba(153, 102, 255, 0.7)",
+                "pointBackgroundColor" => "rgba(153, 102, 255, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $respiration,
+            ]
+            ,
+            [
+                "label" => "Systolic",
+                "fill" => false,
+                'backgroundColor' => "rgba(220, 231, 117, 0.31)",
+                'borderColor' => "rgba(220, 231, 117, 0.7)",
+                "pointBorderColor" => "rgba(220, 231, 117, 0.7)",
+                "pointBackgroundColor" => "rgba(220, 231, 117, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220, 231, 117,1)",
+                'data' => $sbp,
+            ]
+            ,
+            [
+                "label" => "Diastolic",
+                "fill" => false,
+                'backgroundColor' => "rgba(0, 188, 212, 0.31)",
+                'borderColor' => "rgba(0, 188, 212, 0.7)",
+                "pointBorderColor" => "rgba(0, 188, 212, 0.7)",
+                "pointBackgroundColor" => "rgba(0, 188, 212, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(0, 188, 212,1)",
+                'data' => $dbp,
+            ]
+
+
+            
+        ])
+        ->options([]);
+
+        //dd($vitalcharts);
+
+        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->orderby('created_on','desc')->get();
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
         $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Radiology')->orwhere('department','Laboratory')->get();
         $departments     = Department::get();
         $doctors         = Doctor::get();
         $visittypes      = VisitType::get();
-
-
         $bills              = Bill::where('visit_id' ,'=', $id)->where('note', 'Unpaid')->orderBy('date', 'ASC')->get();
         $payables = 0;
-
-
         foreach($bills as $bill)
        {
             $payables += ($bill->rate * $bill->quantity);
        }
 
-       return view('dietian.review', compact('mype','pe_constitutional','pe_heart','pe_neck','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
+
+
+       return view('dietian.review', compact('mype','referals','mydoctorplan','continuation','vitalcharts','expcomplaints','expdirectquestion','myplan','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
         ->with('doctors',$doctors)
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
@@ -639,7 +745,7 @@ class DoctorController extends Controller
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         //$histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
 
@@ -696,7 +802,7 @@ class DoctorController extends Controller
 
         //Timeline
         $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
-        $myhistories = PatientHistory::where('patientid' ,'=', $visit_details->patient_id)->get();
+        $myhistories = PatientHistory::where('patientid' ,'=', $visit_details->patient_id)->first() ?: new PatientHistory;
         $myros = ROS::where('visit_id' ,'=', $id)->get();
         $mype = PatientPE::where('visit_id' ,'=', $id)->get();
         $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
@@ -704,32 +810,142 @@ class DoctorController extends Controller
         $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
         $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
         $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
-
-       
+        $referals = ReferalNote::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $mydoctorplan = PatientAssessment::where('visit_id' ,'=', $id)->first() ?: new PatientAssessment;
+        $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->orderby('created_on','desc')->first() ?: new ContinuationSheet;
 
        // dd($expcomplaints);
 
+        $views = DB::table('patient_vitals')
+             ->select(DB::raw("DATE_FORMAT(created_on,'%H:%i, %d-%M-%Y') as period"),DB::raw("visit_id,temperature,pulse_rate,respiration,sbp,dbp"))
+             ->where('visit_id',$id)
+             //->groupBy('period')
+             ->get();
+
+           // dd($views); 
+        
+        $labels      = array();
+        $temperature = array();
+        $pulse_rate  = array();
+        $respiration  = array();
+        $sbp  = array();
+        $dbp  = array();
+
+        foreach ($views as $view) {
+
+            array_push($labels, $view->period);
+            array_push($temperature, $view->temperature);
+            array_push($pulse_rate, $view->pulse_rate);
+            array_push($respiration, $view->respiration);
+            array_push($sbp, $view->sbp);
+            array_push($dbp, $view->dbp);
+        }
+        //dd($commentDataset);
+    
+        $vitalcharts = app()->chartjs
+        ->name('vitals')
+        ->type('line')
+        ->size(['width' => 1000, 'height' => 300])
+        ->labels($labels)
+        ->datasets([
+            [
+                "label" => "Temperature",
+                'beginAtZero' => "true",
+                 "fill" => false,
+                'backgroundColor' => "rgba(38, 185, 154, 0.31)",
+                'borderColor' => "rgba(38, 185, 154, 0.7)",
+                'strokeColor' => "#f56954",
+                'pointColor' => "#A62121",
+                'pointStrokeColor' => "#741F1F",
+                "pointBorderColor" => "rgba(38, 185, 154, 0.7)",
+                "pointBackgroundColor" => "rgba(38, 185, 154, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $temperature,
+            ],
+            [
+                "label" => "Pulse Rate",
+                 "fill" => false,
+                'backgroundColor' => "rgba(255, 99, 132, 0.31)",
+                'borderColor' => "rgba(255, 99, 132, 0.7)",
+                "pointBorderColor" => "rgba(255, 99, 132, 0.7)",
+                "pointBackgroundColor" => "rgba(255, 99, 132, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $pulse_rate,
+            ],
+            [
+                "label" => "Respiration",
+                "fill" => false,
+                'backgroundColor' => "rgba(153, 102, 255, 0.31)",
+                'borderColor' => "rgba(153, 102, 255, 0.7)",
+                "pointBorderColor" => "rgba(153, 102, 255, 0.7)",
+                "pointBackgroundColor" => "rgba(153, 102, 255, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $respiration,
+            ]
+            ,
+            [
+                "label" => "Systolic",
+                "fill" => false,
+                'backgroundColor' => "rgba(220, 231, 117, 0.31)",
+                'borderColor' => "rgba(220, 231, 117, 0.7)",
+                "pointBorderColor" => "rgba(220, 231, 117, 0.7)",
+                "pointBackgroundColor" => "rgba(220, 231, 117, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220, 231, 117,1)",
+                'data' => $sbp,
+            ]
+            ,
+            [
+                "label" => "Diastolic",
+                "fill" => false,
+                'backgroundColor' => "rgba(0, 188, 212, 0.31)",
+                'borderColor' => "rgba(0, 188, 212, 0.7)",
+                "pointBorderColor" => "rgba(0, 188, 212, 0.7)",
+                "pointBackgroundColor" => "rgba(0, 188, 212, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(0, 188, 212,1)",
+                'data' => $dbp,
+            ]
+
+
+            
+        ])
+        ->options([]);
+
+        //dd($vitalcharts);
 
         $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
-        
-
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
         $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Radiology')->orwhere('department','Laboratory')->get();
         $departments     = Department::get();
         $doctors         = Doctor::get();
         $visittypes      = VisitType::get();
-
-
-        $bills              = Bill::where('visit_id' ,'=', $id)->where('note', 'Unpaid')->orderBy('date', 'ASC')->get();
+        $mynursenotes = NurseNote::where('visit_id' ,'=', $id)->first() ?: new NurseNote;
+       
+        $bills              = Bill::where('visit_id', $id)->orderBy('date', 'desc')->get();
+        $paiditems          = Payments::where('EventID', $id)->get();
+    
         $payables = 0;
-
+        $receivables = 0;
+        $outstanding=0;
 
         foreach($bills as $bill)
        {
             $payables += ($bill->rate * $bill->quantity);
        }
 
-       return view('doctor.review', compact('mype','expcomplaints','expdirectquestion','myplan','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
+       foreach($paiditems as $paiditem)
+       {
+            $receivables += ($paiditem->AmountReceived);
+       }
+
+        $outstanding = ($payables - $receivables);
+
+
+       return view('doctor.review', compact('mype','mynursenotes','referals','payables','receivables','outstanding','mydoctorplan','continuation','vitalcharts','expcomplaints','expdirectquestion','myplan','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
         ->with('doctors',$doctors)
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
@@ -748,7 +964,7 @@ class DoctorController extends Controller
     public function psychoConsulation($id)
     {   
 
-        $visit_details  =   OPD::where('opd_number' ,'=', $id)->first();
+       $visit_details  =   OPD::where('opd_number' ,'=', $id)->first();
         $patients        =   Customer::where('patient_id' ,'=', $visit_details->patient_id)->get();
         $periods          = DrugPeriod::orderBy('type', 'ASC')->get();
         $images           = Images::where('accountnumber' , $visit_details->patient_id)->get();
@@ -757,7 +973,7 @@ class DoctorController extends Controller
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         //$histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
 
@@ -814,7 +1030,7 @@ class DoctorController extends Controller
 
         //Timeline
         $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
-        $myhistories = PatientHistory::where('patientid' ,'=', $visit_details->patient_id)->get();
+        $myhistories = PatientHistory::where('patientid' ,'=', $visit_details->patient_id)->first() ?: new PatientHistory;
         $myros = ROS::where('visit_id' ,'=', $id)->get();
         $mype = PatientPE::where('visit_id' ,'=', $id)->get();
         $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
@@ -822,32 +1038,129 @@ class DoctorController extends Controller
         $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
         $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
         $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
-
-       
+        $referals = ReferalNote::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $mydoctorplan = PatientAssessment::where('visit_id' ,'=', $id)->first() ?: new PatientAssessment;
+        $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->orderby('created_on','desc')->first() ?: new ContinuationSheet;
 
        // dd($expcomplaints);
 
+        $views = DB::table('patient_vitals')
+             ->select(DB::raw("DATE_FORMAT(created_on,'%H:%i, %d-%M-%Y') as period"),DB::raw("visit_id,temperature,pulse_rate,respiration,sbp,dbp"))
+             ->where('visit_id',$id)
+             //->groupBy('period')
+             ->get();
+
+           // dd($views); 
+        
+        $labels      = array();
+        $temperature = array();
+        $pulse_rate  = array();
+        $respiration  = array();
+        $sbp  = array();
+        $dbp  = array();
+
+        foreach ($views as $view) {
+
+            array_push($labels, $view->period);
+            array_push($temperature, $view->temperature);
+            array_push($pulse_rate, $view->pulse_rate);
+            array_push($respiration, $view->respiration);
+            array_push($sbp, $view->sbp);
+            array_push($dbp, $view->dbp);
+        }
+        //dd($commentDataset);
+    
+        $vitalcharts = app()->chartjs
+        ->name('vitals')
+        ->type('line')
+        ->size(['width' => 1000, 'height' => 300])
+        ->labels($labels)
+        ->datasets([
+            [
+                "label" => "Temperature",
+                'beginAtZero' => "true",
+                 "fill" => false,
+                'backgroundColor' => "rgba(38, 185, 154, 0.31)",
+                'borderColor' => "rgba(38, 185, 154, 0.7)",
+                'strokeColor' => "#f56954",
+                'pointColor' => "#A62121",
+                'pointStrokeColor' => "#741F1F",
+                "pointBorderColor" => "rgba(38, 185, 154, 0.7)",
+                "pointBackgroundColor" => "rgba(38, 185, 154, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $temperature,
+            ],
+            [
+                "label" => "Pulse Rate",
+                 "fill" => false,
+                'backgroundColor' => "rgba(255, 99, 132, 0.31)",
+                'borderColor' => "rgba(255, 99, 132, 0.7)",
+                "pointBorderColor" => "rgba(255, 99, 132, 0.7)",
+                "pointBackgroundColor" => "rgba(255, 99, 132, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $pulse_rate,
+            ],
+            [
+                "label" => "Respiration",
+                "fill" => false,
+                'backgroundColor' => "rgba(153, 102, 255, 0.31)",
+                'borderColor' => "rgba(153, 102, 255, 0.7)",
+                "pointBorderColor" => "rgba(153, 102, 255, 0.7)",
+                "pointBackgroundColor" => "rgba(153, 102, 255, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $respiration,
+            ]
+            ,
+            [
+                "label" => "Systolic",
+                "fill" => false,
+                'backgroundColor' => "rgba(220, 231, 117, 0.31)",
+                'borderColor' => "rgba(220, 231, 117, 0.7)",
+                "pointBorderColor" => "rgba(220, 231, 117, 0.7)",
+                "pointBackgroundColor" => "rgba(220, 231, 117, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220, 231, 117,1)",
+                'data' => $sbp,
+            ]
+            ,
+            [
+                "label" => "Diastolic",
+                "fill" => false,
+                'backgroundColor' => "rgba(0, 188, 212, 0.31)",
+                'borderColor' => "rgba(0, 188, 212, 0.7)",
+                "pointBorderColor" => "rgba(0, 188, 212, 0.7)",
+                "pointBackgroundColor" => "rgba(0, 188, 212, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(0, 188, 212,1)",
+                'data' => $dbp,
+            ]
+
+
+            
+        ])
+        ->options([]);
+
+        //dd($vitalcharts);
 
         $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
-        
-
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
         $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Radiology')->orwhere('department','Laboratory')->get();
         $departments     = Department::get();
         $doctors         = Doctor::get();
         $visittypes      = VisitType::get();
-
-
         $bills              = Bill::where('visit_id' ,'=', $id)->where('note', 'Unpaid')->orderBy('date', 'ASC')->get();
         $payables = 0;
-
-
         foreach($bills as $bill)
        {
             $payables += ($bill->rate * $bill->quantity);
        }
 
-       return view('doctor.psycho', compact('mype','expcomplaints','expdirectquestion','myplan','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
+
+
+       return view('doctor.psycho', compact('mype','referals','mydoctorplan','continuation','vitalcharts','expcomplaints','expdirectquestion','myplan','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
         ->with('doctors',$doctors)
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
@@ -866,7 +1179,9 @@ class DoctorController extends Controller
     public function doConsulationWalkin($id)
     {   
 
+       
         $visit_details  =   OPD::where('opd_number' ,'=', $id)->first();
+         $patients        =   Customer::where('patient_id' ,'=', $visit_details->patient_id)->first();
         $periods          = DrugPeriod::orderBy('type', 'ASC')->get();
         $images           = Images::where('accountnumber' , $visit_details->patient_id)->get();
         $investigations   = ServiceCharge::where('department','Laboratory')->orwhere('department','Radiology')->orderBy('type', 'ASC')->get();
@@ -874,7 +1189,7 @@ class DoctorController extends Controller
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         //$histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
 
@@ -922,7 +1237,7 @@ class DoctorController extends Controller
             $payables += ($bill->rate * $bill->quantity);
        }
 
-       return view('doctor.walkin', compact('bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
+       return view('doctor.walkin', compact('bills','patients','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
         ->with('doctors',$doctors)
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
@@ -948,7 +1263,7 @@ class DoctorController extends Controller
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         $histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
         $diagnosis        = Diagnosis::orderBy('type', 'ASC')->get();
@@ -1133,7 +1448,7 @@ class DoctorController extends Controller
        //  $application      = DrugApplication::get();
        //  $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
        //  $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-       //  $drugs            = Drug::orderBy('name', 'ASC')->get();
+       //  $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
        //  $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
        //  $histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
        //  //$diagnosis        = Diagnosis::orderBy('category', 'ASC')->distinct()->get(['category']);
@@ -1166,13 +1481,13 @@ class DoctorController extends Controller
         $patients         = Customer::where('patient_id' ,'=', $visit_details->patient_id)->get();
         $tooths            = DentalCavity::get();
         $periods          = DrugPeriod::orderBy('type', 'ASC')->get();
-        $images           = Images::where('accountnumber' ,'=', $visit_details->patient_id)->get();
+        $images           = Images::where('accountnumber' ,'=', $visit_details->patient_id)->where('source','<>','Laboratory')->where('source','<>','Radiology')->get();
         $investigations   = ServiceCharge::where('department','Dental-Radiology')->orderBy('type', 'ASC')->get();
         $complaints       = Complaint::where('speciality','Dental')->orderBy('type', 'ASC')->get();
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','dental')->orderBy('type', 'ASC')->get();
         $histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
         //$diagnosis        = Diagnosis::orderBy('category', 'ASC')->distinct()->get(['category']);
@@ -1182,7 +1497,7 @@ class DoctorController extends Controller
         $complaintperiods = range(date("D") , 30 );
 
 
-         //Review of systems
+          //Review of systems
         $ros_constitutional      = SystemReview::where('system','General')->where('description','Review of System')->get();
         $ros_skin                = SystemReview::where('system','Skin')->where('description','Review of System')->get();
         $ros_head       = SystemReview::where('system','Head')->where('description','Review of System')->get();
@@ -1202,22 +1517,20 @@ class DoctorController extends Controller
         $ros_neuropsychiatric       = SystemReview::where('system','Neuropsychiatric')->where('description','Review of System')->get();
 
         //Physical Exam
-        $ros_constitutional      = SystemReview::where('system','General')->get();
-        $pe_neck       = SystemReview::where('system','Neck')->get();
-        $pe_head       = SystemReview::where('system','Head')->get();
-        $ros_throat       = SystemReview::where('system','Throat')->get();
-        $pe_nose         = SystemReview::where('system','Nose')->get();
-        $pe_ears         = SystemReview::where('system','Ears')->get();
-        $pe_eyes         = SystemReview::where('system','Eyes')->get();
-        $ros_chest       = SystemReview::where('system','Respiratory')->get();
-        $pe_heart       = SystemReview::where('system','Cardiovascular')->get();
-        $pe_gastro      = SystemReview::where('system','Gastrointestinal')->get();
-        $pe_gynecology       = SystemReview::where('system','Gynecologic')->get();
-        $pe_genitourinary       = SystemReview::where('system','Genitourinary')->get();
-        $pe_abdominal       = SystemReview::where('system','Abdominal')->get();
-        $pe_pelvic       = SystemReview::where('system','Pelvic')->get();
-        $pe_extremities       = SystemReview::where('system','Extremities')->get();
-        $pe_neuropsychiatric       = SystemReview::where('system','Neuropsychiatric')->get();
+        $pe_constitutional     = SystemReview::where('system','General')->where('description','Physical Examination')->get();
+        $pe_neck               = SystemReview::where('system','Neck')->where('description','Physical Examination')->get();
+        $pe_HEENT              = SystemReview::where('system','Nose')->orwhere('system','Head')->orwhere('system','Eyes')->orwhere('system','Ears')->orwhere('system','Throat')->where('description','Physical Examination')->get();
+        $pe_respiratory        = SystemReview::where('system','Respiratory')->where('description','Physical Examination')->get();
+        $pe_heart              = SystemReview::where('system','Cardiovascular')->where('description','Physical Examination')->get();
+        $pe_gastro             = SystemReview::where('system','Gastrointestinal')->where('description','Physical Examination')->get();
+        $pe_gynecology         = SystemReview::where('system','Gynecologic')->where('description','Physical Examination')->get();
+        $pe_musculoskeletal    = SystemReview::where('system','Musculoskeletal')->where('description','Physical Examination')->get();
+        $pe_abdominal          = SystemReview::where('system','Abdominal')->where('description','Physical Examination')->get();
+        $pe_psychological      = SystemReview::where('system','Psychological')->where('description','Physical Examination')->get();
+        $pe_extremities        = SystemReview::where('system','Extremities')->where('description','Physical Examination')->get();
+        $pe_neuropsychiatric   = SystemReview::where('system','Neuropsychiatric')->where('description','Physical Examination')->get();
+        $pe_breast      = SystemReview::where('system','Breast')->where('description','Physical Examination')->get();
+        //pe_constitutional,pe_neck,pe_head,ros_throat
 
         $pastmedicalhx   = SocialFamilyHistory::where('category','Past Medical')->orderBy('type', 'ASC')->get();
         $familyhx        = SocialFamilyHistory::where('category','Past Medical')->orderBy('type', 'ASC')->get();
@@ -1230,12 +1543,25 @@ class DoctorController extends Controller
 
         //Timeline
         $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
-        $myhistories = PatientHistory::where('visitid' ,'=', $id)->get();
+        $myhistories = PatientHistory::where('patientid' ,'=', $visit_details->patient_id)->first() ?: new PatientHistory;
         $myros = ROS::where('visit_id' ,'=', $id)->get();
+        $mype = PatientPE::where('visit_id' ,'=', $id)->get();
         $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
         $mylabs = PatientInvestigation::where('visitid' ,'=', $id)->get();
         $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
-        $myvitals = PatientVitals::where('visit_id' ,'=', $id)->get();
+        $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
+        $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $referals = ReferalNote::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $mydoctorplan = PatientAssessment::where('visit_id' ,'=', $id)->first() ?: new PatientAssessment;
+        $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->first() ?: new ContinuationSheet;
+        
+
+        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
+        $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
+        $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
+        $departments     = Department::get();
+        $doctors         = Doctor::get();
+        $visittypes      = VisitType::get();
 
         //dd($visit_details->patient_id);
 
@@ -1260,7 +1586,7 @@ class DoctorController extends Controller
         $outstanding = ($payables - $receivables);
       
 
-        return view('dentist.review', compact('patients','payables','receivables','outstanding','bills','payables','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','tooths','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
+        return view('dentist.review', compact('patients','servicetype','doctors','oldvisits','myplan','mype','myros','mydrugs','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','mylabs','pe_constitutional','referals','mydoctorplan','continuation','payables','receivables','outstanding','bills','payables','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','tooths','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
         ->with('drugs',$drugs)
@@ -1274,32 +1600,37 @@ class DoctorController extends Controller
         ->with('application',$application);
     }
 
+    public function dentalCavity()
+    {
+
+        return view('dentist.cavity');
+    }
+
 
 
     public function doantenatalReview($id)
     {   
-
-       $visit_details  =   OPD::where('opd_number' ,'=', $id)->first();
+        $visit_details  =   OPD::where('opd_number' ,'=', $id)->first();
         $patients        =   Customer::where('patient_id' ,'=', $visit_details->patient_id)->get();
         $periods          = DrugPeriod::orderBy('type', 'ASC')->get();
-        $images           = Images::where('accountnumber' ,'=', $visit_details->patient_id)->get();
+        $images           = Images::where('accountnumber' , $visit_details->patient_id)->get();
         $investigations   = ServiceCharge::where('department','Laboratory')->orwhere('department','Radiology')->orderBy('type', 'ASC')->get();
         $complaints       = Complaint::where('speciality','General')->orderBy('type', 'ASC')->get();
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
-        $histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
+        //$histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
 
         $pastmedicalhx   = SocialFamilyHistory::where('category','Past Medical')->orderBy('type', 'ASC')->get();
         $familyhx        = SocialFamilyHistory::where('category','Past Medical')->orderBy('type', 'ASC')->get();
         $socialhx        = SocialFamilyHistory::where('category','Social')->orderBy('type', 'ASC')->get();
-        $vacinnationhx        = SocialFamilyHistory::where('category','Vaccination')->orderBy('type', 'ASC')->get();
-        $medicationhx        = SocialFamilyHistory::where('category','Medication')->orderBy('type', 'ASC')->get();
-        $surgicalhx        = SocialFamilyHistory::where('category','Surgical')->orderBy('type', 'ASC')->get();
-        $reproductivehx        = SocialFamilyHistory::where('category','Reproductive')->orderBy('type', 'ASC')->get();
-        $allergichx        = SocialFamilyHistory::where('category','Allergy')->orderBy('type', 'ASC')->get();
+        $vacinnationhx   = SocialFamilyHistory::where('category','Vaccination')->orderBy('type', 'ASC')->get();
+        $medicationhx    = SocialFamilyHistory::where('category','Medication')->orderBy('type', 'ASC')->get();
+        $surgicalhx      = SocialFamilyHistory::where('category','Surgical')->orderBy('type', 'ASC')->get();
+        $reproductivehx  = SocialFamilyHistory::where('category','Reproductive')->orderBy('type', 'ASC')->get();
+        $allergichx      = SocialFamilyHistory::where('category','Allergy')->orderBy('type', 'ASC')->get();
 
         $diagnosis        = Diagnosis::orderBy('type', 'ASC')->get();
         $doctors          = Doctor::get();
@@ -1307,7 +1638,6 @@ class DoctorController extends Controller
         $complaintperiods = range( date("D") , 30 );
         $servicetype = ServiceCharge::where('type','like','%Follow up%')->orderby('type','asc')->get(); 
         
-         $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
 
          //Review of systems
         $ros_constitutional      = SystemReview::where('system','General')->where('description','Review of System')->get();
@@ -1339,23 +1669,129 @@ class DoctorController extends Controller
         $pe_musculoskeletal    = SystemReview::where('system','Musculoskeletal')->where('description','Physical Examination')->get();
         $pe_abdominal          = SystemReview::where('system','Abdominal')->where('description','Physical Examination')->get();
         $pe_psychological      = SystemReview::where('system','Psychological')->where('description','Physical Examination')->get();
-        $pe_breast             = SystemReview::where('system','Breast')->where('description','Physical Examination')->get();
         $pe_extremities        = SystemReview::where('system','Extremities')->where('description','Physical Examination')->get();
         $pe_neuropsychiatric   = SystemReview::where('system','Neuropsychiatric')->where('description','Physical Examination')->get();
-        $pe_breast   = SystemReview::where('system','Breast')->where('description','Physical Examination')->get();
-
+        $pe_breast      = SystemReview::where('system','Breast')->where('description','Physical Examination')->get();
         //pe_constitutional,pe_neck,pe_head,ros_throat
 
         //Timeline
         $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
-        $myhistories = PatientHistory::where('visitid' ,'=', $id)->get();
+        $myhistories = PatientHistory::where('patientid' ,'=', $visit_details->patient_id)->first() ?: new PatientHistory;
         $myros = ROS::where('visit_id' ,'=', $id)->get();
         $mype = PatientPE::where('visit_id' ,'=', $id)->get();
         $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
         $mylabs = PatientInvestigation::where('visitid' ,'=', $id)->get();
         $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
-         $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
+        $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
         $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $referals = ReferalNote::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+       
+
+       // dd($expcomplaints);
+
+        $views = DB::table('patient_vitals')
+             ->select(DB::raw("DATE_FORMAT(created_on,'%H:%i, %d-%M-%Y') as period"),DB::raw("visit_id,temperature,pulse_rate,respiration,sbp,dbp"))
+             ->where('visit_id',$id)
+             //->groupBy('period')
+             ->get();
+
+           // dd($views); 
+        
+        $labels      = array();
+        $temperature = array();
+        $pulse_rate  = array();
+        $respiration  = array();
+        $sbp  = array();
+        $dbp  = array();
+
+        foreach ($views as $view) {
+
+            array_push($labels, $view->period);
+            array_push($temperature, $view->temperature);
+            array_push($pulse_rate, $view->pulse_rate);
+            array_push($respiration, $view->respiration);
+            array_push($sbp, $view->sbp);
+            array_push($dbp, $view->dbp);
+        }
+        //dd($commentDataset);
+    
+        $vitalcharts = app()->chartjs
+        ->name('vitals')
+        ->type('line')
+        ->size(['width' => 1000, 'height' => 300])
+        ->labels($labels)
+        ->datasets([
+            [
+                "label" => "Temperature",
+                'beginAtZero' => "true",
+                 "fill" => false,
+                'backgroundColor' => "rgba(38, 185, 154, 0.31)",
+                'borderColor' => "rgba(38, 185, 154, 0.7)",
+                'strokeColor' => "#f56954",
+                'pointColor' => "#A62121",
+                'pointStrokeColor' => "#741F1F",
+                "pointBorderColor" => "rgba(38, 185, 154, 0.7)",
+                "pointBackgroundColor" => "rgba(38, 185, 154, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $temperature,
+            ],
+            [
+                "label" => "Pulse Rate",
+                 "fill" => false,
+                'backgroundColor' => "rgba(255, 99, 132, 0.31)",
+                'borderColor' => "rgba(255, 99, 132, 0.7)",
+                "pointBorderColor" => "rgba(255, 99, 132, 0.7)",
+                "pointBackgroundColor" => "rgba(255, 99, 132, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $pulse_rate,
+            ],
+            [
+                "label" => "Respiration",
+                "fill" => false,
+                'backgroundColor' => "rgba(153, 102, 255, 0.31)",
+                'borderColor' => "rgba(153, 102, 255, 0.7)",
+                "pointBorderColor" => "rgba(153, 102, 255, 0.7)",
+                "pointBackgroundColor" => "rgba(153, 102, 255, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $respiration,
+            ]
+            ,
+            [
+                "label" => "Systolic",
+                "fill" => false,
+                'backgroundColor' => "rgba(220, 231, 117, 0.31)",
+                'borderColor' => "rgba(220, 231, 117, 0.7)",
+                "pointBorderColor" => "rgba(220, 231, 117, 0.7)",
+                "pointBackgroundColor" => "rgba(220, 231, 117, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220, 231, 117,1)",
+                'data' => $sbp,
+            ]
+            ,
+            [
+                "label" => "Diastolic",
+                "fill" => false,
+                'backgroundColor' => "rgba(0, 188, 212, 0.31)",
+                'borderColor' => "rgba(0, 188, 212, 0.7)",
+                "pointBorderColor" => "rgba(0, 188, 212, 0.7)",
+                "pointBackgroundColor" => "rgba(0, 188, 212, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(0, 188, 212,1)",
+                'data' => $dbp,
+            ]
+
+
+            
+        ])
+        ->options([]);
+
+        //dd($vitalcharts);
+
+        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
         
 
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
@@ -1363,14 +1799,6 @@ class DoctorController extends Controller
         $departments     = Department::get();
         $doctors         = Doctor::get();
         $visittypes      = VisitType::get();
-
-        $gestationperiods = GestationDays::get();
-        $presentations    = Presentation::get();
-        $fetus            = Fetus::get();
-        $lie              = GestationLie::get();
-        $position         = GestationPostion::get();
-       
-
 
 
         $bills              = Bill::where('visit_id' ,'=', $id)->where('note', 'Unpaid')->orderBy('date', 'ASC')->get();
@@ -1382,7 +1810,21 @@ class DoctorController extends Controller
             $payables += ($bill->rate * $bill->quantity);
        }
 
-       return view('antenatal.review', compact('mype','gestationperiods','myplan','oldvisits','pe_breast','presentations','fetus','position','lie','pe_constitutional','pe_heart','pe_neck','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
+        
+
+
+
+
+        $gestationperiods = GestationDays::get();
+        $presentations    = Presentation::get();
+        $fetus            = Fetus::get();
+        $lie              = GestationLie::get();
+        $position         = GestationPostion::get();
+       
+
+
+
+      return view('antenatal.reviewnew', compact('mype','referals','gestationperiods','presentations','fetus','position','lie','continuation','vitalcharts','expcomplaints','expdirectquestion','myplan','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
         ->with('doctors',$doctors)
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
@@ -1393,7 +1835,6 @@ class DoctorController extends Controller
         ->with('complaints',$complaints)
         ->with('investigations',$investigations)
         ->with('frequency',$frequency)
-        ->with('histories',$histories)
         ->with('application',$application);
     }
 
@@ -1409,10 +1850,26 @@ class DoctorController extends Controller
             //if(Input::get("oedema")){$oedema =  implode(", ", Input::get("oedema"));} else {$oedema = null;}
 
 
+            //calculate Gest Age & EDD
+            $mydate = Carbon::now();
+            $mylmp = Carbon::createFromFormat('d/m/Y', Input::get("lmp"));
+            $gestation_period = $mydate->diff($mylmp);
+
+            $weeks = $mydate->diffInWeeks($mylmp).' Weeks';
+            $calgp = $weeks.' '.$gestation_period->format('%d days');
+
+            $edddays = $mylmp->addDays(280);
+            
+
+           
+
+
            $record                      = new AntenatalChart;
            $record->visit_id            = Input::get("opd_number");
+           $record->patient_id          = Input::get("patient_id");
            $record->review_date         = Input::get("review_date");
-           $record->gestation_by_date   = Input::get("gestation_by_date");
+           $record->lmp                 = Carbon::createFromFormat('d/m/Y', Input::get("lmp"));
+           $record->gestation_by_date   = $calgp;
            $record->fetus               = Input::get("fetus");       
            $record->presentation        = $presentation;
            $record->engagement          = $engagement;
@@ -1422,7 +1879,7 @@ class DoctorController extends Controller
            $record->oedema              = Input::get("oedema");
            $record->urine_sugar         = Input::get("urine_sugar");       
            $record->urine_protein       = Input::get("urine_sugar"); 
-           $record->edd                 = Input::get("edd"); 
+           $record->edd                 = $edddays;
            $record->bloodtype           = Input::get("bloodtype");
            $record->g6pd                = Input::get("g6pd"); 
            $record->tt                  = Input::get("tt"); 
@@ -1495,7 +1952,7 @@ class DoctorController extends Controller
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','like','%eye%')->orderBy('type', 'ASC')->get();
         $histories        = SocialFamilyHistory::orderBy('type', 'ASC')->get();
         //$diagnosis        = Diagnosis::orderBy('category', 'ASC')->distinct()->get(['category']);
@@ -1508,8 +1965,8 @@ class DoctorController extends Controller
          //Review of systems
         $ros_constitutional      = SystemReview::where('system','General')->where('description','Review of System')->get();
         $ros_skin                = SystemReview::where('system','Skin')->where('description','Review of System')->get();
-        $ros_head       = SystemReview::where('system','Head')->where('description','Review of System')->get();
-        $ros_throat       = SystemReview::where('system','Throat')->where('description','Review of System')->get();
+        $ros_head                = SystemReview::where('system','Head')->where('description','Review of System')->get();
+        $ros_throat              = SystemReview::where('system','Throat')->where('description','Review of System')->get();
         $ros_nose         = SystemReview::where('system','Nose')->where('description','Review of System')->get();
         $ros_ears         = SystemReview::where('system','Ears')->where('description','Review of System')->get();
         $ros_eyes         = SystemReview::where('system','Eyes')->where('description','Review of System')->get();
@@ -1552,13 +2009,38 @@ class DoctorController extends Controller
         $allergichx      = SocialFamilyHistory::where('category','Allergy')->orderBy('type', 'ASC')->get();
 
         //Timeline
+        // $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
+        // $myhistories = PatientHistory::where('visitid' ,'=', $id)->get();
+        // $myros = ROS::where('visit_id' ,'=', $id)->get();
+        // $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
+        // $mylabs = PatientInvestigation::where('visitid' ,'=', $id)->get();
+        // $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
+        // $myvitals = PatientVitals::where('visit_id' ,'=', $id)->get();
+
+
         $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
-        $myhistories = PatientHistory::where('visitid' ,'=', $id)->get();
+        $myhistories = PatientHistory::where('patientid' ,'=', $visit_details->patient_id)->first() ?: new PatientHistory;
         $myros = ROS::where('visit_id' ,'=', $id)->get();
+        $mype = PatientPE::where('visit_id' ,'=', $id)->get();
         $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
         $mylabs = PatientInvestigation::where('visitid' ,'=', $id)->get();
         $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
-        $myvitals = PatientVitals::where('visit_id' ,'=', $id)->get();
+        $myplan = PatientAssessment::where('visit_id' ,'=', $id)->first() ?: new PatientAssessment;
+        $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $mydoctorplan = PatientAssessment::where('visit_id' ,'=', $id)->first() ?: new PatientAssessment;
+        $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->orderby('created_on','desc')->first() ?: new ContinuationSheet;
+        $referals = ReferalNote::where('visit_id' ,'=', $id)->first() ?: new ReferalNote;
+
+        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
+        $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
+        $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Radiology')->orwhere('department','Laboratory')->get();
+        $departments     = Department::get();
+        $doctors         = Doctor::get();
+        $visittypes      = VisitType::get();
+        $bills              = Bill::where('visit_id' ,'=', $id)->where('note', 'Unpaid')->orderBy('date', 'ASC')->get();
+
+
+
 
         $lenstypes      = LensTypes::get();
         $lenstreatments = LensTreatment::get();
@@ -1588,7 +2070,7 @@ class DoctorController extends Controller
 
       
 
-        return view('optometry.review', compact('patients','outstanding','payables','receivables','eyefindings','ocularfindings','bills','payables','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','tooth','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
+        return view('optometry.review', compact('mype','doctors','mydoctorplan','referals','continuation','vitalcharts','expcomplaints','expdirectquestion','myplan','pe_constitutional','oldvisits','patients','outstanding','payables','receivables','eyefindings','ocularfindings','bills','payables','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','tooth','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
         ->with('drugs',$drugs)
@@ -1614,7 +2096,7 @@ public function laboratory()
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         $histories       = SocialFamilyHistory::orderBy('type', 'ASC')->get();
         //$diagnosis        = Diagnosis::orderBy('category', 'ASC')->distinct()->get(['category']);
@@ -1659,7 +2141,7 @@ public function laboratory()
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         //$diagnosis        = Diagnosis::orderBy('type', 'ASC')->limit(1000)->get();
          $diagnosis        = Diagnosis::orderBy('type', 'ASC')->get();
@@ -1718,7 +2200,7 @@ public function laboratory()
         $application      = DrugApplication::get();
         $frequency        = DrugFrequency::orderBy('type', 'ASC')->get();
         $dosage           = DrugDosage::orderBy('type', 'ASC')->get();
-        $drugs            = Drug::orderBy('name', 'ASC')->get();
+        $drugs            = Drug::where('status','Active')->orderBy('name', 'ASC')->get();
         $treatments       = Treatment::where('department','procedures')->orderBy('type', 'ASC')->get();
         $histories       = SocialFamilyHistory::orderBy('type', 'ASC')->get();
         //$diagnosis        = Diagnosis::orderBy('category', 'ASC')->distinct()->get(['category']);
@@ -1788,6 +2270,7 @@ public function laboratory()
            $prescription->patientid   = Input::get("patient_id");
            $prescription->visitid     = Input::get("opd_number");
            $prescription->expiry_date = Carbon::now()->addDays(7);
+           $prescription->drug_id     = Input::get("medication");
            $prescription->drug_name   = $drug->name;
            $prescription->source      = $drug->supplier;
            $prescription->drug_cost   = $drug->unit_price * $margin;
@@ -1975,40 +2458,70 @@ public function generateStaffID()
             {
          
         case 'Health Insurance':
-                    if($getpatientstatus->care_provider=='Glico Health Care')
+                    
+                    
+
+
+                       if($getpatientstatus->care_provider == 'Glico Health Care')
                        {
                          $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('glico');
                          
                        }
 
-                    elseif($getpatientstatus->care_provider=='Cosmopolitan Health Insurance')
+                     elseif($getpatientstatus->care_provider == 'Glico Tpa Barclays')
+                       {
+                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('glico');
+                         
+                       }
+
+                    elseif($getpatientstatus->care_provider == 'Cosmopolitan Health Insurance')
                        {
                          $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('cosmopolitan');
                          
                        }
 
-                     elseif($getpatientstatus->care_provider=='Premier Mutual Health')
+
+                     elseif($getpatientstatus->care_provider == 'Premier Mutual Health')
                        {
                          $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('premier');
+                         
                        }
 
 
-                     elseif($getpatientstatus->care_provider=='Acacia Health Insurance')
+                     elseif($getpatientstatus->care_provider == 'Acacia Health Insurance')
                        {
                          $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('acacia');
+                         
                        }
 
-
-                     elseif($getpatientstatus->care_provider=='Apex Health Insurance')
+                        elseif($getpatientstatus->care_provider == 'Apex Health Insurance')
                        {
                          $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('apex');
+                         
                        }
 
-
-
-                     elseif($getpatientstatus->care_provider=='Metropolitan Health Insurance')
+                      elseif($getpatientstatus->care_provider == 'Metropolitan Health Insurance')
                        {
                          $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('metropolitan');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Nationwide Mutual Insurance')
+                       {
+                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('nationwide');
+                         
+                       }
+
+                        elseif($getpatientstatus->care_provider == 'Universal Health Insurance')
+                       {
+                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('universal');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Phoenix Health Insurance')
+                       {
+                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('phoenix');
+                         
                        }
 
                        else
@@ -2102,44 +2615,71 @@ public function generateStaffID()
             {
          
         case 'Health Insurance':
-               if($getpatientstatus->care_provider=='Glico Health Care')
+               if($getpatientstatus->care_provider == 'Glico Health Care')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('glico');
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('glico');
                          
                        }
 
-                    elseif($getpatientstatus->care_provider=='Cosmopolitan Health Insurance')
+                     elseif($getpatientstatus->care_provider == 'Glico Tpa Barclays')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('cosmopolitan');
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('glico');
                          
                        }
 
-                     elseif($getpatientstatus->care_provider=='Premier Mutual Health')
+                    elseif($getpatientstatus->care_provider == 'Cosmopolitan Health Insurance')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('premier');
-                       }
-
-                       elseif($getpatientstatus->care_provider=='Acacia Health Insurance')
-                       {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('acacia');
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('cosmopolitan');
+                         
                        }
 
 
-                     elseif($getpatientstatus->care_provider=='Apex Health Insurance')
+                     elseif($getpatientstatus->care_provider == 'Premier Mutual Health')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('apex');
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('premier');
+                         
                        }
 
 
-
-                     elseif($getpatientstatus->care_provider=='Metropolitan Health Insurance')
+                     elseif($getpatientstatus->care_provider == 'Acacia Health Insurance')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('metropolitan');
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('acacia');
+                         
+                       }
+
+                        elseif($getpatientstatus->care_provider == 'Apex Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('apex');
+                         
+                       }
+
+                      elseif($getpatientstatus->care_provider == 'Metropolitan Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('metropolitan');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Nationwide Mutual Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('nationwide');
+                         
+                       }
+
+                        elseif($getpatientstatus->care_provider == 'Universal Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('universal');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Phoenix Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("investigation"))->value('phoenix');
+                         
                        }
 
                        else
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('insurance');
+                         $service_charge = ServiceCharge::where('type',$request->input('investigation'))->value('insurance');
                           
                        }
             break;
@@ -2233,44 +2773,72 @@ public function generateStaffID()
             switch(Input::get('accounttype')) 
             {
          
-        case 'Health Insurance':
-              if($getpatientstatus->care_provider=='Glico Health Care')
+           case 'Health Insurance':
+              if($getpatientstatus->care_provider == 'Glico Health Care')
                        {
                          $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('glico');
                          
                        }
 
-                    elseif($getpatientstatus->care_provider=='Cosmopolitan Health Insurance')
+                     elseif($getpatientstatus->care_provider == 'Glico Tpa Barclays')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('glico');
+                         
+                       }
+
+                    elseif($getpatientstatus->care_provider == 'Cosmopolitan Health Insurance')
                        {
                          $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('cosmopolitan');
                          
                        }
 
-                     elseif($getpatientstatus->care_provider=='Premier Mutual Health')
+
+                     elseif($getpatientstatus->care_provider == 'Premier Mutual Health')
                        {
                          $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('premier');
                          
                        }
 
-                       elseif($getpatientstatus->care_provider=='Acacia Health Insurance')
+
+                     elseif($getpatientstatus->care_provider == 'Acacia Health Insurance')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("procedure"))->value('acacia');
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('acacia');
+                         
                        }
 
-
-                     elseif($getpatientstatus->care_provider=='Apex Health Insurance')
+                        elseif($getpatientstatus->care_provider == 'Apex Health Insurance')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("procedure"))->value('apex');
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('apex');
+                         
                        }
 
-                     elseif($getpatientstatus->care_provider=='Metropolitan Health Insurance')
+                      elseif($getpatientstatus->care_provider == 'Metropolitan Health Insurance')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("procedure"))->value('metropolitan');
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('metropolitan');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Nationwide Mutual Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('nationwide');
+                         
+                       }
+
+                        elseif($getpatientstatus->care_provider == 'Universal Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('universal');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Phoenix Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('phoenix');
+                         
                        }
 
                        else
                        {
-                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('insurance');
+                         $service_charge = ServiceCharge::where('type',$request->input('procedure'))->value('insurance');
                           
                        }
             break;
@@ -2346,42 +2914,71 @@ public function generateStaffID()
             {
          
         case 'Health Insurance':
-              if($getpatientstatus->care_provider=='Glico Health Care')
+              if($getpatientstatus->care_provider == 'Glico Health Care')
                        {
                          $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('glico');
                          
                        }
 
-                    elseif($getpatientstatus->care_provider=='Cosmopolitan Health Insurance')
+                     elseif($getpatientstatus->care_provider == 'Glico Tpa Barclays')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('glico');
+                         
+                       }
+
+                    elseif($getpatientstatus->care_provider == 'Cosmopolitan Health Insurance')
                        {
                          $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('cosmopolitan');
                          
                        }
 
-                     elseif($getpatientstatus->care_provider=='Premier Mutual Health')
+
+                     elseif($getpatientstatus->care_provider == 'Premier Mutual Health')
                        {
                          $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('premier');
                          
                        }
 
-                       elseif($getpatientstatus->care_provider=='Acacia Health Insurance')
+
+                     elseif($getpatientstatus->care_provider == 'Acacia Health Insurance')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("procedure"))->value('acacia');
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('acacia');
+                         
                        }
 
-                     elseif($getpatientstatus->care_provider=='Apex Health Insurance')
+                        elseif($getpatientstatus->care_provider == 'Apex Health Insurance')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("procedure"))->value('apex');
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('apex');
+                         
                        }
 
-                     elseif($getpatientstatus->care_provider=='Metropolitan Health Insurance')
+                      elseif($getpatientstatus->care_provider == 'Metropolitan Health Insurance')
                        {
-                         $investigation_amount = ServiceCharge::where('type',Input::get("procedure"))->value('metropolitan');
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('metropolitan');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Nationwide Mutual Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('nationwide');
+                         
+                       }
+
+                        elseif($getpatientstatus->care_provider == 'Universal Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('universal');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Phoenix Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('phoenix');
+                         
                        }
 
                        else
                        {
-                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('insurance');
+                         $service_charge = ServiceCharge::where('type',$request->input('procedure'))->value('insurance');
                           
                        }
             break;
@@ -2453,11 +3050,79 @@ public function generateStaffID()
          if(Input::get("tooth")){$tooth =  implode(", ", Input::get("tooth"));} else {$tooth = null;}
            
              $transactionid     = uniqid(20);
+             $getpatientstatus = OPD::where('opd_number',Input::get("opd_number"))->first();
+
             switch(Input::get('accounttype')) 
             {
          
         case 'Health Insurance':
-              $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('insurance');
+              if($getpatientstatus->care_provider == 'Glico Health Care')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('glico');
+                         
+                       }
+
+                     elseif($getpatientstatus->care_provider == 'Glico Tpa Barclays')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('glico');
+                         
+                       }
+
+                    elseif($getpatientstatus->care_provider == 'Cosmopolitan Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('cosmopolitan');
+                         
+                       }
+
+
+                     elseif($getpatientstatus->care_provider == 'Premier Mutual Health')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('premier');
+                         
+                       }
+
+
+                     elseif($getpatientstatus->care_provider == 'Acacia Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('acacia');
+                         
+                       }
+
+                        elseif($getpatientstatus->care_provider == 'Apex Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('apex');
+                         
+                       }
+
+                      elseif($getpatientstatus->care_provider == 'Metropolitan Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('metropolitan');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Nationwide Mutual Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('nationwide');
+                         
+                       }
+
+                        elseif($getpatientstatus->care_provider == 'Universal Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('universal');
+                         
+                       }
+
+                       elseif($getpatientstatus->care_provider == 'Phoenix Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('phoenix');
+                         
+                       }
+
+                       else
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('procedure'))->value('insurance');
+                          
+                       }
             break;
         case 'Corporate':
              $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('corporate');
@@ -2469,7 +3134,6 @@ public function generateStaffID()
              $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('charge');
             break;
            }
-
            //$getpatientstatus = OPD::where('opd_number',Input::get("opd_number"))->first();
 
 
@@ -2512,6 +3176,8 @@ public function generateStaffID()
            $diagnosis                  = new PatientDiagnosis;
            $diagnosis->visitid         = Input::get("opd_number");
            $diagnosis->diagnosis       = $mydiagnosis;
+           $diagnosis->diagnosis_type  = Input::get("diagnosis_type");
+           $diagnosis->remark          = Input::get("diagnosis_remark");
            $diagnosis->date            = Carbon::now();
            $diagnosis->created_by      = Auth::user()->getNameOrUsername();
 
@@ -2539,6 +3205,8 @@ public function generateStaffID()
            $diagnosis                  = new PatientDiagnosis;
            $diagnosis->visitid         = Input::get("opd_number");
            $diagnosis->diagnosis       = Input::get("diagnosis");
+           $diagnosis->diagnosis_type  = Input::get("diagnosis_type");
+           $diagnosis->remark          = Input::get("diagnosis_remark");
            $diagnosis->date            = Carbon::now();
            $diagnosis->created_by      = Auth::user()->getNameOrUsername();
 
@@ -2777,14 +3445,84 @@ public function generateStaffID()
      public function addAssessment()
     {     
          
+           
+            
+            $ID = Input::get("opd_number");
+            $affectedRows = PatientAssessment::where('visit_id', '=', $ID)->delete();
+
            $assessment                  = new PatientAssessment;
-           $assessment->visit_id         = Input::get("opd_number");
-           $assessment->assessment       = Input::get("assessment");
+           $assessment->visit_id        = Input::get("opd_number");
+           $assessment->patient_id      = Input::get("patient_id");
+           $assessment->assessment      = Input::get("assessment");
            $assessment->created_on      = Carbon::now();
            $assessment->created_by      = Auth::user()->getNameOrUsername();
 
 
             
+
+            if($assessment->save())
+            {
+    
+              $added_response = array('OK'=>'OK');
+                return  Response::json($added_response);
+
+            }
+            else
+            {
+                $added_response = array('No Data'=>'No Data');
+                return  Response::json($added_response);
+            }
+
+    }
+
+
+     public function addReferalNote()
+    {     
+         
+           
+            
+            $ID = Input::get("opd_number");
+            $affectedRows = ReferalNote::where('visit_id', '=', $ID)->delete();
+
+           $assessment                  = new ReferalNote;
+           $assessment->visit_id        = Input::get("opd_number");
+           $assessment->patient_id      = Input::get("patient_id");
+           $assessment->content      = Input::get("referal_note");
+           $assessment->created_on      = Carbon::now();
+           $assessment->created_by      = Auth::user()->getNameOrUsername();
+
+
+            
+
+            if($assessment->save())
+            {
+    
+              $added_response = array('OK'=>'OK');
+                return  Response::json($added_response);
+
+            }
+            else
+            {
+                $added_response = array('No Data'=>'No Data');
+                return  Response::json($added_response);
+            }
+
+    }
+
+
+     public function addContinuation()
+    {     
+
+
+            $ID = Input::get("opd_number");
+            $affectedRows = ContinuationSheet::where('visit_id', '=', $ID)->delete();
+
+           $assessment                  = new ContinuationSheet;
+           $assessment->visit_id        = Input::get("opd_number");
+           $assessment->patient_id      = Input::get("patient_id");
+           $assessment->content         = Input::get("continuation_sheet");
+           $assessment->created_on      = Carbon::now();
+           $assessment->created_by      = Auth::user()->getNameOrUsername();
 
             if($assessment->save())
             {
@@ -2922,6 +3660,7 @@ public function generateStaffID()
             if(Input::get("vaccinations_history")){$vacinnation =  implode(", ", Input::get("vaccinations_history"));} else {$vacinnation = null;}
             if(Input::get("surgical_history")){$surgical =  implode(", ", Input::get("surgical_history"));} else {$surgical = null;}
             if(Input::get("drug_history")){$drugs =  implode(", ", Input::get("drug_history"));} else {$drugs = null;}
+            if(Input::get("drug_history_recent")){$drugs_recent =  implode(", ", Input::get("drug_history_recent"));} else {$drugs_recent = null;}
             if(Input::get("reproductive_history")){$reproduction =  implode(", ", Input::get("reproductive_history"));} else {$reproduction = null;}
             if(Input::get("allergy")){$allergy =  implode(", ", Input::get("allergy"));} else {$allergy = null;}
 
@@ -3014,7 +3753,8 @@ public function generateStaffID()
            $history->family_history             = $family;//implode(', ', Input::get("family_history"));
            $history->social_history             = $social;//implode(',', Input::get("social_history"));
            $history->vaccinations_history       = $vacinnation;//implode(',', Input::get("vaccinations_history"));
-           $history->drug_history               = $drugs;//implode(',', Input::get("vaccinations_history"));
+           $history->drug_history               = $drugs;//implode(',', Input::get("vaccinations_history"));''
+           $history->drug_history_recent        = $drugs_recent;
            $history->surgical_history           = $surgical;//implode(',', Input::get("vaccinations_history"));
            $history->reproductive_history       = $reproduction;//implode(',', Input::get("vaccinations_history"));
            $history->allergy                    = $allergy;//implode(',', Input::get("vaccinations_history"));
@@ -3707,6 +4447,7 @@ public function addNoteForDental()
            $vitals->fbs             = Input::get("fbs");
            $vitals->rbs             = Input::get("rbs");
            $vitals->spo2            = Input::get("spo2");
+           $vitals->remarks            = Input::get("vital_remark");
 
            $vitals->bmi             = $BMI;
            $vitals->calories        = $calories;
@@ -3797,8 +4538,8 @@ public function getAntenatalRecords()
     try
     {
 
-            $opd_number = Input::get("visit_id");
-            $records = AntenatalChart::where('visit_id','=',$opd_number)->get();
+            $patient_id = Input::get("patient_id");
+            $records = AntenatalChart::where('patient_id','=',$patient_id)->get();
               return  Response::json($records);
     }
 
@@ -4173,6 +4914,34 @@ public function excludeMedication()
         {
             $ID = Input::get("ID");
             $affectedRows = PatientFurtherPlan::where('id', $ID)->delete();
+
+            if($affectedRows > 0)
+            {
+                $ini   = array('OK'=>'OK');
+                return  Response::json($ini);
+            }
+            else
+            {
+                $ini   = array('No Data'=>$ID);
+                return  Response::json($ini);
+            }
+        }
+        else
+        {
+           $ini   = array('No Data'=>'No Data');
+           return  Response::json($ini);
+        }
+
+   }
+
+
+
+   public function doProcedurePlan()
+   {
+        if(Input::get("ID"))
+        {
+            $ID = Input::get("ID");
+           $affectedRows = PatientFurtherPlan::where('id',$ID)->update(array('status' => 'Done'));
 
             if($affectedRows > 0)
             {
@@ -4647,11 +5416,13 @@ public function excludeComplain()
 
     try
     {
+
+
         $company = Company::get()->first();
         $admission   = EyeExamination::where('visit_id' , $id)->first();
         $patients   = Customer::where('patient_id' , $admission->patient_id)->first();
 
-        
+        //dd($id);
 
       
         return view('optometry.print', compact('admission','company','patients'));
@@ -4739,6 +5510,39 @@ public function excludeComplain()
                     $ini   = array('No Data'=>'No Data');
                     return  Response::json($ini);
                 }
+
+    }
+
+
+    public function getDiagnosisState()
+    {
+
+          if(Input::get("opd_number"))
+            {
+                    $ID = Input::get("opd_number");
+                    $affectedRows = PatientDiagnosis::where('visitid', $ID)->count();
+
+                   
+
+                if($affectedRows < 1)
+                {
+                    $ini   = array('OK'=>'OK');
+                    return  Response::json($ini);
+                }
+            
+                 else
+                {
+                    $ini   = array('No Data' => $ID);
+                    return  Response::json($ini);
+                }
+            }
+                else
+               {
+                    $ini   = array('No Data'=>'No Data');
+                    return  Response::json($ini);
+                }
+
+
 
     }
 

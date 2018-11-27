@@ -63,12 +63,14 @@ class HomeController extends Controller
 
         //Visit Graph
 
-       $views = OPD::where('payercode','Private')->whereRaw("created_on >= last_day(now()) + interval 1 day - interval 2 month")->groupBy(DB::raw('DATE(admissions.created_on)'))->orderby('created_on','asc')->limit(60)->get([DB::raw("count(*) as no_of_visits"),DB::raw("DATE_FORMAT(created_on,'%d-%M') as day_of_month")]);
-       $views2 = OPD::where('payercode','Corporate')->whereRaw("created_on >= last_day(now()) + interval 1 day - interval 2 month")->groupBy(DB::raw('DATE(admissions.created_on)'))->orderby('created_on','asc')->limit(60)->get([DB::raw("count(*) as no_of_visits"),DB::raw("DATE_FORMAT(created_on,'%d-%M') as day_of_month")]);
-       $views3 = OPD::where('payercode','Health Insurance')->whereRaw("created_on >= last_day(now()) + interval 1 day - interval 2 month")->groupBy(DB::raw('DATE(admissions.created_on)'))->orderby('created_on','asc')->limit(60)->get([DB::raw("count(*) as no_of_visits"),DB::raw("DATE_FORMAT(created_on,'%d-%M') as day_of_month")]);
+       $views = OPD::where('payercode','Private')->whereRaw("created_on >= last_day(now()) + interval 1 day - interval 1 month")->groupBy(DB::raw('DATE(admissions.created_on)'))->orderby('created_on','asc')->limit(30)->get([DB::raw("count(*) as no_of_visits,0"),DB::raw("DATE_FORMAT(created_on,'%d-%M') as day_of_month")]);
+       $views2 = OPD::where('payercode','Corporate')->whereRaw("created_on >= last_day(now()) + interval 1 day - interval 1 month")->groupBy(DB::raw('DATE(admissions.created_on)'))->orderby('created_on','asc')->limit(30)->get([DB::raw("count(*) as no_of_visits,0"),DB::raw("DATE_FORMAT(created_on,'%d-%M') as day_of_month")]);
+       $views3 = OPD::where('payercode','Health Insurance')->whereRaw("created_on >= last_day(now()) + interval 1 day - interval 1 month")->groupBy(DB::raw('DATE(admissions.created_on)'))->orderby('created_on','asc')->limit(30)->get([DB::raw("count(*) as no_of_visits,0"),DB::raw("DATE_FORMAT(created_on,'%d-%M') as day_of_month")]);
        
 
-       //dd($views->toSql());
+
+
+       //dd($views);
        //dd($views->query);
 
         // $views = DB::table('admissions')
@@ -190,36 +192,42 @@ class HomeController extends Controller
 
 
     //bills Graph
-             $views = DB::table('master_bill_list')
-             ->select(DB::raw("DATE_FORMAT(date,'%d-%M') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
-            ->where('payercode','Private')
-            ->whereRaw("date >= last_day(now()) + interval 1 day - interval 2 month")
-            ->whereNull('deleted_at')
-             ->groupBy('day_of_month')
-             ->orderby('date','asc')
-             ->limit(60)
-             ->get();
+            //  $views = DB::table('master_bill_list')
+            //  ->select(DB::raw("DATE_FORMAT(date,'%d-%M') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
+            // ->where('payercode','Private')
+            // ->whereRaw("date >= last_day(now()) + interval 1 day - interval 2 month")
+            // ->whereNull('deleted_at')
+            //  ->groupBy('day_of_month')
+            //  ->orderby('date','asc')
+            //  ->limit(60)
+            //  ->get();
 
-            $views2 = DB::table('master_bill_list')
-             ->select(DB::raw("DATE_FORMAT(date,'%d-%M') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
-            ->where('payercode','Corporate')
-               ->whereRaw("date >= last_day(now()) + interval 1 day - interval 2 month")
-               ->whereNull('deleted_at')
-             ->groupBy('day_of_month')
-             ->orderby('date','asc')
-             ->limit(60)
-             ->get();
+        $views = Bill::where('payercode','Private')->whereRaw("date >= last_day(now()) + interval 1 day - interval 1 month")->groupBy(DB::raw('DATE(bills.date)'))->orderby('date','asc')->limit(30)->get([DB::raw("sum(quantity*rate) as billamount"),DB::raw("DATE_FORMAT(date,'%d-%M') as day_of_month")]);
+       $views2 = Bill::where('payercode','Corporate')->whereRaw("date >= last_day(now()) + interval 1 day - interval 1 month")->groupBy(DB::raw('DATE(bills.date)'))->orderby('date','asc')->limit(30)->get([DB::raw("sum(quantity*rate) as billamount"),DB::raw("DATE_FORMAT(date,'%d-%M') as day_of_month")]);
+       $views3 = Bill::where('payercode','Health Insurance')->whereRaw("date >= last_day(now()) + interval 1 day - interval 1 month")->groupBy(DB::raw('DATE(bills.date)'))->orderby('date','asc')->limit(30)->get([DB::raw("sum(quantity*rate) as billamount"),DB::raw("DATE_FORMAT(date,'%d-%M') as day_of_month")]);
+       
 
 
-            $views3 = DB::table('master_bill_list')
-             ->select(DB::raw("DATE_FORMAT(date,'%d-%M') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
-            ->where('payercode','Health Insurance')
-               ->whereRaw("date >= last_day(now()) + interval 1 day - interval 2 month")
-               ->whereNull('deleted_at')
-             ->groupBy('day_of_month')
-             ->orderby('date','asc')
-             ->limit(60)
-             ->get();
+            // $views2 = DB::table('master_bill_list')
+            //  ->select(DB::raw("DATE_FORMAT(date,'%d-%M') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
+            // ->where('payercode','Corporate')
+            //    ->whereRaw("date >= last_day(now()) + interval 1 day - interval 2 month")
+            //    ->whereNull('deleted_at')
+            //  ->groupBy('day_of_month')
+            //  ->orderby('date','asc')
+            //  ->limit(60)
+            //  ->get();
+
+
+            // $views3 = DB::table('master_bill_list')
+            //  ->select(DB::raw("DATE_FORMAT(date,'%d-%M') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
+            // ->where('payercode','Health Insurance')
+            //    ->whereRaw("date >= last_day(now()) + interval 1 day - interval 2 month")
+            //    ->whereNull('deleted_at')
+            //  ->groupBy('day_of_month')
+            //  ->orderby('date','asc')
+            //  ->limit(60)
+            //  ->get();
 
         
         $labels = array();
@@ -436,10 +444,10 @@ class HomeController extends Controller
         //dd(,$labels);
     
         $categorycharts = app()->chartjs
-        ->name('categoryamount')
+        ->name('categoryname3')
         ->type('line')
         ->size(['width' => 900, 'height' => 300])
-        ->labels($labels)
+        ->labels($categoryamount3)
         ->datasets([
             
             [
@@ -632,34 +640,310 @@ class HomeController extends Controller
             
         ])
         ->options([]);
+
+
+
+
+
+
+        // /// Utilization of Services
+        //  $medicalviews = DB::table('bills')
+        //      ->select(DB::raw('category as department'), DB::raw('sum(quantity*rate) as service_charge'),DB::raw("DATE_FORMAT(date,'%M-%YY') as month_of_year"))
+        //      ->groupBy('month_of_year')
+        //      ->orderBy('month_of_year', 'DESC')
+        //      ->limit(10)
+        //      ->get();
+        
+        // $medicallabels = array();
+        // $medicalviewDataset = array();
+        // $medicalcommentDataset = array();
+
+        // foreach ($medicalviews as $medicalview) {
+
+        //     array_push($medicallabels, $medicalview->drug);
+            
+        //     array_push($medicalcommentDataset, $medicalview->drugs_no);
+        // }
+        // //dd($commentDataset);
+    
+        // $medicalchartjs = app()->chartjs
+        // ->name('drugstop10')
+        // ->type('horizontalBar')
+        // ->size(['width' => 600, 'height' => 300])
+        // ->labels($medicallabels)
+        // ->datasets([
+        //     [
+               
+        //         "label" => "Top 10 Drugs Dispensed",
+        //         "labelLength" => 5,
+        //          'suggestedMin' => 0,
+        //         'beginAtZero' => "true",
+        //         'responsive' => true,
+        //         'backgroundColor' => "rgba(206, 147, 216, 0.7)",
+        //         'borderColor' => "rgba(38, 185, 154, 0.7)",
+        //         'strokeColor' => "#f56954",
+        //         'pointColor' => "#A62121",
+        //         'pointStrokeColor' => "#741F1F",
+        //         "pointBorderColor" => "rgba(38, 185, 154, 0.7)",
+        //         "pointBackgroundColor" => "rgba(38, 185, 154, 0.7)",
+        //         "pointHoverBackgroundColor" => "#fff",
+        //         "pointHoverBorderColor" => "rgba(220,220,220,1)",
+        //         'data' => $medicalcommentDataset,
+        //     ]
+            
+        // ])
+        // ->options([]);      
+
+
+
+        // Services sources chart
+             $views217 = DB::table('bills')
+             ->select(DB::raw("DATE_FORMAT(date,'%M-%Y') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
+            ->where('category','Dental')
+             ->groupBy('day_of_month')
+             ->orderby('date','asc')
+             ->limit(60)
+             ->get();
+
+           
+
+            $views237 = DB::table('bills')
+             ->select(DB::raw("DATE_FORMAT(date,'%M-%Y') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
+            ->where('category','Pharmacy')
+             ->groupBy('day_of_month')
+             ->orderby('date','asc')
+              ->limit(60)
+             ->get();
+
+            $views247 = DB::table('bills')
+             ->select(DB::raw("DATE_FORMAT(date,'%M-%Y') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
+            ->where('category','OPD')
+             ->groupBy('day_of_month')
+             ->orderby('date','asc')
+              ->limit(60)
+             ->get();
+
+               $views257 = DB::table('bills')
+             ->select(DB::raw("DATE_FORMAT(date,'%M-%Y') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
+            ->where('category','IPD')
+             ->groupBy('day_of_month')
+             ->orderby('date','asc')
+              ->limit(60)
+             ->get();
+
+               $views267 = DB::table('bills')
+             ->select(DB::raw("DATE_FORMAT(date,'%M-%Y') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
+            ->where('category','Eye')
+             ->groupBy('day_of_month')
+             ->orderby('date','asc')
+              ->limit(60)
+             ->get();
+
+                $views277 = DB::table('bills')
+             ->select(DB::raw("DATE_FORMAT(date,'%M-%Y') as day_of_month"), DB::raw("sum(quantity*rate) as billamount"))
+            ->where('category','Laboratory')
+             ->groupBy('day_of_month')
+             ->orderby('date','asc')
+              ->limit(60)
+             ->get();
+
+             //dd($views277);
+
+              
+
+
+        $categoryname17 = array();
+        $categoryamount17 = array();
+
+
+        $categoryname37 = array();
+        $categoryamount37 = array();
+
+        $categoryname47 = array();
+        $categoryamount47 = array();
+
+        $categoryname57 = array();
+        $categoryamount57 = array();
+
+        $categoryname67 = array();
+        $categoryamount67 = array();
+
+        $categoryname77 = array();
+        $categoryamount77 = array();
+
+       
+
+        foreach ($views217 as $view217) {
+            array_push($categoryname17, $view217->day_of_month);
+            array_push($categoryamount17, $view217->billamount);
+        }
+
+      
+
+        foreach ($views237 as $view237) {
+            array_push($categoryname37, $view237->day_of_month);
+            array_push($categoryamount37, $view237->billamount);
+        }
+
+
+        foreach ($views247 as $view247) {
+            array_push($categoryname47, $view247->day_of_month);
+            array_push($categoryamount47, $view247->billamount);
+        }
+
+
+        foreach ($views257 as $view257) {
+            array_push($categoryname57, $view257->day_of_month);
+            array_push($categoryamount57, $view257->billamount);
+        }
+
+
+        foreach ($views267 as $view267) {
+            array_push($categoryname67, $view267->day_of_month);
+            array_push($categoryamount67, $view267->billamount);
+        }
+
+
+        foreach ($views277 as $view277) {
+            array_push($categoryname77, $view277->day_of_month);
+            array_push($categoryamount77, $view277->billamount);
+        }
+
       
 
 
         
-      
+       
+        
+        //dd(,$labels);
+    
+        $categorychartsutilization = app()->chartjs
+        ->name('categoryname17')
+        ->type('line')
+        ->size(['width' => 1000, 'height' => 600])
+        ->labels($categoryname17)
+        ->datasets([
+            
+            [
+               // labels: [$labels],
+                "label" => "Dental",
+                 //fill => false,
+                //'beginAtZero' => "true",
+                'backgroundColor' => "rgba(38, 185, 154, 0.31)",
+                'borderColor' => "rgba(38, 185, 154, 0.7)",
+                'strokeColor' => "#f56954",
+                'pointColor' => "#A62121",
+                'pointStrokeColor' => "#741F1F",
+                "pointBorderColor" => "rgba(38, 185, 154, 0.7)",
+                "pointBackgroundColor" => "rgba(38, 185, 154, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(220,220,220,1)",
+                'data' => $categoryamount17,
+                'spanGaps' => "false",
+            ],
+           
+            [
+                "label" => "Pharmacy",
+                 //fill => false,
+                //'beginAtZero' => "true",
+                'backgroundColor' => "rgba(241, 196, 15, 0.31)",
+                'borderColor' => "rgba(241, 196, 15, 0.7)",
+                "pointBorderColor" => "rgba(241, 196, 15, 0.7)",
+                "pointBackgroundColor" => "rgba(241, 196, 15, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(241, 196, 15,1)",
+                'data' => $categoryamount37,
+                'spanGaps' => "false",
+            ],
+            [
+                "label" => "OPD",
+                 //fill => false,
+                //'beginAtZero' => "true",
+                'backgroundColor' => "rgba(231, 76, 60, 0.31)",
+                'borderColor' => "rgba(231, 76, 60, 0.7)",
+                "pointBorderColor" => "rgba(231, 76, 60, 0.7)",
+                "pointBackgroundColor" => "rgba(231, 76, 60, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(231, 76, 60,1)",
+                'data' => $categoryamount47,
+                'spanGaps' => "false",
+            ],
+            [
+                "label" => "IPD",
+                 //fill => false,
+                //'beginAtZero' => "true",
+                'backgroundColor' => "rgba(240, 178, 122, 0.31)",
+                'borderColor' => "rgba(240, 178, 122, 0.7)",
+                "pointBorderColor" => "rgba(240, 178, 122, 0.7)",
+                "pointBackgroundColor" => "rgba(240, 178, 122, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(240, 178, 122,1)",
+                'data' => $categoryamount57,
+                'spanGaps' => "false",
+            ],
+            [
+                "label" => "Eye",
+                 //fill => false,
+                //'beginAtZero' => "true",
+                'backgroundColor' => "rgba(174, 214, 241, 0.31)",
+                'borderColor' => "rgba(174, 214, 241, 0.7)",
+                "pointBorderColor" => "rgba(174, 214, 241, 0.7)",
+                "pointBackgroundColor" => "rgba(174, 214, 241, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(174, 214, 241,1)",
+                'data' => $categoryamount67,
+                'spanGaps' => "false",
+            ],
+            [
+                "label" => "Laboratory",
+                 //fill => false,
+                //'beginAtZero' => "true",
+                'backgroundColor' => "rgba(125, 60, 152, 0.31)",
+                'borderColor' => "rgba(125, 60, 152, 0.7)",
+                "pointBorderColor" => "rgba(125, 60, 152, 0.7)",
+                "pointBackgroundColor" => "rgba(125, 60, 152, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(125, 60, 152,1)",
+                'data' => $categoryamount77,
+                'spanGaps' => "false",
+            ]
+            
+            
+        ])
+        ->options([]);
+
+
+
+
+
+        
+       
+
 
 
         $visitrate = 0;
         $customercount=Customer::count();
 
         //$getactivities  = DB::table('activity_log')->limit(5)->orderBy('created_at','desc')->get();
-        $today          = Carbon::now()->format('Y-m-d').'%';
+        $today          = Carbon::today()->format('Y-m-d'); //Carbon::now()->format('Y-m-d').'%';
         $events         = Event::orderBy('start_time','DESC')->where('start_time', 'like', $today)->get();
         
+        //dd($today." 23:59:59");
+
         $patients       = Customer::orderBy('created_at','DESC')->take(5)->get();
         $patientnumber  = Customer::count();
-        $visits         = OPD::where('created_on','like', $today)->count();
-        $myvisits       = OPD::where('created_on', 'like', $today)->get();
+        $visits         = OPD::where('created_on','>', $today)->count();
+        $myvisits       = OPD::where('created_on', '>', $today)->get();
 
         $visitrate      = (int)($visits/ $patientnumber) * 100;
 
-        $mybills          = Bill::where('date','like', $today)->get();
-        $mypharmacybills  = Bill::where('category','Pharmacy')->where('date','like', $today)->get();
-        $mylabbills       = Bill::where('category','Laboratory')->where('date','like', $today)->get();
-        $myopdbills       = Bill::where('category','OPD')->where('date','like', $today)->get();
-        $myimagingbills   = Bill::where('category','Radiotherapy')->where('date','like', $today)->get();
+        $mybills          = Bill::whereBetween('date',array($today." 00:00:00",$today." 23:59:59"))->get();
+        $mypharmacybills  = Bill::where('category','Pharmacy')->whereBetween('date',array($today." 00:00:00",$today." 23:59:59"))->get();
+        $mylabbills       = Bill::where('category','Laboratory')->whereBetween('date',array($today." 00:00:00",$today." 23:59:59"))->get();
+        $myopdbills       = Bill::where('category','OPD')->whereBetween('date',array($today." 00:00:00",$today." 23:59:59"))->get();
+        $myimagingbills   = Bill::where('category','Radiotherapy')->whereBetween('date',array($today." 00:00:00",$today." 23:59:59"))->get();
 
-       //dd($visitrate);
+       //dd($today);
         $bills=0;
         $pharmacybills=0;
         $labbills=0;
@@ -694,7 +978,7 @@ class HomeController extends Controller
         $assignees =    User::get();
         $drugs      =  Consumables::where('is_Active','Active')->orderBy('name', 'ASC')->get();
 
-        return View('pages.dashboard', compact('assignees','drugs','categorycharts','billscharts','myvisits','company','bills','opdbills','chartjs','dayscharts','diagnosischartjs','medicalchartjs','imagingbills','customercount','events','patients','visits','visitrate','pharmacybills','labbills'));
+        return View('pages.dashboard', compact('assignees','drugs','categorychartsutilization','categorycharts','billscharts','myvisits','company','bills','opdbills','chartjs','dayscharts','diagnosischartjs','medicalchartjs','imagingbills','customercount','events','patients','visits','visitrate','pharmacybills','labbills'));
     }
 
 

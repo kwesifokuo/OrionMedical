@@ -134,7 +134,7 @@
                     <section class="scrollable">
                       <div class="tab-content">
                         <div class="tab-pane active" id="individual">
-                           <form  class="bootstrap-modal-form" method="post" action="/add-service" class="panel-body wrapper-lg">
+                           <form  class="bootstrap-modal-form" data-validate="parsley" method="post" action="/add-service" class="panel-body wrapper-lg">
                            @include('settings/add_service')
                         <input type="hidden" name="_token" value="{{ Session::token() }}">
                       </form>
@@ -165,7 +165,7 @@
                     <section class="scrollable">
                       <div class="tab-content">
                         <div class="tab-pane active" id="individual">
-                           <form  class="bootstrap-modal-form" method="post" action="/update-service" class="panel-body wrapper-lg">
+                           <form  class="bootstrap-modal-form" data-validate="parsley" method="post" action="/update-service" class="panel-body wrapper-lg">
                            @include('settings/edit_service')
                         <input type="hidden" name="_token" value="{{ Session::token() }}">
                       </form>
@@ -262,9 +262,18 @@ function editService(id)
                 $('#edit-service input[name="walk_margin"]').val(json.charge);
                 $('#edit-service input[name="corporate_margin"]').val(json.corporate_margin);
                 $('#edit-service input[name="insurance_margin"]').val(json.insurance_margin);
+                
                 $('#edit-service input[name="glico_margin"]').val(json.glico_margin);
                 $('#edit-service input[name="cosmopolitan_margin"]').val(json.cosmopolitan_margin);
                 $('#edit-service input[name="premier_margin"]').val(json.premier_margin);
+
+                $('#edit-service input[name="metropolitan_margin"]').val(json.metropolitan_margin);
+                $('#edit-service input[name="apex_margin"]').val(json.apex_margin);
+                $('#edit-service input[name="acacia_margin"]').val(json.acacia_margin);
+
+                $('#edit-service input[name="universal_margin"]').val(json.universal_margin);
+                $('#edit-service input[name="nationwide_margin"]').val(json.nationwide_margin);
+
                 
                 $('#edit-service select[name="department"]').val(json.department);
                  $('#edit-service select[name="department"]').select2();

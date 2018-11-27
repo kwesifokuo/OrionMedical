@@ -65,7 +65,7 @@
                 <form  data-validate="parsley" method="post" action="/do-payment" class="panel-body wrapper-lg">
                 <section class="panel panel-default">
                   
-                    @role(['Billing','System Admin','Special Admin'])
+                    @role(['Billing','System Admin','Special Admin','Pharmacist','Pharmacy Technician'])
                       <div class="panel-body">
                        
                         <div class="clearfix m-b">
@@ -139,6 +139,8 @@
                         <button type="submit" class="btn btn-success btn-s-xs">Pay</button>
                          <input type="hidden" name="visit_id" id="visit_id" value="{{ $visitdetails->opd_number }}">
                           <input type="hidden" name="patient_id" id="patient_id" value="{{ $visitdetails->patient_id }}">
+                          <input type="hidden" name="yourname" id="yourname" value="{{ $visitdetails->name }}">
+                          <input type="hidden" name="yourphone" id="yourphone" value="{{ $patients->mobile_number }}">
                           <input type="hidden" name="payercode" id="payercode" value="{{ $visitdetails->payercode }}">
                           <input type="hidden" name="fullname" id="fullname" value="{{ $visitdetails->name }}">
                           <input type="hidden" name="_token" value="{{ Session::token() }}">

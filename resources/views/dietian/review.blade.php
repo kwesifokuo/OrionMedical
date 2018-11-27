@@ -1,8 +1,9 @@
+@role(['System Admin','Doctor'])
 @extends('layouts.default')
 @section('content')
 <section class="vbox">
             <header class="header bg-white b-b b-light">
-                    <p><span class="label label-success">{{ $visit_details->consultation_type }} - {{ $patients[0]->fullname }}</span></p> 
+                    <p><span class="label label-success">{{ $visit_details->consultation_type }} - {{ $visit_details->referal_doctor }}</span></p> 
                     <p class="block"><a href="#" class=""></a> <span class="label label-warning btn-rounded">{{ $visit_details->visit_type }}</span></p>
                      <p class="block"><a href="#" class=""></a> <span class="label label-success btn-rounded">{{ $visit_details->opd_number }}</span></p>
                      <p class="block"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Created : {{ Carbon\Carbon::parse($visit_details->created_on)->diffForHumans() }}</span></p>
@@ -47,7 +48,11 @@
                             </div>
                             <div class="col-xs-4">
                               <a href="#">
+                                @if($patients[0]->date_of_birth->age > 1)
                                 <span class="m-b-xs h4 block">{{ $patients[0]->date_of_birth->age }}</span>
+                                @else
+                                 <span class="m-b-xs h4 block"> {{ \Carbon\Carbon::createFromTimeStamp(strtotime($patients[0]->date_of_birth))->diffForHumans() }} </span>
+                                @endif
                                 <small class="text-muted">Age</small>
                               </a>
                             </div>
@@ -113,8 +118,11 @@
                                  <div class="line"></div>
                                @endforeach
                               </h5>
-                            </ul>
+
+                        </ul>
                           <br>
+                     
+                          
                           <img src="/images/144315.svg"> 
                         </div>
                       </div>
@@ -128,16 +136,24 @@
                   <section class="vbox">
                     <header class="header bg-light bg-gradient">
                       <ul class="nav nav-tabs nav-white">
+                    
+                     
                           <li class=""><a href="#review-complaint" data-toggle="tab"><i class="fa fa-meh-o text-default"></i> Nutritional Assessment </a></li>
-                       <li class=""><a href="#review-assessment" data-toggle="tab"><i class="fa fa-puzzle-piece text-default"></i> Nutritional Intervention </a></li>
-                        <li class=""><a href="#review-diagnosis" data-toggle="tab"><i class="fa fa fa-legal (alias) text-default"></i> Diagnosis </a></li> 
+                        <li class=""><a href="#review-diagnosis" data-toggle="tab"><i class="fa fa fa-legal (alias) text-default"></i> Provisional Diagnosis </a></li> 
+                        {{--  <li class=""><a href="#review-assessment" data-toggle="tab"><i class="fa fa-puzzle-piece text-default"></i> Nutritional Intervention </a></li> --}}
                          <li class=""><a href="#review-investigation" data-toggle="tab"><i class="fa fa-film text-default"></i> Lab / Investigations </a></li>
-                       
-                        <li class=""><a href="#review-medication" data-toggle="tab"><i class="fa fa-flask text-default"></i> Nutritional Supplements </a></li>
-                         <li class=""><a href="#review-discharge" data-toggle="tab"><i class="fa fa-bars text-default"></i> Visit Summary </a></li>
+                        <li class=""><a href="#review-procedure" data-toggle="tab"><i class="fa fa-gears (alias) text-default"></i> Procedures </a></li>
+                        <li class=""><a href="#review-medication" data-toggle="tab"><i class="fa fa-flask text-default"></i> Nutritional Supplement </a></li>
+                        
                          <li class=""><a href="#review-documents" data-toggle="tab"><i class="fa fa-folder text-default"></i> Documents </a></li> 
-                         <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa fa-folder text-default"></i> Notes Summary </a></li> 
-                         <span class="hidden-sm">.</span>
+                         <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa  fa-code-fork text-default"></i> Notes Summary </a></li> 
+                         <li class=""><a href="#history-summary" data-toggle="tab"><i class="fa fa-archive text-default"></i> Notes History (Old Visits) </a></li> 
+                         <li class=""><a href="#review-referal" data-toggle="tab"><i class="fa fa-briefcase text-default"></i> Referal Note </a></li> 
+                         <li class=""><a href="#review-continuation" data-toggle="tab"><i class="fa fa-file text-default"></i> Continuation Note for Review </a></li> 
+ 
+                         <li class=""><a href="#review-discharge" data-toggle="tab"><i class="fa fa-bars text-default"></i> Visit Summary </a></li>
+                         <li class=""><a href="#review-appointment" data-toggle="tab"><i class="fa fa-calendar text-default"></i> Book & View Appointments </a></li>
+                        
                       </ul>
                     </header>
 
@@ -145,6 +161,8 @@
 
                      <div class="panel-body">
                      <div class="tab-content"> 
+
+
 
 
                         <div class="tab-pane" id="review-investigation">
@@ -174,7 +192,10 @@
                           </div>
                         </div>
                         <footer class="panel-footer text-right bg-light lter">
+                         @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
                         <button type="button" onclick="addInvestigation()" class="btn btn-success btn-s-xs">Add Investigation</button>
+                        @else
+                        @endif
                       </footer>
                       </div>
                       
@@ -191,6 +212,8 @@
                               <th>Cost</th>
                               <th>Date</th>
                               <th>Status</th>
+                              <th>Requested By</th>
+                               <th>Remarks</th>
                               <th></th>
                               <th></th>
                               <th></th>
@@ -213,7 +236,7 @@
 
                          <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
-                            <label class="badge bg-default">Reason for Discharge </label> 
+                            <label class="badge bg-default">Conclusion </label> 
                             <div class="form-group{{ $errors->has('treament_plan') ? ' has-error' : ''}}">
                             <textarea type="text" rows="5" class="form-control" id="treament_plan" name="treament_plan" value="{{ Request::old('treament_plan') ?: '' }}"></textarea>   
                            @if ($errors->has('treament_plan'))
@@ -224,55 +247,50 @@
                         </div>
 
 
-                        <div class="form-group pull-in clearfix">
+                         <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
-                            <div class="form-group">
-                      <label class="col-sm-2 control-label badge bg-default">Disposition</label>
-                      <div class="col-sm-10">
-                        <div class="checkbox">
-                          <label>
-                            <input type="checkbox" value="">
-                            Return Visit Request <a href="/doctor-appointments/{{ $visit_details->referal_doctor}}" class="btn btn-info rounded" data-toggle="modal">Appointment Request</a>
-                          </label>
-                        </div>
-
-                        <div class="radio">
-                          <label>
-                            <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked="">
-                            Corespondence Letter <a href="#letter-request" class="btn btn-info rounded" data-toggle="modal">Create A Request</a>
-                          </label>
-                        </div>
-                         <div class="radio">
-                          <label>
-                            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
-                            Internal Referral <a href="#internal-referral" class="btn btn-info rounded bootstrap-modal-form-open" onclick="getDetails('{{ $patients[0]->id }}')" data-toggle="modal">Create Internal Referral</a>
-                          </label>
-                        </div>
-                        <div class="radio">
-                          <label>
-                            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
-                            External Referral <a href="/print-referal-note/{{ $visit_details->opd_number }}" class="btn btn-info rounded" data-toggle="modal">Create Referral Letter</a>
-                          </label>
-                        </div>
-
-                         <div class="radio">
-                          <label>
-                            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
-                            Excuse Duty <a href="/print-excuse-duty/{{ $visit_details->opd_number }}" class="btn btn-info rounded" data-toggle="modal">Print Excuse Duty</a>
-                          </label>
-                        </div>
-
-                         <div class="radio">
-                          <label>
-                            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
-                            Refusal of Treatment <a href="/print-refusal-treatment/{{ $visit_details->opd_number }}" class="btn btn-info rounded" data-toggle="modal">Print Refusal of Treatment</a>
-                          </label>
-                        </div>
-                       
-                      </div>
-                    </div>
+                            <label class="badge bg-default">Recommendations </label> 
+                            <div class="form-group{{ $errors->has('treament_plan_action') ? ' has-error' : ''}}">
+                            <textarea type="text" rows="5" class="form-control" id="treament_plan_action" name="treament_plan_action" value="{{ Request::old('treament_plan') ?: '' }}"></textarea>   
+                           @if ($errors->has('treament_plan'))
+                          <span class="help-block">{{ $errors->first('treament_plan') }}</span>
+                           @endif    
+                          </div>
                           </div>
                         </div>
+
+
+                        <section class="panel panel-info">
+                                
+                                <div class="panel-body">
+                                      <div class="table-responsive">
+                       <table width="100%">
+                          
+                          <tbody>
+                            <tr>
+                            <td>
+                            <a href="/doctor-appointments/{{ $visit_details->referal_doctor}}" class="btn btn-info rounded" data-toggle="modal">Appointment Request</a>
+                            </td>
+                            <td>
+                             <a href="#internal-referral" class="btn btn-info rounded bootstrap-modal-form-open" onclick="getDetails('{{ $patients[0]->id }}')" data-toggle="modal">Create Internal Referral</a>
+                            </td>
+                            <td>
+                            <a href="/print-referal-note/{{ $visit_details->opd_number }}" class="btn btn-info rounded" data-toggle="modal">Print Referral Letter</a>
+                            </td>
+                            </tr>
+                            <tr>
+                            <td>
+                           <a href="/print-excuse-duty/{{ $visit_details->opd_number }}" class="btn btn-info rounded" data-toggle="modal">Print Excuse Duty</a>
+                            </td>
+                            <td>
+                          <a href="/print-refusal-treatment/{{ $visit_details->opd_number }}" class="btn btn-info rounded" data-toggle="modal">Print Refusal of Treatment</a>
+                            </td>
+                        </tr>
+                          </tbody>
+                        </table>
+                    </div>
+                    </div>
+                    </section>
 
 
                       </div>
@@ -305,10 +323,122 @@
                     </section>
                   </div>
 
-                  <div class="tab-pane" id="review-summary">
+                  <div class="tab-pane" id="history-summary">
+                    <section class="panel panel-default portlet-item" style="opacity: 1;">
+                <header class="panel-heading">                    
+                  <span class="label bg-dark"></span> Visits
+                </header>
+                <section class="panel-body">
+
+                  @foreach($oldvisits as $visits)
+                  <article class="media">
+                    <span class="pull-left thumb-sm"><img src="images/avatar_default.jpg" class="img-circle"></span>
+                    <div class="media-body">
+                      <div class="pull-right media-xs text-center text-muted">
+                        <strong class="h4">{{$visits->created_on->format('d/m/Y')}}</strong><br>
+                       
+                      </div>
+                      <a href="/consultation/{{$visits->opd_number}}" class="h4">{{$visits->consultation_type}}</a>
+                      <small class="block"><a href="#" class="">{{$visits->referal_doctor}}</a> <span class="label label-success">Click to view</span></small>
+                      <small class="block m-t-sm">{{$visits->chief_complaint}}</small>
+                    </div>
+                  </article>
+                  <div class="line"></div>
+                  @endforeach
+
+
+
+                  <div class="line pull-in"></div>
+                </section>
+              </section>
+              </div>
+
+
+
+              <div class="tab-pane" id="review-referal">
+                    <section class="panel panel-default portlet-item" style="opacity: 1;">
+                <header class="panel-heading">                    
+                  <span class="label bg-dark"></span> Referals
+                </header>
+                <section class="panel-body">
+                <div class="col-sm-12">
+                        <label class="badge bg-default">Referal note</label> 
+                        <div class="btn-toolbar m-b-sm btn-editor" data-role="editor-toolbar" data-target="#editor">
+                          <div class="btn-group">
+                            <a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Font"><i class="fa fa-font"></i><b class="caret"></b></a>
+                              <ul class="dropdown-menu">
+                              <li><a data-edit="fontName Serif" style="font-family:'Serif'">Serif</a></li><li><a data-edit="fontName Sans" style="font-family:'Sans'">Sans</a></li><li><a data-edit="fontName Arial" style="font-family:'Arial'">Arial</a></li><li><a data-edit="fontName Arial Black" style="font-family:'Arial Black'">Arial Black</a></li><li><a data-edit="fontName Courier" style="font-family:'Courier'">Courier</a></li><li><a data-edit="fontName Courier New" style="font-family:'Courier New'">Courier New</a></li><li><a data-edit="fontName Comic Sans MS" style="font-family:'Comic Sans MS'">Comic Sans MS</a></li><li><a data-edit="fontName Helvetica" style="font-family:'Helvetica'">Helvetica</a></li><li><a data-edit="fontName Impact" style="font-family:'Impact'">Impact</a></li><li><a data-edit="fontName Lucida Grande" style="font-family:'Lucida Grande'">Lucida Grande</a></li><li><a data-edit="fontName Lucida Sans" style="font-family:'Lucida Sans'">Lucida Sans</a></li><li><a data-edit="fontName Tahoma" style="font-family:'Tahoma'">Tahoma</a></li><li><a data-edit="fontName Times" style="font-family:'Times'">Times</a></li><li><a data-edit="fontName Times New Roman" style="font-family:'Times New Roman'">Times New Roman</a></li><li><a data-edit="fontName Verdana" style="font-family:'Verdana'">Verdana</a></li></ul>
+                          </div>
+                          <div class="btn-group">
+                            <a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Font Size"><i class="fa fa-text-height"></i>&nbsp;<b class="caret"></b></a>
+                              <ul class="dropdown-menu">
+                              <li><a data-edit="fontSize 5"><font size="5">Huge</font></a></li>
+                              <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
+                              <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
+                              </ul>
+                          </div>
+                          <div class="btn-group">
+                            <a class="btn btn-default btn-sm" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>
+                            <a class="btn btn-default btn-sm" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a>
+                            <a class="btn btn-default btn-sm" data-edit="strikethrough" title="" data-original-title="Strikethrough"><i class="fa fa-strikethrough"></i></a>
+                            <a class="btn btn-default btn-sm" data-edit="underline" title="" data-original-title="Underline (Ctrl/Cmd+U)"><i class="fa fa-underline"></i></a>
+                          </div>
+                          <div class="btn-group">
+                            <a class="btn btn-default btn-sm" data-edit="insertunorderedlist" title="" data-original-title="Bullet list"><i class="fa fa-list-ul"></i></a>
+                            <a class="btn btn-default btn-sm" data-edit="insertorderedlist" title="" data-original-title="Number list"><i class="fa fa-list-ol"></i></a>
+                            <a class="btn btn-default btn-sm" data-edit="outdent" title="" data-original-title="Reduce indent (Shift+Tab)"><i class="fa fa-dedent"></i></a>
+                            <a class="btn btn-default btn-sm" data-edit="indent" title="" data-original-title="Indent (Tab)"><i class="fa fa-indent"></i></a>
+                          </div>
+                          <div class="btn-group">
+                            <a class="btn btn-default btn-sm" data-edit="justifyleft" title="" data-original-title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a>
+                            <a class="btn btn-default btn-sm" data-edit="justifycenter" title="" data-original-title="Center (Ctrl/Cmd+E)"><i class="fa fa-align-center"></i></a>
+                            <a class="btn btn-default btn-sm btn-info" data-edit="justifyright" title="" data-original-title="Align Right (Ctrl/Cmd+R)"><i class="fa fa-align-right"></i></a>
+                            <a class="btn btn-default btn-sm" data-edit="justifyfull" title="" data-original-title="Justify (Ctrl/Cmd+J)"><i class="fa fa-align-justify"></i></a>
+                          </div>
+                          <div class="btn-group">
+                          <a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Hyperlink"><i class="fa fa-link"></i></a>
+                            <div class="dropdown-menu">
+                              <div class="input-group m-l-xs m-r-xs">
+                                <input class="form-control input-sm" placeholder="URL" type="text" data-edit="createLink">
+                                <div class="input-group-btn">
+                                  <button class="btn btn-default btn-sm" type="button">Add</button>
+                                </div>
+                              </div>
+                            </div>
+                            <a class="btn btn-default btn-sm" data-edit="unlink" title="" data-original-title="Remove Hyperlink"><i class="fa fa-cut"></i></a>
+                          </div>
+                          
+                          <div class="btn-group">
+                            <a class="btn btn-default btn-sm" title="" id="pictureBtn" data-original-title="Insert picture (or just drag &amp; drop)"><i class="fa fa-picture-o"></i></a>
+                            <input type="file" data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" style="opacity: 0; position: absolute; top: 0px; left: 0px; width: 36px; height: 31px;">
+                          </div>
+                          <div class="btn-group">
+                            <a class="btn btn-default btn-sm" data-edit="undo" title="" data-original-title="Undo (Ctrl/Cmd+Z)"><i class="fa fa-undo"></i></a>
+                            <a class="btn btn-default btn-sm" data-edit="redo" title="" data-original-title="Redo (Ctrl/Cmd+Y)"><i class="fa fa-repeat"></i></a>
+                          </div>
+                        </div>
+                        <div id="myreferal" name="myreferal" class="form-control" style="overflow:scroll;height:300px;max-height:300px" contenteditable="true"> @foreach($referals as $note)
+                                 <a>{!!$note->content!!}</a>
+                               @endforeach</div>
+
+
+                      </div>
+                       <footer class="panel-footer text-right bg-light lter">
+                        <button type="button" onclick="addPlanReferal()" class="btn btn-success btn-s-xs">Add Referal Plan</button>
+                      </footer>
+                
+
+
+
+                  
+                </section>
+              </section>
+              </div>
+
+                  <div class="tab-pane @if($visit_details->doctor!= Auth::user()->getNameOrUsername()) active @else @endif" id="review-summary">
                     
                     <section class="panel panel-info">
-                                <header class="panel-heading font-bold">Treatment Summary</header>
+                                <header class="panel-heading font-bold">Note Summary</header>
                                 <div class="panel-body">
                                        <section class="scrollable wrapper">
                   <div class="timeline">
@@ -317,7 +447,7 @@
                           <div class="panel bg-primary lter no-borders">
                             <div class="panel-body">
                               <span class="timeline-icon"><i class="fa fa-bell-o time-icon bg-primary"></i></span> 
-                              <span class="timeline-date"> <label class="badge bg-danger">  <label class="badge bg-danger"> </span>
+                              <span class="timeline-date"> <label class="badge bg-danger">  <label class="badge bg-danger"> {{ $visit_details->created_on }} -  {{ $visit_details->consultation_type  }} </span>
                               <h5>
                                 <span>Chief Complaint</span>
                                @foreach($mycomplaints as $complaint)
@@ -326,13 +456,15 @@
                               </h5>
                               <div class="m-t-sm timeline-action">
                                {{--  <span class="h3 pull-left m-r-sm">4:51</span> --}}
-                                <a href="/print-visit-summary/{{ $visit_details->opd_number  }}"><button class="btn btn-sm btn-default btn-bg"><i class="fa fa-check"></i> Print </button></a>
+                                <a href="/print-visit-summary/{{ $visit_details->opd_number  }}"><button class="btn btn-sm btn-default btn-bg"><i class="fa fa-check"></i> Print this note </button></a>
+
+                                <a href="/print-executive-cover/{{ $visit_details->opd_number  }}"><button class="btn btn-sm btn-default btn-bg"><i class="fa fa-check"></i> Exec Cover Note </button></a>
                               </div>
                             </div>
                           </div>
                         </div>
                     </article>
-                    <article class="timeline-item active">
+                    <article class="timeline-item">
                         <div class="timeline-caption">
                           <div class="panel panel-default">
                             <div class="panel-body">
@@ -363,19 +495,19 @@
                               <span class="timeline-date">History</span>
                               <h5>
                                 <span>History</span>
-                                @foreach($myhistories as $history)
+                                
                                 <ul>
-                                @if($history->medical_history == '') @else <li>Past Medical History <label class="badge bg-default"> {{$history->medical_history}}  </label></li> @endif
-                                @if($history->family_history == '') @else <li>Family History <label class="badge bg-info"> {{$history->family_history}}  </label></li> @endif
-                                @if($history->social_history == '') @else <li> Social History <label class="badge bg-primary"> {{$history->social_history}}  </label></li> @endif
-                                 @if($history->drug_history == '') @else <li> Drug History <label class="badge bg-success">Takes {{$history->drug_history}}  </label></li> @endif
-                                @if($history->surgical_history == '') @else <li>Surgical History <label class="badge bg-warning"> {{$history->surgical_history}}  </label></li> @endif
-                                @if($history->reproductive_history == '') @else <li> Reproductive History <label class="badge bg-danger"> {{$history->reproductive_history}}  </label></li> @endif
-                                @if($history->vaccinations_history == '') @else <li>Vacinnations <label class="badge bg-default"> {{$history->vaccinations_history}}  </label></li> @endif
-                                @if($history->allergy == '') @else <li> Allergies <label class="badge bg-danger"> {{$history->allergy}}  </label></li> 
+                                @if($myhistories->medical_history == '') @else <li>Past Medical History <label class="badge bg-default"> {{$myhistories->medical_history}}  </label></li> @endif
+                                @if($myhistories->family_history == '') @else <li>Family History <label class="badge bg-info"> {{$myhistories->family_history}}  </label></li> @endif
+                                @if($myhistories->social_history == '') @else <li> Social History <label class="badge bg-primary"> {{$myhistories->social_history}}  </label></li> @endif
+                                 @if($myhistories->drug_history == '') @else <li> Drug History <label class="badge bg-success">Takes {{$myhistories->drug_history}}  </label></li> @endif
+                                @if($myhistories->surgical_history == '') @else <li>Surgical History <label class="badge bg-warning"> {{$myhistories->surgical_history}}  </label></li> @endif
+                                @if($myhistories->reproductive_history == '') @else <li> Reproductive History <label class="badge bg-danger"> {{$myhistories->reproductive_history}}  </label></li> @endif
+                                @if($myhistories->vaccinations_history == '') @else <li>Vacinnations <label class="badge bg-default"> {{$myhistories->vaccinations_history}}  </label></li> @endif
+                                @if($myhistories->allergy == '') @else <li> Allergies <label class="badge bg-danger"> {{$myhistories->allergy}}  </label></li> 
                                 @endif
                                 </ul>
-                               @endforeach
+                               
                               </h5>
                               <p></p>
                             </div>
@@ -466,6 +598,8 @@
                                 @if($physical->pe_musculoskeletal == '') @else <li> Musculoskeletal <label class="badge bg-default"> {{$physical->pe_musculoskeletal}}  </label></li> @endif
 
                                 @if($physical->pe_psychological == '') @else <li> Psychological <label class="badge bg-default"> {{$physical->pe_psychological}}  </label></li> @endif
+
+                                 @if($physical->pe_breast == '') @else <li> Breast <label class="badge bg-default"> {{$physical->pe_breast}}  </label></li> @endif
                                 
                                @endforeach
                               </h5>
@@ -534,6 +668,24 @@
                           </div>
                         </div>
                     </article>
+                     <article class="timeline-item">
+                        <div class="timeline-caption">
+                          <div class="panel panel-default">
+                            <div class="panel-body">
+                              <span class="arrow left"></span>
+                              <span class="timeline-icon"><i class="fa fa-fire time-icon bg-dark"></i></span>
+                              <span class="timeline-date">Plan</span>
+                              <h5>
+                                <span>Plan</span>
+                                @foreach($myplan as $plan)
+                                 <a>{!!$plan->assessment!!} <i class="fa fa-trash-o text-muted"></i> </a>
+                               @endforeach
+                              </h5>
+                              
+                            </div>
+                          </div>
+                        </div>
+                    </article>
                     <div class="timeline-footer"><a href="#"><i class="fa fa-plus time-icon inline-block bg-dark"></i></a></div>
                   </div>
                 </section>
@@ -551,6 +703,18 @@
                
                        <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
+                           <select id="diagnosis_type" name="diagnosis_type" rows="3" tabindex="1" data-placeholder="Search diagnosis ..." class="form-control m-b">
+                           <option value="">-- Select Diagnosis Type --</option>
+                            <option value="Differential Diagnosis">Differential Diagnosis</option>
+                             <option value="Provisional Diagnosis">Provisional Diagnosis</option>
+                             <option value="Final Diagnosis">Final Diagnosis</option>
+                        </select>         
+                          </div>
+                        </div>
+
+
+                       <div class="form-group pull-in clearfix">
+                          <div class="col-sm-12">
                            <select id="diagnosis" name="diagnosis[]" multiple rows="3" tabindex="1" data-placeholder="Search diagnosis ..." style="width:100%">
                            <option value="">-- Select Diagnosis --</option>
                            @foreach($diagnosis as $diagnosis)
@@ -564,7 +728,7 @@
                           <div class="col-sm-12">
                             <label>Remarks</label> 
                             <div class="form-group{{ $errors->has('diagnosis_remark') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="3" class="form-control" id="diagnosis_remark" name="investigation_remark" value="{{ Request::old('diagnosis_remark') ?: '' }}"></textarea>   
+                            <textarea type="text" rows="3" class="form-control" id="diagnosis_remark" name="diagnosis_remark" value="{{ Request::old('diagnosis_remark') ?: '' }}"></textarea>   
                            @if ($errors->has('diagnosis_remark'))
                           <span class="help-block">{{ $errors->first('diagnosis_remark') }}</span>
                            @endif    
@@ -573,7 +737,10 @@
                         </div>
                       </div>
                       <footer class="panel-footer text-right bg-light lter">
+                       @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
                         <button type="button" onclick="addDiagnosis()" class="btn btn-success btn-s-xs">Add Diagnosis</button>
+                        @else
+                        @endif
                       </footer>
                     </section>
                      <img src="/images/426394.svg" width="10%" align="right"> 
@@ -584,9 +751,10 @@
                       <table id="diagnosisTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
                           <thead>
                             <tr>
-                          
+                              <th>Type</th>
                               <th>Diagnosis</th>
-                              <th></th>
+                              <th> Remark </th>
+                              <th> By</th>
                               <th>Date</th>
                               <th></th>
                             </tr>
@@ -601,6 +769,30 @@
                   </div>
 
 
+
+                                   <div class="tab-pane active" id="review-vitals">
+                         
+                    <img src="/images/139328.svg" width="7%" align="right"> 
+                        <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Vital Signs Chart</header>
+                                
+                      <div class="col-lg-12">
+                  <section class="panel panel-default">
+                    <header class="panel-heading">
+                      Vital Chart Graph
+                    </header>
+                    <div class="panel-body text-center">
+                      
+                      <small class="text-muted block"></small>
+                      <div class="inline">
+                          @include('charts/vitals') 
+                      </div>                      
+                    </div>
+                    <div class="panel-footer"><small><a href="#" > % of change</a></small></div>
+                  </section>
+                </div>
+                    </section>
+                  </div>
                   
                    <div class="tab-pane" id="review-history">
                           <section class="panel panel-default">
@@ -629,7 +821,7 @@
                     </section>
                   </div>
 
-                   <div class="tab-pane active" id="review-complaint">
+                   <div class="tab-pane @if($visit_details->doctor== Auth::user()->getNameOrUsername()) active @else @endif" id="review-complaint">
                           <section class="panel panel-default">
                       <div class="panel-body">
 
@@ -637,8 +829,8 @@
                        <!-- .accordion -->
                   <div class="panel-group m-b" id="accordion2">
                    
-{{-- 
-                    <div class="panel panel-default">
+
+                   {{--  <div class="panel panel-default">
                       <div class="panel-heading">
                         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
                          1. Chief Compliant
@@ -650,23 +842,16 @@
                          <div class="form-group pull-in clearfix">
                            <div class="col-sm-12">
                               <label>Complaint</label> 
-                        <select name="complaint[]" id="complaint" style="width:100%" multiple data-placeholder=""  >
+                        <select name="complaint[]" id="complaint" style="width:100%" multiple data-placeholder="">
+
+                        <option value="@foreach($mycomplaints as $val) {{ $val->complaint }}@endforeach" selected > @foreach($mycomplaints as $val) {{ $val->complaint }},@endforeach </option>
+
                           @foreach($complaints as $complaint)
                         <option  value="{{ $complaint->type }}">{{ $complaint->type }}</option>
                           @endforeach
                             </select>    
                           </div>
                           </div>
-
-                          <div>
-                            
-                              @foreach($mycomplaints as $complaint)
-                               <a a href="#"> <label class="badge bg-danger"> {{$complaint->complaint}} <i onclick="removecomplain('{{$complaint->id}}','{{$complaint->complaint}}')" class="fa fa-trash-o"></i></label></a>
-                               @endforeach
-                          </div>
-
-
-
 
                         </div>
                       </div>
@@ -683,7 +868,7 @@
                         <div class="panel-body text-sm">
                           <div class="form-group pull-in clearfix">
                         <div class="col-sm-12">
-                        <label class="badge bg-default">Nutritional Assessment</label> 
+                       
                         <div class="btn-toolbar m-b-sm btn-editor" data-role="editor-toolbar" data-target="#editor">
                           <div class="btn-group">
                             <a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Font"><i class="fa fa-font"></i><b class="caret"></b></a>
@@ -747,7 +932,7 @@
                       </div>
                     </div>
 
-                    {{--   <div class="panel panel-default">
+                   {{--    <div class="panel panel-default">
                       <div class="panel-heading">
                         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseEight">
                          3. On Direct Question
@@ -760,130 +945,52 @@
                            <div class="col-sm-12">
                               <label>On Direct Question</label> 
                         <select name="directquestion[]" id="directquestion" style="width:100%" multiple data-placeholder=""  >
+                           <option value="@foreach($mycomplaints as $val) {{ $val->directquestion }}@endforeach" selected > @foreach($mycomplaints as $val) {{ $val->directquestion }}@endforeach
+                        </option>
                           @foreach($complaints as $complaint)
                         <option  value="{{ $complaint->type }}">{{ $complaint->type }}</option>
                           @endforeach
                             </select>    
                           </div>
                           </div>
-                           @foreach($mycomplaints as $complaint)
-                                 <a> <label class="badge bg-danger"> {{$complaint->directquestion}} </label></a> <i class="fa fa-trash-o text-muted"></i> </a>
-                               @endforeach
-
-                        </div>
+                          
                       </div>
                     </div>
+                    </div> --}}
                   
- --}}
+
                   <div class="panel panel-default">
                       <div class="panel-heading">
                         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseThree">
-                         2. Personal , Family , Social History
+                         2. Nutritional Intervention
                         </a>
                       </div>
-                      <div id="collapseThree" class="panel-collapse collapse">
-                        <div class="panel-body text-sm">
-                        <div class="panel-body">
-                        <div class="form-group pull-in clearfix ">
-                           <div class="col-sm-3">
-                             <label class="badge bg-primary">Past Medical History</label> 
-                        <select name="medical_history[]" id="medical_history" style="width:100%" multiple data-placeholder="PMHx"  >
-                          @foreach($pastmedicalhx as $pastmedicalhx)
-                        <option  value="{{ $pastmedicalhx->type }}">{{ $pastmedicalhx->type }}</option>
-                          @endforeach
-                            </select>    
-                          </div>
-                           <div class="col-sm-3">
-                           <label class="badge bg-warning">Family History</label> 
-                        <select name="family_history[]" id="family_history" style="width:100%" multiple data-placeholder="FMHx"  >
-                          @foreach($familyhx as $familyhx)
-                        <option  value="{{ $familyhx->type }}">{{ $familyhx->type }}</option>
-                          @endforeach
-                            </select>    
-                          </div>
-                           <div class="col-sm-3">
-                           <label class="badge bg-success">Phychosocial History</label> 
-                        <select name="social_history[]" id="social_history" style="width:100%" multiple data-placeholder="SHx"  >
-                          @foreach($socialhx as $socialhx)
-                        <option  value="{{ $socialhx->type }}">{{ $socialhx->type }}</option>
-                          @endforeach
-                            </select>    
-                          </div>
-
-                           <div class="col-sm-3">
-                           <label class="badge bg-danger">Vaccinations</label> 
-                        <select name="vaccinations_history[]" id="vaccinations_history" style="width:100%" multiple data-placeholder=""  >
-                          @foreach($vacinnationhx as $vacinnationhx)
-                        <option  value="{{ $vacinnationhx->type }}">{{ $vacinnationhx->type }}</option>
-                          @endforeach
-                            </select>    
-                          </div>
-                          </div>
-
-
+                      <div id="collapseThree" class="panel-collapse in">
+                        <section class="panel panel-info">
+                                <header class="panel-heading font-bold"></header>
+                                <div class="panel-body">
+                                      <div class="panel-body text-sm">
+                          <div class="col-sm-12">
+                      
                         
-
-
-                            <div class="form-group pull-in clearfix ">
-                           <div class="col-sm-3">
-                           <label class="badge bg-danger">Current Medications</label> 
-                        <select name="drug_history[]" id="drug_history" style="width:100%" multiple data-placeholder="Meds"  >
-                          @foreach($medicationhx as $medicationhx)
-                        <option  value="{{ $medicationhx->type }}">{{ $medicationhx->type }}</option>
-                          @endforeach
-                            </select>    
-                          </div>
-
-                           <div class="col-sm-3">
-                           <label class="badge bg-info">Surgical History</label> 
-                        <select name="surgical_history[]" id="surgical_history" style="width:100%" multiple data-placeholder="PSHx"  >
-                          @foreach($surgicalhx as $surgicalhx)
-                        <option  value="{{ $surgicalhx->type }}">{{ $surgicalhx->type }}</option>
-                          @endforeach
-                            </select>    
-                          </div>
-
-                           <div class="col-sm-3">
-                           <label class="badge bg-warning">Reproductive/Prenatal History</label> 
-                        <select name="reproductive_history[]" id="reproductive_history" style="width:100%" multiple data-placeholder="RHx"  >
-                          @foreach($reproductivehx as $reproductivehx)
-                        <option  value="{{ $reproductivehx->type }}">{{ $reproductivehx->type }}</option>
-                          @endforeach
-                            </select>    
-                          </div>
-
-
-                           <div class="col-sm-3">
-                           <label class="badge bg-default"> Allergies</label> 
-                        <select name="allergy[]" id="allergy" style="width:100%" multiple data-placeholder="Allergy"  >
-                          @foreach($allergichx as $allergichx)
-                        <option  value="{{ $allergichx->type }}">{{ $allergichx->type }}</option>
-                          @endforeach
-                            </select>    
-                          </div>
-                          </div>
-
+                       <textarea id="assessment" name="assessment"> 
+                                 {!!$mydoctorplan->assessment!!}
+                               </textarea>
+                       
                       </div>
-                      @foreach($myhistories as $history)
-                                <ul>
-                                @if($history->medical_history == '') @else <li>Past Medical History <label class="badge bg-default"> {{$history->medical_history}}  </label></li> @endif
-                                @if($history->family_history == '') @else <li>Family History <label class="badge bg-info"> {{$history->family_history}}  </label></li> @endif
-                                @if($history->social_history == '') @else <li> Social History <label class="badge bg-primary"> {{$history->social_history}}  </label></li> @endif
-                                 @if($history->drug_history == '') @else <li> Drug History <label class="badge bg-success">Takes {{$history->drug_history}}  </label></li> @endif
-                                @if($history->surgical_history == '') @else <li>Surgical History <label class="badge bg-warning"> {{$history->surgical_history}}  </label></li> @endif
-                                @if($history->reproductive_history == '') @else <li> Reproductive History <label class="badge bg-danger"> {{$history->reproductive_history}}  </label></li> @endif
-                                @if($history->vaccinations_history == '') @else <li>Vacinnations <label class="badge bg-default"> {{$history->vaccinations_history}}  </label></li> @endif
-                                @if($history->allergy == '') @else <li> Allergies <label class="badge bg-danger"> {{$history->allergy}}  </label></li> 
-                                @endif
-                                </ul>
-                               @endforeach
-                     
+                      </div>
+
+                                </div>
+                                </section>
+
+                       {{--  <footer class="panel-footer text-right bg-light lter">
+                         <button type="button" onclick="addAssessment()" class="btn btn-success btn-s-xs">Save </button>
                          
-                        </div>
+                      </footer> --}}
                       </div>
                     </div>
                       
-                     {{-- <div class="panel panel-default">
+                    {{--  <div class="panel panel-default">
                       <div class="panel-heading">
                         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseFour">
                          5. Review of Systems (ROS)
@@ -896,6 +1003,8 @@
                            <div class="col-sm-3">
                              <label class="badge bg-info">Constitutional</label> 
                         <select name="ros_constitutional[]" id="ros_constitutional" style="width:100%" multiple data-placeholder="General"  >
+                         <option value="@foreach($myros as $val) {{ $val->general }}@endforeach" selected > @foreach($myros as $val) {{ $val->general }}@endforeach </option>
+
                           @foreach($ros_constitutional as $ros_constitutional)
                         <option  value="{{ $ros_constitutional->type }}">{{ $ros_constitutional->type }}</option>
                           @endforeach
@@ -904,6 +1013,7 @@
                           <div class="col-sm-3">
                               <label class="badge bg-info">Skin</label> 
                         <select name="ros_skin[]" id="ros_skin" style="width:100%" multiple data-placeholder="Skin"  >
+                         <option value="@foreach($myros as $val) {{ $val->skin }}@endforeach" selected > @foreach($myros as $val) {{ $val->skin }}@endforeach </option>
                           @foreach($ros_skin as $ros_skin)
                         <option  value="{{ $ros_skin->type }}">{{ $ros_skin->type }}</option>
                           @endforeach
@@ -912,6 +1022,7 @@
                           <div class="col-sm-3">
                               <label class="badge bg-info">Head</label> 
                         <select name="ros_head[]" id="ros_head" style="width:100%" multiple data-placeholder="Head"  >
+                         <option value="@foreach($myros as $val) {{ $val->head }}@endforeach" selected > @foreach($myros as $val) {{ $val->head }}@endforeach </option>
                           @foreach($ros_head as $ros_head)
                         <option  value="{{ $ros_head->type }}">{{ $ros_head->type }}</option>
                           @endforeach
@@ -923,6 +1034,7 @@
                            <div class="col-sm-3">
                              <label class="badge bg-primary">Eyes</label> 
                         <select name="ros_eyes[]" id="ros_eyes" style="width:100%" multiple data-placeholder="Eyes"  >
+                        <option value="@foreach($myros as $val) {{ $val->eyes }}@endforeach" selected > @foreach($myros as $val) {{ $val->eyes }}@endforeach </option>
                           @foreach($ros_eyes as $ros_eyes)
                         <option  value="{{ $ros_eyes->type }}">{{ $ros_eyes->type }}</option>
                           @endforeach
@@ -931,6 +1043,7 @@
                           <div class="col-sm-3">
                              <label class="badge bg-primary">Ears</label> 
                         <select name="ros_ears[]" id="ros_ears" style="width:100%" multiple data-placeholder="Ears"  >
+                         <option value="@foreach($myros as $val) {{ $val->ears }}@endforeach" selected > @foreach($myros as $val) {{ $val->ears }}@endforeach </option>
                           @foreach($ros_ears as $ros_ears)
                         <option  value="{{ $ros_ears->type }}">{{ $ros_ears->type }}</option>
                           @endforeach
@@ -939,6 +1052,7 @@
                             <div class="col-sm-3">
                              <label class="badge bg-primary">Nose</label> 
                         <select name="ros_nose[]" id="ros_nose" style="width:100%" multiple data-placeholder="Nose"  >
+                        <option value="@foreach($myros as $val) {{ $val->nose }}@endforeach" selected > @foreach($myros as $val) {{ $val->nose }}@endforeach </option>
                           @foreach($ros_nose as $ros_nose)
                         <option  value="{{ $ros_nose->type }}">{{ $ros_nose->type }}</option>
                           @endforeach
@@ -948,6 +1062,7 @@
                           <div class="col-sm-3">
                               <label class="badge bg-primary">Throat</label> 
                         <select name="ros_throat[]" id="ros_throat" style="width:100%" multiple data-placeholder="Throat"  >
+                         <option value="@foreach($myros as $val) {{ $val->throat }}@endforeach" selected > @foreach($myros as $val) {{ $val->throat }}@endforeach </option>
                           @foreach($ros_throat as $ros_throat)
                         <option  value="{{ $ros_throat->type }}">{{ $ros_throat->type }}</option>
                           @endforeach
@@ -959,6 +1074,7 @@
                            <div class="col-sm-3">
                              <label class="badge bg-warning">Respiratory</label> 
                         <select name="ros_respiratory[]" id="ros_respiratory" style="width:100%" multiple data-placeholder="Respiratory"  >
+                        <option value="@foreach($myros as $val) {{ $val->respiratory }}@endforeach" selected > @foreach($myros as $val) {{ $val->respiratory }}@endforeach </option>
                           @foreach($ros_respiratory as $ros_respiratory)
                         <option  value="{{ $ros_respiratory->type }}">{{ $ros_respiratory->type }}</option>
                           @endforeach
@@ -967,6 +1083,7 @@
                           <div class="col-sm-3">
                              <label class="badge bg-warning">Cardiovascular</label> 
                         <select name="ros_cardiovasular[]" id="ros_cardiovasular" style="width:100%" multiple data-placeholder="Cardio"  >
+                        <option value="@foreach($myros as $val) {{ $val->cardiovascular }}@endforeach" selected > @foreach($myros as $val) {{ $val->cardiovascular }}@endforeach </option>
                           @foreach($ros_cardiovasular as $ros_cardiovasular)
                         <option  value="{{ $ros_cardiovasular->type }}">{{ $ros_cardiovasular->type }}</option>
                           @endforeach
@@ -975,6 +1092,7 @@
                             <div class="col-sm-3">
                              <label class="badge bg-warning">Gastrointestinal</label> 
                         <select name="ros_gastro[]" id="ros_gastro" style="width:100%" multiple data-placeholder="Gastro"  >
+                         <option value="@foreach($myros as $val) {{ $val->gastrointestinal }}@endforeach" selected > @foreach($myros as $val) {{ $val->gastrointestinal }}@endforeach </option>
                           @foreach($ros_gastro as $ros_gastro)
                         <option  value="{{ $ros_gastro->type }}">{{ $ros_gastro->type }}</option>
                           @endforeach
@@ -984,6 +1102,7 @@
                           <div class="col-sm-3">
                               <label class="badge bg-warning">Gynecologic</label> 
                         <select name="ros_gynecology[]" id="ros_gynecology" style="width:100%" multiple data-placeholder="Gynea"  >
+                        <option value="@foreach($myros as $val) {{ $val->gynecologic }}@endforeach" selected > @foreach($myros as $val) {{ $val->gynecologic }}@endforeach </option>
                           @foreach($ros_gynecology as $ros_gynecology)
                         <option  value="{{ $ros_gynecology->type }}">{{ $ros_gynecology->type }}</option>
                           @endforeach
@@ -996,6 +1115,7 @@
                            <div class="col-sm-3">
                              <label class="badge bg-default">Genitourinary</label> 
                         <select name="ros_genitourinary[]" id="ros_genitourinary" style="width:100%" multiple data-placeholder="Genitour"  >
+                        <option value="@foreach($myros as $val) {{ $val->genitourinary }}@endforeach" selected > @foreach($myros as $val) {{ $val->genitourinary }}@endforeach </option>
                           @foreach($ros_genitourinary as $ros_genitourinary)
                         <option  value="{{ $ros_genitourinary->type }}">{{ $ros_genitourinary->type }}</option>
                           @endforeach
@@ -1004,6 +1124,7 @@
                           <div class="col-sm-3">
                              <label class="badge bg-default">Endocrine</label> 
                         <select name="ros_endocrine[]" id="ros_endocrine" style="width:100%" multiple data-placeholder="Endocrine"  >
+                        <option value="@foreach($myros as $val) {{ $val->endocrine }}@endforeach" selected > @foreach($myros as $val) {{ $val->endocrine }}@endforeach </option>
                           @foreach($ros_endocrine as $ros_endocrine)
                         <option  value="{{ $ros_endocrine->type }}">{{ $ros_endocrine->type }}</option>
                           @endforeach
@@ -1012,6 +1133,7 @@
                             <div class="col-sm-3">
                              <label class="badge bg-default">Musculoskeletal</label> 
                         <select name="ros_musculoskeletal[]" id="ros_musculoskeletal" style="width:100%" multiple data-placeholder="Muscu"  >
+                        <option value="@foreach($myros as $val) {{ $val->musculoskeletal }}@endforeach" selected > @foreach($myros as $val) {{ $val->musculoskeletal }}@endforeach </option>
                           @foreach($ros_musculoskeletal as $ros_musculoskeletal)
                         <option  value="{{ $ros_musculoskeletal->type }}">{{ $ros_musculoskeletal->type }}</option>
                           @endforeach
@@ -1021,6 +1143,7 @@
                           <div class="col-sm-3">
                               <label class="badge bg-default">Peripheral Vascular</label> 
                         <select name="ros_peripheral_vascular[]" id="ros_peripheral_vascular" style="width:100%" multiple data-placeholder="Vascular"  >
+                        <option value="@foreach($myros as $val) {{ $val->peripheral_vascular }}@endforeach" selected > @foreach($myros as $val) {{ $val->peripheral_vascular }}@endforeach </option>
                           @foreach($ros_peripheral_vascular as $ros_peripheral_vascular)
                         <option  value="{{ $ros_peripheral_vascular->type }}">{{ $ros_peripheral_vascular->type }}</option>
                           @endforeach
@@ -1033,6 +1156,7 @@
                            <div class="col-sm-3">
                              <label class="badge bg-danger">Hematology</label> 
                         <select name="ros_hematology[]" id="ros_hematology" style="width:100%" multiple data-placeholder="Hematology"  >
+                        <option value="@foreach($myros as $val) {{ $val->hematology }}@endforeach" selected > @foreach($myros as $val) {{ $val->hematology }}@endforeach </option>
                           @foreach($ros_hematology as $ros_hematology)
                         <option  value="{{ $ros_hematology->type }}">{{ $ros_hematology->type }}</option>
                           @endforeach
@@ -1042,49 +1166,29 @@
                           <div class="col-sm-3">
                              <label class="badge bg-danger">Neuropsychiatric</label> 
                         <select name="ros_neuropsychiatric[]" id="ros_neuropsychiatric" style="width:100%" multiple data-placeholder="Neuro"  >
+                        <option value="@foreach($myros as $val) {{ $val->neuro }}@endforeach" selected > @foreach($myros as $val) {{ $val->neuro }}@endforeach </option>
                           @foreach($ros_neuropsychiatric as $ros_neuropsychiatric)
                         <option  value="{{ $ros_neuropsychiatric->type }}">{{ $ros_neuropsychiatric->type }}</option>
                           @endforeach
                             </select>    
                           </div>
                           </div>
-                          <span>Review of System</span>
-                                @foreach($myros as $ros)
-                                <ul>
-                                @if($ros->general == '') @else <li> General <label class="badge bg-default"> {{$ros->general}}  </label></li> @endif
-                                @if($ros->skin == '') @else <li> Skin <label class="badge bg-info"> {{$ros->skin}}  </label></li> @endif
-                                @if($ros->head == '') @else <li> Head <label class="badge bg-primary"> {{$ros->head}}  </label></li> @endif
-                                 @if($ros->eyes == '') @else <li>Eyes <label class="badge bg-success"> {{$ros->eyes}}  </label></li> @endif
-                                @if($ros->ears == '') @else <li> Ears <label class="badge bg-warning"> {{$ros->ears }}  </label></li> @endif
-                                @if($ros->nose == '') @else <li> Nose <label class="badge bg-danger"> {{$ros->nose}}  </label></li> @endif
-                                @if($ros->throat == '') @else <li> Throat <label class="badge bg-default"> {{$ros->throat}}  </label></li> @endif
-                                @if($ros->respiratory == '') @else <li> Respiratory <label class="badge bg-danger"> {{$ros->respiratory}}  </label></li> @endif
-                                </ul>
-                                @if($ros->cardiovascular == '') @else <li> Cardiovascular <label class="badge bg-default"> {{$ros->cardiovascular}}  </label></li> @endif
-                                @if($ros->gastrointestinal == '') @else <li> Gastrointestinal <label class="badge bg-default"> {{$ros->gastrointestinal}}  </label></li> @endif
-                                @if($ros->gynecologic == '') @else <li> Gynecologic <label class="badge bg-default"> {{$ros->gynecologic}}  </label></li> @endif
-                                @if($ros->genitourinary == '') @else <li> Genitourinary <label class="badge bg-default"> {{$ros->genitourinary}}  </label></li> @endif
-                                @if($ros->endocrine == '') @else <li> Endocrine <label class="badge bg-default"> {{$ros->endocrine}}  </label></li> @endif
-                                @if($ros->musculoskeletal == '') @else <li> Musculoskeletal <label class="badge bg-default"> {{$ros->musculoskeletal}}  </label></li> @endif
-                                @if($ros->peripheral_vascular == '') @else <li> Peripheral Vascular <label class="badge bg-default"> {{$ros->peripheral_vascular}}  </label></li> @endif
-                                @if($ros->hematology == '') @else <li> Hematology <label class="badge bg-default"> {{$ros->hematology}}  </label></li> @endif
-                                @if($ros->neuro == '') @else <li> Neuropsychiatric  <label class="badge bg-default"> {{$ros->neuro}}  </label></li> @endif
-                               @endforeach
+                          
                         </div>
 
 
                       </div>
-                    </div> --}}
-
-
-                    
+                    </div>
+ --}}
 
                     
 
-                    <div class="panel panel-default">
+                    
+
+                    {{-- <div class="panel panel-default">
                       <div class="panel-heading">
                         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseFive">
-                         3. Vitals
+                         5. Vitals
                         </a>
                       </div>
                       <div id="collapseFive" class="panel-collapse collapse">
@@ -1184,48 +1288,6 @@
 
                         </div>
 
-
-
-
-
-
-                        <div class="form-group pull-in clearfix">
-                        <div class="col-sm-3">
-                            <label>Frame</label> 
-                          <input type="text" class="form-control" id="frame"  value="{{ Request::old('frame') ?: '' }}"  name="frame">
-                          @if ($errors->has('frame'))
-                          <span class="help-block">{{ $errors->first('frame') }}</span>
-                           @endif   
-                          </div>
-
-                           <div class="col-sm-3">
-                            <label>Wrist Circumference</label> 
-                          <input type="text" class="form-control" id="wrist_circumference"  value="{{ Request::old('wrist_circumference') ?: '' }}"  name="wrist_circumference">
-                           @if ($errors->has('wrist_circumference'))
-                          <span class="help-block">{{ $errors->first('wrist_circumference') }}</span>
-                           @endif    
-                          </div> 
-
-                          
-
-                           <div class="col-sm-3">
-                            <label>Body Fat</label> 
-                            <input type="text" class="form-control" id="b_fat"  value="{{ Request::old('b_fat') ?: '' }}"  name="b_fat">
-                           @if ($errors->has('b_fat'))
-                          <span class="help-block">{{ $errors->first('b_fat') }}</span>
-                           @endif    
-                          </div> 
-
-                             <div class="col-sm-3">
-                            <label>Visceral Fat</label> 
-                            <input type="text" class="form-control" id="v_fat"  value="{{ Request::old('v_fat') ?: '' }}"  name="v_fat">
-                          @if ($errors->has('v_fat'))
-                          <span class="help-block">{{ $errors->first('v_fat') }}</span>
-                           @endif   
-                          </div>
-
-                        </div>
-
                          <div class="form-group pull-in clearfix">
                      
                         
@@ -1252,7 +1314,10 @@
                       </div>
                      
                       <footer class="panel-footer text-right bg-light lter">
+                       @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
                         <button type="button" onclick="addVitals()" class="btn btn-success btn-s-xs">Add New</button>
+                        @else
+                        @endif
                       </footer>
                     </section>
                     
@@ -1291,10 +1356,10 @@
                 <br>
                 <br>
                       </div>
-                    </div>
+                    </div> --}}
 
 
-                  {{--    <div class="panel panel-default">
+                     {{-- <div class="panel panel-default">
                       <div class="panel-heading">
                         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseSix">
                          7. Physical Examination
@@ -1305,16 +1370,18 @@
 
                          <div class="form-group pull-in clearfix">
                            <div class="col-sm-3">
-                             <label class="badge bg-info">General</label> 
+                             <label class="badge bg-info" data-toggle="tooltip" data-placement="right" title="" data-original-title="General statement about overall health status of the patient and general apperance">General</label> 
                         <select name="pe_general[]" id="pe_general" style="width:100%" multiple data-placeholder="General"  >
+                         <option value="@foreach($mype as $val) {{ $val->pe_general }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_general }}@endforeach </option>
                           @foreach($pe_constitutional as $pe_constitutional)
                         <option  value="{{ $pe_constitutional->type }}">{{ $pe_constitutional->type }}</option>
                           @endforeach 
                             </select>    
                           </div>
                           <div class="col-sm-3">
-                              <label class="badge bg-info">HEENT</label> 
+                              <label class="badge bg-info" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Facial Symmetry, involuntary movement, color of hair, hair texture, distribution, eye acuity, visual fields, eyebrows, eyelids, scelera, extraocular movements, outer ear, ear canals, typanic membranes, outer nose, nsal mucosa, nasal septum.">HEENT</label> 
                         <select name="pe_HEENT[]" id="pe_HEENT" style="width:100%" multiple data-placeholder="HEENT"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_HEENT }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_HEENT }}@endforeach </option>
                          @foreach($pe_HEENT as $pe_HEENT)
                         <option  value="{{ $pe_HEENT->type }}">{{ $pe_HEENT->type }}</option>
                           @endforeach 
@@ -1323,6 +1390,7 @@
                           <div class="col-sm-3">
                               <label class="badge bg-info">Neck</label> 
                         <select name="pe_neck[]" id="pe_neck" style="width:100%" multiple data-placeholder="Neck"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_neck }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_neck }}@endforeach </option>
                           @foreach($pe_neck as $pe_neck)
                         <option  value="{{ $pe_neck->type }}">{{ $pe_neck->type }}</option>
                           @endforeach 
@@ -1334,6 +1402,7 @@
                            <div class="col-sm-3">
                              <label class="badge bg-primary">Lungs</label> 
                         <select name="pe_respiratory[]" id="pe_respiratory" style="width:100%" multiple data-placeholder="Lungs"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_respiratory }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_respiratory }}@endforeach </option>
                           @foreach($pe_respiratory as $pe_respiratory)
                         <option  value="{{ $pe_respiratory->type }}">{{ $pe_respiratory->type }}</option>
                           @endforeach 
@@ -1342,6 +1411,7 @@
                           <div class="col-sm-3">
                              <label class="badge bg-primary">Heart</label> 
                         <select name="pe_heart[]" id="pe_heart" style="width:100%" multiple data-placeholder="Heart"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_heart }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_heart }}@endforeach </option>
                           @foreach($pe_heart as $pe_heart)
                         <option  value="{{ $pe_heart->type }}">{{ $pe_heart->type }}</option>
                           @endforeach 
@@ -1350,6 +1420,7 @@
                             <div class="col-sm-3">
                              <label class="badge bg-primary">Abdomen</label> 
                         <select name="pe_abdominal[]" id="pe_abdominal" style="width:100%" multiple data-placeholder="Abdomen"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_abdominal }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_abdominal }}@endforeach </option>
                           @foreach($pe_abdominal as $pe_abdominal)
                         <option  value="{{ $pe_abdominal->type }}">{{ $pe_abdominal->type }}</option>
                           @endforeach 
@@ -1359,6 +1430,7 @@
                           <div class="col-sm-3">
                               <label class="badge bg-primary">Extremities</label> 
                         <select name="pe_extremities[]" id="pe_extremities" style="width:100%" multiple data-placeholder="Extremities"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_extremities }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_extremities }}@endforeach </option>
                          @foreach($pe_extremities as $pe_extremities)
                         <option  value="{{ $pe_extremities->type }}">{{ $pe_extremities->type }}</option>
                           @endforeach 
@@ -1368,8 +1440,9 @@
 
                              <div class="form-group pull-in clearfix">
                            <div class="col-sm-3">
-                             <label class="badge bg-warning">CNS</label> 
+                             <label class="badge bg-warning" data-toggle="tooltip" data-placement="right" title="" data-original-title="Mental status(describe using SLUMS 0/30) , cranial nerves, motor strength, sensory function (light touch, pinprick, temperature, vibration, joint position sense), coordination (rapid alternative movements, finger to finger, heel to shin), reflexes, Babinski, Clonus, Presence of pronator drift, Gait, Romberg ">CNS</label> 
                         <select name="pe_cns[]" id="pe_cns" style="width:100%" multiple data-placeholder="CNS"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_cns }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_cns }}@endforeach </option>
                           @foreach($pe_neuropsychiatric as $pe_neuropsychiatric)
                         <option  value="{{ $pe_neuropsychiatric->type }}">{{ $pe_neuropsychiatric->type }}</option>
                           @endforeach 
@@ -1378,65 +1451,84 @@
                           <div class="col-sm-3">
                              <label class="badge bg-warning">Musculoskeletal</label> 
                         <select name="pe_musculoskeletal[]" id="pe_musculoskeletal" style="width:100%" multiple data-placeholder="Musculoskeletal"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_musculoskeletal }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_musculoskeletal }}@endforeach </option>
                           @foreach($pe_musculoskeletal as $pe_musculoskeletal)
                         <option  value="{{ $pe_musculoskeletal->type }}">{{ $pe_musculoskeletal->type }}</option>
                           @endforeach 
                             </select>    
                           </div>
                             <div class="col-sm-3">
-                             <label class="badge bg-warning">Psychological</label> 
+                             <label class="badge bg-warning" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Affect, Mood, Appearance, Judgement, Mini-Mental State Examination.">Psychological</label> 
                         <select name="pe_psychological[]" id="pe_psychological" style="width:100%" multiple data-placeholder="Psychological"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_psychological }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_psychological }}@endforeach </option>
                           @foreach($pe_psychological as $pe_psychological)
                         <option  value="{{ $pe_psychological->type }}">{{ $pe_psychological->type }}</option>
                           @endforeach 
                             </select>    
                           </div>
 
+                            <div class="col-sm-3">
+                             <label class="badge bg-warning">Breast</label> 
+                        <select name="pe_breast[]" id="pe_breast" style="width:100%" multiple data-placeholder="Breast"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_breast }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_breast }}@endforeach </option>
+                          @foreach($pe_breast as $pe_breast)
+                        <option  value="{{ $pe_breast->type }}">{{ $pe_breast->type }}</option>
+                          @endforeach 
+                            </select>    
+                          </div>
+
                         
-                          </div> --}}
+                          </div>
 
 
-           {{--                 
+                           
 
 
                           
                         </div> 
                       </div>
-                    </div> --}}
-                      {{--  <div class="panel panel-default">
+                    </div>
+                     --}}
+                       {{-- <div class="panel panel-default">
                       <div class="panel-heading">
                         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseSeven">
-                         8. Drawings
+                         6. Doctor Comments
                         </a>
                       </div>
                       <div id="collapseSeven" class="panel-collapse collapse">
                         <div class="panel-body text-sm">
-                          <a href="/images/dermatomes.jpg">
-                        <img src="/images/dermatomes.jpg" >
-                        </a>
+                          <textarea type="text" rows="3" class="form-control" id="perspective_comment_doctor" name="perspective_comment_doctor" value="{{ Request::old('perspective_comment_doctor') ?: '' }}">@foreach($mycomplaints as $complaint)
+                                 {!!$complaint->doctors_note!!}
+                               @endforeach</textarea>
                         </div>
                       </div>
                     </div>
-              --}}
+
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseNine">
+                         7. Patient's Diet Perspective
+                        </a>
+                      </div>
+                      <div id="collapseNine" class="panel-collapse collapse">
+                        <div class="panel-body text-sm">
+                          <textarea type="text" rows="3" class="form-control" id="perspective_comment_patient" name="perspective_comment_patient" value="{{ Request::old('perspective_comment_patient') ?: '' }}" > {{ $complaint->patients_note }}</textarea>
+                        </div>
+                      </div>
+                    </div> --}}
+             
                   <!-- / .accordion -->
                           
-
-
-                     
+                      @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
                       <footer class="panel-footer text-right bg-light lter">
-                        <button type="button" onclick="addNote()" class="btn btn-success btn-s-xs">Save Note</button>
+                        <button type="button" onclick="addNote();addAssessment();" class="btn btn-success btn-s-xs">Save Note</button>
                       </footer>
+                      @else
+
+                    @endif
                     </section>
-
-
-                        
-
                   </div>
  
- 
-
-                   
-
 
                   <div class="tab-pane" id="review-medication">
                     <section class="panel panel-default">
@@ -1532,11 +1624,17 @@
                       </div>
                      
                       <footer class="panel-footer text-right bg-light lter">
+                        @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
+                        <a href="https://reference.medscape.com/drug-interactionchecker" target="_new" class="btn btn-dark btn-s-xs">Drug Interaction Checker</a>
                         <button type="button" onclick="addDrug()" class="btn btn-success btn-s-xs">Add Medication</button>
+                        @else
+                        @endif
                       </footer>
                     </section>
                        <img src="/images/139202.svg" width="10%" align="right"> 
+                      <section>
                       
+                      </section>
                         <section class="panel panel-info">
                                 <header class="panel-heading font-bold">Medication History</header>
                                 <div class="panel-body">
@@ -1550,8 +1648,36 @@
                               <th>Dosage Remark</th>
                               <th>Unit Cost</th>
                               <th>Total Cost</th>
+                              <th>Requested By</th>
                               <th></th>
                                <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            
+                          </tbody>
+                        </table>
+                    </div>
+                    </div>
+                    </section>
+
+
+                    <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Drug Administration Notes</header>
+                                <div class="panel-body">
+                                      <div class="table-responsive">
+                       <table id="treatmentTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
+                          <thead>
+                            <tr>
+                            
+                              <th>Drug</th>
+                              <th>Time</th>
+                              <th>Remark</th>
+                             <th>Created By</th>
+                             <th></th>
+                             {{--  <th>Unit Cost</th>
+                              <th>Total Cost</th> --}}
+                             
                             </tr>
                           </thead>
                           <tbody>
@@ -1583,6 +1709,20 @@
                           </div>
                         </div>
 
+
+                          <div class="form-group pull-in clearfix">
+                         <div class="col-sm-3">
+                          <div class="form-group{{ $errors->has('drug_form') ? ' has-error' : ''}}">
+                            <label>Quantity</label>
+                             <input type="number" class="form-control" class="text-success" id="procedure_quantity"  value="{{ Request::old('procedure_quantity') ?: '' }}"  name="procedure_quantity">       
+                           @if ($errors->has('procedure_quantity'))
+                          <span class="help-block">{{ $errors->first('procedure_quantity') }}</span>
+                           @endif    
+                          </div>  
+                          </div>
+                          </div> 
+                          
+
                         <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
                             <label>Remarks</label> 
@@ -1599,7 +1739,10 @@
                              
 
                       <footer class="panel-footer text-right bg-light lter">
+                        @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
                         <button type="button" onclick="addProcedure()" class="btn btn-success btn-s-xs">Add Procedure</button>
+                        @else
+                        @endif
                       </footer>
                     </section>
                           
@@ -1654,14 +1797,20 @@
                   </div>
 
 
-                  <div class="tab-pane" id="review-assessment">
+                 {{--  <div class="tab-pane" id="review-assessment">
                           <section class="panel panel-default">
                       <div class="panel-body">
+                       
                          <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
-                            <label class="badge bg-default">Nutritional Intervention</label> 
+                            <label class="badge bg-default">Plan</label> 
                             <div class="form-group{{ $errors->has('assessment') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="10" class="form-control" id="assessment" name="assessment" value="{{ Request::old('assessment') ?: '' }}"></textarea>   
+                           <div id="assessment" name="assessment" class="form-control" style="overflow:scroll;height:500px;max-height:500px" contenteditable="true"> @foreach($myplan as $plan)
+
+                                 <a>{!!$plan->assessment!!}</a>
+                                 <br>
+                                <br>
+                               @endforeach</div>   
                            @if ($errors->has('assessment'))
                           <span class="help-block">{{ $errors->first('assessment') }}</span>
                            @endif    
@@ -1671,12 +1820,15 @@
 
                       </div>
                       <footer class="panel-footer text-right bg-light lter">
-                        <button type="button" onclick="addAssessment()" class="btn btn-success btn-s-xs">Add Plan</button>
+                        @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
+                        <button type="button" onclick="addAssessment()" class="btn btn-success btn-s-xs">Save Plan</button>
+                        @else
+                        @endif
                       </footer>
                     </section>
-
-                    <img src="/images/439190.svg" width="10%" align="right"> 
-                        <section class="panel panel-info">
+                      <img src="/images/439190.svg" width="10%" align="right"> 
+                   
+                      {{--   <section class="panel panel-info">
                                 <header class="panel-heading font-bold">Plan History</header>
                                 <div class="panel-body">
                                       <div class="table-responsive">
@@ -1696,69 +1848,139 @@
                         </table>
                     </div>
                     </div>
-                    </section>
+                    </section>  
                   </div>
 
-                  <div class="tab-pane" id="review-plan">
+ --}}
+                    <div class="tab-pane" id="review-assessment">
+                         
+                        <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Nutritional Intervention</header>
+                                <div class="panel-body">
+                                      <div class="panel-body text-sm">
+                          <div class="col-sm-12">
+                      
+                        
+                       <textarea id="assessment" name="assessment"> 
+                                 {!!$mydoctorplan->assessment!!}
+                               </textarea>
+                       
+                      </div>
+                      </div>
+
+                                </div>
+                                </section>
+
+                        <footer class="panel-footer text-right bg-light lter">
+                         <button type="button" onclick="addAssessment()" class="btn btn-success btn-s-xs">Save </button>
+                         
+                      </footer>
+                     
+                  </div>
+
+
+
+                    <div class="tab-pane" id="review-appointment">
+                         <section class="hbox stretch">          
+            <!-- .aside -->
+            <aside>
+              <section class="vbox">
+                <section class="scrollable wrapper">
+                  <section class="panel panel-default">
+                    <header class="panel-heading bg-light clearfix">
+                      <div class="btn-group pull-right" data-toggle="buttons">
+                        <label class="btn btn-sm btn-bg btn-default active" id="monthview">
+                          <input type="radio" name="options">Month
+                        </label>
+                        <label class="btn btn-sm btn-bg btn-default" id="weekview">
+                          <input type="radio" name="options">Week
+                        </label>
+                        <label class="btn btn-sm btn-bg btn-default" id="dayview">
+                          <input type="radio" name="options">Day
+                        </label>
+                      </div>
+                      <span class="m-t-xs inline">
+                        Fullcalendar - {{ $visit_details->referal_doctor }}
+                      </span>
+                    </header>
+                    <div class="calendar" id="calendar">
+
+                    </div>
+                  </section>
+                </section>
+              </section>
+            </aside>
+            <!-- /.aside -->
+            <!-- .aside -->
+         <aside class="aside-lg b-l">
+              <div class="padder">
+                <h5>Dragable events</h5>
+                <div class="line"></div>
+
+
+                 <div>
+                <a href="#new-appointment-request"  data-toggle="modal" class="btn btn-sm btn-info bootstrap-modal-form-open"> <i class="fa fa-plus"></i> Create An Appointment</a>
+                </div>
+
+                {{-- <div class="line"></div>
+                 <p class="text-muted">By Consultation </p>
+                <div>
+                 @foreach($servicetype as $servicetype)
+                <a href="/consultation-calendar/{{ 1 }}"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open"> <i class="fa fa-home"></i>  {{ $servicetype->description }} </a>
+                @endforeach
+                </div> --}}
+                <div class="line"></div>
+                <div>  
+               <input type="hidden" id="doctor" name="doctor" value="{{ $visit_details->referal_doctor }}">
+                </div>
+                <p class="text-muted">By Doctor </p>
+                <div>
+                @foreach($doctors as $doctor)
+                <a href="/doctor-appointments/{{ $doctor->name }}"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open"> <i class="fa fa-user-md"></i>  {{ $doctor->name }} </a>
+                @endforeach
+                </div>
+              </div>
+            </aside>
+            <!-- /.aside -->
+          </section>
+                       
+                     
+                  </div>
+
+
+                   <div class="tab-pane" id="review-continuation">
                           <section class="panel panel-default">
                       <div class="panel-body">
-                 
-                
-
                          <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
-                            <label class="badge bg-default">Plan</label> 
-                            <div class="form-group{{ $errors->has('treament_plan') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="10" class="form-control" id="treament_plan" name="treament_plan" value="{{ Request::old('treament_plan') ?: '' }}"></textarea>   
-                           @if ($errors->has('treament_plan'))
-                          <span class="help-block">{{ $errors->first('treament_plan') }}</span>
+                            <label class="badge bg-default">Continuation Sheet / SOAP Notes</label> 
+                            <div class="form-group{{ $errors->has('assessment') ? ' has-error' : ''}}">
+                            
+                       <textarea id="continuation_sheet" name="continuation_sheet">
+                                 {!!$continuation->content!!}
+                               </textarea> 
+
+                           @if ($errors->has('continuation_sheet'))
+                          <span class="help-block">{{ $errors->first('continuation_sheet') }}</span>
+
                            @endif    
                           </div>
                           </div>
                         </div>
 
-                         <div class="form-group pull-in clearfix">
-                          <div class="col-sm-12">
-                            <label class="badge bg-default">Action</label> 
-                            <div class="form-group{{ $errors->has('treament_plan_action') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="10" class="form-control" id="treament_plan_action" name="treament_plan_action" value="{{ Request::old('treament_plan_action') ?: '' }}"></textarea>   
-                           @if ($errors->has('treament_plan_action'))
-                          <span class="help-block">{{ $errors->first('treament_plan_action') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-                        </div>
                       </div>
                       <footer class="panel-footer text-right bg-light lter">
-                        <button type="button" onclick="addPlan()" class="btn btn-success btn-s-xs">Add Plan</button>
+                        @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
+                        <button type="button" onclick="addContinuation()" class="btn btn-success btn-s-xs">Add Note</button>
+                        @else
+                        @endif
                       </footer>
-                    </section>
-                    <img src="/images/432215.svg" width="10%" align="right"> 
-                        <section class="panel panel-info">
-                                <header class="panel-heading font-bold">Plan History</header>
-                                <div class="panel-body">
-                                      <div class="table-responsive">
-                       <table id="planTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
-                          <thead>
-                            <tr>
-                              <th>Plan</th>
-                              <th>Action</th>
-                              <th>Date</th>
-                              <th>Status</th>
-                              <th></th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            
-                          </tbody>
-                        </table>
-                    </div>
-                    </div>
                     </section>
                   </div>
 
-                   <div class="tab-pane" id="review-documents">
+
+
+                  <div class="tab-pane" id="review-documents">
                          <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
                           <header class="panel-heading">
                       <a href="#attach_document" class="bootstrap-modal-form-open" data-toggle="modal"><span class="label bg-success pull-right">Add New</span></a>
@@ -1780,7 +2002,7 @@
                     @elseif($image->mime == 'pdf')
                      <a href="{!! '/uploads/images/'.$image->filepath !!}" target="_blank">
                               <img src="{!! '/images/pdf.png' !!}" class="img-circle">
-                              </a>{{ $image->filename }} <a href="#" class="bootstrap-modal-form-open" onclick="deleteImage('{{  $image->id }}','{{ $image->filename }}')"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-trash"></i></a> <span class="label label-default btn-rounded">{{ $image->created_on->diffForHumans() }}</span>
+                              </a>{{ $image->filename }} <a href="#" class="bootstrap-modal-form-open" onclick="deleteImage('{{  $image->id }}','{{ $image->filename }}')"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-trash"></i></a> <span class="label label-default btn-rounded" data-toggle="tooltip" data-placement="top" title="" data-original-title="{{ $image->created_on}}">{{ $image->created_on->diffForHumans() }}</span>
                       @else 
                      <a href="{!! '/uploads/images/'.$image->filepath !!}" target="_blank">
                               <img src="{!! '/uploads/images/'.$image->filepath !!}" class="img-circle">
@@ -1793,7 +2015,6 @@
                     </div>
                           </ul>
                         </div>
-
 
                
                       </div>
@@ -1812,26 +2033,131 @@
 
   @stop
 
+  <script src="{{ asset('/js/jquery.min.js')}}"></script>
+   <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
+  <script src="{{ asset('/event_components/bootstrap.min.js')}}"></script>
+  <script src="{{ asset('/event_components/fullcalendar.min.js')}}"></script>
+  <script src="{{ asset('/event_components/moment.min.js')}}"></script>
 
-  <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
+<script src="{{ asset('/js/tinymce/tinymce.min.js')}}"></script>
+ 
+ <script>tinymce.init({
+  selector: '#assessment',
+  height: 300,
+  menubar: true,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor textcolor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table contextmenu paste code help wordcount',
+    'template'
+  ],
+  toolbar: 'insert | undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+  templates: [
+    //{title: 'Some title 1', description: 'Some desc 1', content: 'My content  {$bond_description}'},
+    //{title: 'Advance Payment Bond', description: 'Some desc 2', url: 'http://127.0.0.1:8000/bond-test'}
+  ],
+  template_replace_values: {
+
+  }
+
+  
+
+});
+ </script>
+
+ <script>tinymce.init({
+  selector: '#continuation_sheet',
+  height: 500,
+  menubar: true,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor textcolor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table contextmenu paste code help wordcount',
+    'template'
+  ],
+  toolbar: 'insert | undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+  templates: [
+    //{title: 'Some title 1', description: 'Some desc 1', content: 'My content  {$bond_description}'},
+    //{title: 'Advance Payment Bond', description: 'Some desc 2', url: 'http://127.0.0.1:8000/bond-test'}
+  ],
+  template_replace_values: {
+
+  }
+
+  
+
+});
+ </script>
+
+
 
 
 <script type="text/javascript">
+  $(document).ready(function() {
+
+  
+       
+    var base_url = '{{ url('/') }}';
+     var doctor = $('#doctor').val();
+
+   $('#calendar').fullCalendar({
+      weekends: false,
+      slotMinutes: 15,
+      theme: false,
+    header: false,
+       minTime: 7,
+    maxTime: 20,
+    height: 800,
+    slotEventOverlap: true,
+
+      header: {
+        left: 'prev,next today,prevYear,nextYear',
+        center: 'title',
+        right: 'listDay,month,agendaWeek,agendaDay'
+      },
+      //weekends : false,
+     defaultView: 'month',
+      weekNumberTitle : "Week",
+      allDayDefault: false,
+      weekNumbers : true,
+      editable: false,
+      eventLimit: true, // allow "more" link when too many events
+      events: {
+         url: '/doctor-calendar/'+doctor+'' ,
+        error: function() {
+          alert("cannot load json");
+        }
+      }
+    });
+  
+  $('#new-appointment-request select[name="title"]').select2();
+  $('#new-appointment-request select[name="name"]').select2();
+  $('#new-appointment-request select[name="referal_doctor"]').select2();
+
+  //$('#new-appointment-request select[name="name"]').select2();
+
+  });
+</script>
+
+<script type="text/javascript">
 $(function () {
-   $('#time').daterangepicker({
-    "minDate": moment('2016-06-14 0'),
-     "singleDatePicker":true,
+  $('#new-appointment-request input[name="time"]').daterangepicker({
+     "daysOfWeek": ['Mo', 'Tu', 'We', 'Th', 'Fr'],
+    "singleDatePicker":true,
+    "autoApply": true,
+    "showISOWeekNumbers": true,
+    "showDropdowns": true,
     "timePicker": true,
     "timePicker24Hour": true,
     "timePickerIncrement": 15,
-    "autoApply": true,
     "locale": {
-      "format": "DD/MM/YYYY HH:mm:ss",
+     "format": "DD/MM/YYYY HH:mm:ss",
       "separator": " - ",
     }
   });
 });
 </script>
+
 
 
 <script type="text/javascript">
@@ -1846,6 +2172,7 @@ $(document).ready(function () {
                 loadVitals();
                 loadAssessment();
                 loadPlan();
+                //loadTreatmentPlan();
 
     $('#investigation').select2();  
      $('#procedure').select2();
@@ -1858,6 +2185,8 @@ $(document).ready(function () {
      $('#directquestion').select2({
       tags: true
       });
+
+
 
     $('#drug_application').select2({
       tags: true
@@ -1883,6 +2212,10 @@ $(document).ready(function () {
       tags: true
       });
     $('#drug_history').select2({
+      tags: true
+      });
+
+     $('#drug_history_recent').select2({
       tags: true
       });
     $('#surgical_history').select2({
@@ -1991,6 +2324,11 @@ $(document).ready(function () {
       tags: true
       });
 
+       $('#pe_breast').select2({
+      tags: true
+      });
+
+
       $('#pe_lungs').select2({
       tags: true
       });
@@ -2037,8 +2375,6 @@ if($('#weight').val()!= "" && $('#height').val()!="")
           "height": $('#height').val(),
           "waist_circumference": $('#waist_circumference').val(),
           "hip_circumference":  $('#hip_circumference').val(),
-          "wrist_circumference":  $('#wrist_circumference').val(),
-           "whr": $('#whr').val(),
           "frame": $('#frame').val(),
           "b_fat": $('#b_fat').val(),
           "v_fat": $('#v_fat').val(),
@@ -2078,7 +2414,7 @@ if($('#weight').val()!= "" && $('#height').val()!="")
           {"medication": $('#medication').val()},
           function(json)
           {
-
+                 getDrugAvailable();
             
                 $('#drug_dosage').val(json['drug_dosage']);
                 $('#drug_form').val(json['drug_form']);
@@ -2086,7 +2422,7 @@ if($('#weight').val()!= "" && $('#height').val()!="")
                 $('#drug_generic').val(json['drug_generic']);
                 $('#drug_quantity').val("");
 
-                getDrugAvailable();
+               
                 
               //}
           },
@@ -2146,8 +2482,8 @@ if($('#weight').val()!= "" && $('#height').val()!="")
 
 function addNote()
 {
-if($('#complaint').val()!= "")
-{
+// if($('#complaint').val()!= "")
+// {
 
   //alert($('#editor').html());
     $.get('/add-note',
@@ -2161,6 +2497,8 @@ if($('#complaint').val()!= "")
           "com_remark":  $('#com_remark').val(),
           "presentingcomplaint":  $('#editor').html(),
           "directquestion":  $('#directquestion').val(),
+          "doctors_note":  $('#perspective_comment_doctor').val(),
+          "patients_note":  $('#perspective_comment_patient').val(),
 
           //History
           "medical_history":  $('#medical_history').val(),
@@ -2168,6 +2506,7 @@ if($('#complaint').val()!= "")
           "social_history":  $('#social_history').val(),
           "vaccinations_history":  $('#vaccinations_history').val(),
           "drug_history":  $('#drug_history').val(),
+          "drug_history_recent":  $('#drug_history_recent').val(),
           "surgical_history":  $('#surgical_history').val(),
           "reproductive_history":  $('#reproductive_history').val(),
           "allergy":  $('#allergy').val(),
@@ -2203,6 +2542,7 @@ if($('#complaint').val()!= "")
           "pe_cns":  $('#pe_cns').val(),
           "pe_musculoskeletal":  $('#pe_musculoskeletal').val(),
           "pe_psychological":  $('#pe_psychological').val(),
+          "pe_breast":  $('#pe_breast').val(),
   
 
 
@@ -2232,10 +2572,13 @@ if($('#complaint').val()!= "")
       });
                                         
         },'json');
-  }
-  else
-    {sweetAlert("Please add a complaint!");}
+  // }
+  // else
+  //   {sweetAlert("Please add a complaint!");}
 }
+
+
+
 
 
 function addNoAvailableDrug()
@@ -2311,16 +2654,18 @@ if($('#treament_plan').val()!= "")
 }
 
 
-function addAssessment()
+
+function addPlanReferal()
 {
-if($('#assessment').val()!= "")
+if($('#myreferal').html()!= "")
 {
 
   //alert($('#complaint').val());
-    $.get('/add-assessment',
+    $.get('/add-doctor-referal',
         {
           "opd_number": $('#opd_number').val(),
-          "assessment": $('#assessment').val()
+          "patient_id": $('#patient_id').val(),
+          "referal_note": $('#myreferal').html()
                          
         },
         function(data)
@@ -2330,6 +2675,7 @@ if($('#assessment').val()!= "")
         if(data["OK"])
         {
           
+           sweetAlert("Note saved successfully!");
           loadAssessment();
         }
         else
@@ -2343,6 +2689,81 @@ if($('#assessment').val()!= "")
   else
     {sweetAlert("Please add an assessment!");}
 }
+
+
+function addAssessment()
+{
+if($('#assessment').val()!= "")
+{
+
+  //alert($('#complaint').val());
+
+  tinyMCE.triggerSave();
+    $.get('/add-assessment',
+        {
+          "opd_number": $('#opd_number').val(),
+          "patient_id": $('#patient_id').val(),
+          "assessment": $('#assessment').val()
+                         
+        },
+        function(data)
+        { 
+          
+          $.each(data, function (key, value) {
+        if(data["OK"])
+        {
+          sweetAlert("Plan saved successfully!");
+          loadAssessment();
+        }
+        else
+        {
+          sweetAlert("Assessment failed to be added!");
+        }
+      });
+                                        
+        },'json');
+  }
+  else
+    {sweetAlert("Please add an assessment!");}
+}
+
+function addContinuation()
+{
+if($('#continuation_sheet').val()!= "")
+{
+
+  //alert($('#complaint').val());
+  tinyMCE.triggerSave();
+    $.get('/add-continuation',
+        {
+          "opd_number": $('#opd_number').val(),
+          "patient_id": $('#patient_id').val(),
+          "continuation_sheet": $('#continuation_sheet').val()
+                         
+        },
+        function(data)
+        { 
+          
+          $.each(data, function (key, value) {
+        if(data["OK"])
+        {
+          
+          sweetAlert("Note saved successfully!");
+          //loadContinuation();
+        }
+        else
+        {
+          sweetAlert("Note failed to be added!");
+        }
+      });
+                                        
+        },'json');
+  }
+  else
+    {sweetAlert("Please add a Note!");}
+}
+
+
 
 function getDrugAvailable()
 {
@@ -2363,7 +2784,7 @@ function getDrugAvailable()
         }
         else
         {
-          sweetAlert("Drug failed to be added!");
+          //sweetAlert("Drug failed to be added!");
         }
       });
                                         
@@ -2453,15 +2874,16 @@ if($('#investigation').val()!= "")
 
 function addProcedure()
 {
-if($('#procedure').val()!= "")
+if($('#procedure').val()!= "" && $('#procedure_quantity').val()!= "")
 {
 
-    $.get('/add-procedure',
+    $.get('/add-procedure-nurse',
         {
           "patient_id": $('#patient_id').val(),
            "accounttype": $('#accounttype').val(),
           "opd_number": $('#opd_number').val(),
           "procedure": $('#procedure').val(),
+          "procedure_quanity": $('#procedure_quantity').val(),
           "fullname":  $('#fullname').val()                      
         },
         function(data)
@@ -2483,13 +2905,14 @@ if($('#procedure').val()!= "")
         },'json');
   }
   else
-    {sweetAlert("Please select a Procedure!");}
+    {sweetAlert("Please select a Procedure or enter a quantity!");}
 }
+
 
 
 function addDiagnosis()
 {
-if($('#diagnosis').val()!= "")
+if($('#diagnosis').val()!= "" && $('#diagnosis_type').val()!= "")
 {
 
     $.get('/add-diagnosis',
@@ -2497,7 +2920,8 @@ if($('#diagnosis').val()!= "")
           "patient_id": $('#patient_id').val(),
           "opd_number": $('#opd_number').val(),
           "diagnosis":  $('#diagnosis').val(),
-          "code":       $('#diagnosis_remark').val(),
+          "diagnosis_type":  $('#diagnosis_type').val(),
+          "diagnosis_remark":       $('#diagnosis_remark').val(),
           "fullname":  $('#fullname').val()                      
         },
         function(data)
@@ -2518,7 +2942,7 @@ if($('#diagnosis').val()!= "")
         },'json');
   }
   else
-    {sweetAlert("Please select a Diagnosis!");}
+    {sweetAlert("Please select a diagnosis type / Key in a diagnosis!");}
 }
 
  function loadDiagnosisDescription()
@@ -2670,7 +3094,7 @@ function loadMedication()
             $('#drugTable tbody').empty();
             $.each(data, function (key, value) 
             {           
-            $('#drugTable tbody').append('<tr><td>'+ value['drug_quantity'] +'</td><td>'+ value['drug_name'] +'</td><td>'+ value['drug_application'] +'</td><td>'+ value['drug_cost'] +'</td><td>'+ value['drug_cost']*value['drug_quantity'] +'</td><td><a a href="#" class="btn btn-sm btn-danger btn-rounded">'+ value['status'] +'</a></td><td><a a href="#"><i onclick="removeMedication('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+            $('#drugTable tbody').append('<tr><td>'+ value['drug_quantity'] +'</td><td>'+ value['drug_name'] +'</td><td>'+ value['drug_application'] +'</td><td>'+ value['drug_cost'] +'</td><td>'+ value['drug_cost']*value['drug_quantity'] +'</td><td>'+ value['created_by'] +'</td><td><a a href="#" class="btn btn-sm btn-danger btn-rounded">'+ value['status'] +'</a></td><td><a a href="#"><i onclick="removeMedication('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
             });
                                           
          },'json');      
@@ -2740,25 +3164,6 @@ function loadComplaints()
     }
 
 
- function loadVitals()
-   {
-         
-        
-        $.get('/patient-vitals-all',
-          {
-            "patient_id": $('#patient_id').val()
-          },
-          function(data)
-          { 
-
-            $('#vitalTable tbody').empty();
-            $.each(data, function (key, value) 
-            {           
-            $('#vitalTable tbody').append('<tr><td>'+ value['created_on'] +'</td><td>'+ value['weight'] +'</td><td>'+ value['height'] +'</td><td>'+ value['bmi']  + (value['bmi_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bmi_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bmi_status'] +'</span>' ) +'</td><td>'+ value['temperature'] + (value['temp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['temp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['temp_status'] +'</span>' ) +'</td><td>'+ value['sbp'] + '/' + value['dbp'] + (value['bp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bp_status'] +'</span>' ) +'</td><td>'+ value['pulse_rate'] +'</td><td>'+ value['respiration'] +'</td><td>'+ value['waist_circumference'] +'</td><td>'+ value['hip_circumference'] +'</td><td><a a href="#"><i onclick="removeVital('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
-            });
-                                          
-         },'json');      
-    }
 
 function loadInvestigation()
    {
@@ -2776,10 +3181,44 @@ function loadInvestigation()
             $('#investigationsTable tbody').empty();
             $.each(data, function (key, value) 
             {           
-           $('#investigationsTable tbody').append('<tr><td>'+ value['investigation'] +'</td><td>'+ value['cost'] +'</td><td>'+ value['created_on'] +'</td><td>'+ value['status'] +'</td><td>' + ( value['type'] == "Laboratory" ? '<a a href="/test-collection-slip/'+value['visitid']+'">' : '<a a href="/image-request-slip/'+value['visitid']+'">' ) + '<i onclick="" class="fa fa-print"></i></a></td><td>' + ( value['type'] == "Laboratory" ? '<a a href="/laboratory-results/'+value['visitid']+'">' : '<a a href="/upload-scan/'+value['visitid']+'">' ) + '<i onclick="" class="fa fa-eye"></i></a></td><td><a a href="#"><i onclick="removeinvestigation('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+           $('#investigationsTable tbody').append('<tr><td>'+ value['investigation'] +'</td><td>'+ value['cost'] +'</td><td>'+ value['created_on'] +'</td><td>'+ value['status'] +'</td><td>'+ value['created_by'] +'</td><td><input type="text" style="width:200px; border: 1px solid #ABADB3; text-align: center;" item_code="'+ value['id'] +'" value="'+ value['remark'] +'" onchange="change_count(this);"></td><td>' + ( value['type'] == "Laboratory" ? '<a a href="/test-collection-slip/'+value['visitid']+'">' : '<a a href="/image-request-slip/'+value['id']+'">' ) + '<i onclick="" class="fa fa-print" data-toggle="tooltip" data-placement="top" title="" data-original-title="Print investigation request"></i></a></td><td>' + ( value['type'] == "Laboratory" ? '<a a href="/laboratory-results/'+value['visitid']+'">' : '<a a href="/upload-scan/'+value['visitid']+'">' ) + '<i onclick="" class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="" data-original-title="View result"></i></a></td><td><a a href="#"><i onclick="removeinvestigation('+value['id']+')" class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Investigation"></i></a></td></tr>');
             });
                                           
          },'json');      
+    }
+
+
+    function change_count(obj)
+    {
+
+      var item_code=$(obj).attr('item_code');
+      var new_qty=$(obj).val();
+        //alert(item_code);
+
+          $.get('/update-investigation-comment',
+          {
+             "id": item_code,
+             "drug_quantity": new_qty
+          },
+          function(data)
+          { 
+            
+            $.each(data, function (key, value) 
+            {
+            if(value == "OK")
+            {
+             loadInvestigation();
+             }
+            else
+            { 
+             loadInvestigation();
+              
+            }
+           
+        });
+                                          
+          },'json');    
+           
     }
 
 function loadDiagnosis()
@@ -2796,7 +3235,7 @@ function loadDiagnosis()
             $('#diagnosisTable tbody').empty();
             $.each(data, function (key, value) 
             {           
-            $('#diagnosisTable tbody').append('<tr><td>'+ value['diagnosis'] +'</td><td>'+ value['date'] +'</td><td><a a href="#"><i onclick="removediagnosis('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+            $('#diagnosisTable tbody').append('<tr><td>'+ value['diagnosis_type'] +'</td><td>'+ value['diagnosis'] +'</td><td>'+ value['remark'] +'</td><td>'+ value['created_by'] +'</td><td>'+ value['date'] +'</td><td><a a href="#"><i onclick="removediagnosis('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
             });
                                           
          },'json');      
@@ -2822,6 +3261,48 @@ function loadDiagnosis()
                                           
          },'json');      
     }
+
+
+function loadVitals()
+   {
+         
+        
+        $.get('/patient-vitals-all',
+          {
+            "patient_id": $('#patient_id').val()
+          },
+          function(data)
+          { 
+
+            $('#vitalTable tbody').empty();
+            $.each(data, function (key, value) 
+            {           
+            $('#vitalTable tbody').append('<tr><td>'+ value['created_on'] +'</td><td>'+ value['weight'] +'</td><td>'+ value['height'] +'</td><td>'+ value['bmi']  + (value['bmi_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bmi_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bmi_status'] +'</span>' ) +'</td><td>'+ value['temperature'] + (value['temp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['temp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['temp_status'] +'</span>' ) +'</td><td>'+ value['sbp'] + '/' + value['dbp'] + (value['bp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bp_status'] +'</span>' ) +'</td><td>'+ value['pulse_rate'] +'</td><td>'+ value['respiration'] +'</td><td>'+ value['waist_circumference'] +'</td><td>'+ value['hip_circumference'] +'</td><td><a a href="#"><i onclick="removeVital('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+            });
+                                          
+         },'json');      
+    }
+
+// function loadVitals()
+//    {
+         
+        
+//         $.get('/patient-vitals',
+//           {
+//             "opd_number": $('#opd_number').val()
+//           },
+//           function(data)
+//           { 
+
+//             $('#vitalTable tbody').empty();
+//             $.each(data, function (key, value) 
+//             {           
+//             $('#vitalTable tbody').append('<tr><td>'+ value['created_on'] +'</td><td>'+ value['weight'] +'</td><td>'+ value['height'] +'</td><td>'+ value['bmi']  + (value['bmi_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bmi_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bmi_status'] +'</span>' ) +'</td><td>'+ value['temperature'] + (value['temp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['temp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['temp_status'] +'</span>' ) +'</td><td>'+ value['sbp'] + '/' + value['dbp'] + (value['bp_status'] == "Normal" ? '<span class="label label-success btn-rounded">'+ value['bp_status'] +'</span>' :  '<span class="label label-danger btn-rounded">'+ value['bp_status'] +'</span>' ) +'</td><td>'+ value['pulse_rate'] +'</td><td>'+ value['respiration'] +'</td><td>'+ value['waist_circumference'] +'</td><td>'+ value['hip_circumference'] +'</td><td><a a href="#"><i onclick="removeVital('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+//             });
+                                          
+//          },'json');      
+//     }
+
 
 
     function loadProcedure()
@@ -2885,12 +3366,33 @@ function loadDiagnosis()
          },'json');      
     }
 
+     function loadTreatmentPlan()
+   {
+         
+        
+        $.get('/patient-nurse-treatment',
+          {
+            "opd_number": $('#opd_number').val()
+          },
+          function(data)
+          { 
+
+            $('#treatmentTable tbody').empty();
+            $.each(data, function (key, value) 
+            {           
+            $('#treatmentTable tbody').append('<tr><td>'+ value['treatment_name'] +'</td><td>'+ value['time_given'] +'</td><td>'+ value['remark'] +'</td><td>'+ value['created_by'] +'</td><td><a a href="#"><i onclick="removeTreatment('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+            });
+                                          
+         },'json');      
+    }
 
 
 
+  @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
   function removeMedication(id)
    {
-     
+    
+
           $.get('/delete-medication',
           {
              "ID": id 
@@ -2915,10 +3417,11 @@ function loadDiagnosis()
                                           
           },'json');    
            
-
-
-    
    }
+
+
+   
+
 
     function removeHistory(id)
    {
@@ -3011,35 +3514,7 @@ function removeinvestigation(id)
     
    }
 
-   function removePlan(id)
-   {
-     
-          $.get('/delete-plan',
-          {
-             "ID": id 
-          },
-          function(data)
-          { 
-            
-            $.each(data, function (key, value) 
-            {
-            if(value == "OK")
-            {
-              //swal("Deleted!", name +" was removed from list.", "success"); 
-              loadPlan();
-             }
-            else
-            { 
-              swal("Cancelled", name +" failed to be removed from list.", "error");
-              
-            }
-           
-        });
-                                          
-          },'json');        
-    
-   }
-
+  
    function removeAssessment(id)
    {
      
@@ -3163,6 +3638,41 @@ function removeprocedure(id)
            
     
    }
+
+
+@else
+
+@endif
+
+ function removePlan(id)
+   {
+     
+          $.get('/delete-plan',
+          {
+             "ID": id 
+          },
+          function(data)
+          { 
+            
+            $.each(data, function (key, value) 
+            {
+            if(value == "OK")
+            {
+              //swal("Deleted!", name +" was removed from list.", "success"); 
+              loadPlan();
+             }
+            else
+            { 
+              swal("Cancelled", name +" failed to be removed from list.", "error");
+              
+            }
+           
+        });
+                                          
+          },'json');        
+    
+   }
+
 
 function getAge()
 {
@@ -3445,5 +3955,38 @@ $(function () {
     </div>
 
 
+    <div class="modal fade" id="new-appointment-request" size="600">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">New Appointment</h4>
+        </div>
+        <div class="modal-body">
+          <p></p>
+                      <section class="vbox">
+                    
+                    <section class="scrollable">
+                      <div class="tab-content">
+                        <div class="tab-pane active" id="individual">
+                           <form  class="bootstrap-modal-form" data-validate="parsley" method="post" action="/create-event" class="panel-body wrapper-lg">
+                          @include('event/create')
+                        <input type="hidden" name="_token" value="{{ Session::token() }}">
+                      </form>
+                        </div>
+                  
+                  
+                        </div>
+                      </div>
+                    </section>
+                  </section>
+        </div>
+        
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div>
 
+
+
+@endrole
 

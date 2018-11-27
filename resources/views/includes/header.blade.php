@@ -147,7 +147,7 @@
             </li>
             <li class="divider"></li>
             <li>
-              <a href="/mlogout" >Logout</a>
+             <a href="{{ route('auth.signin') }}" >Logout</a>
             </li>
           </ul>
            @endif

@@ -25,7 +25,7 @@
              			</div>  
                                <div class="form-group{{ $errors->has('referal_doctor') ? ' has-error' : ''}}">
                             <label>Doctor</label>
-                            <select id="referal_doctor" name="referal_doctor" rows="3" data-required="true" tabindex="1" data-placeholder="Select here.." class="form-control" >
+                            <select id="referal_doctor" name="referal_doctor" rows="3" data-required="true" tabindex="1" data-placeholder="Select here.." style="width:100%">
                             <option value="">Select Doctor</option>
                           @foreach($doctors as $doctor)
                         <option value="{{ $doctor->name }}">{{ $doctor->name }}</option>

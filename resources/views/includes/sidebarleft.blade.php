@@ -1,4 +1,4 @@
-  @role(['Receptionist','System Admin','Billing','Doctor','Imaging','Nurse','Medical Records Manager','Medical Records Assistant','Medical Assistant','Cashier','Marketing','Purchases','Laboratory','Pharmacy Technician','Pharmacist','Dentist','Ophthalmologist','Dietian','Specialist','Dental Nurse','Dental Receptionist','Nurse Assistant','Special Admin'])
+  @role(['Receptionist','System Admin','Billing','Doctor','Imaging','Nurse','Medical Records Manager','Medical Records Assistant','Medical Assistant','Cashier','Marketing','Purchases','Laboratory','Pharmacy Technician','Pharmacist','Dentist','Ophthalmologist','Dietian','Specialist','Dental Nurse','Dental Receptionist','Nurse Assistant','Special Admin','Claims Manager'])
  <aside class="bg-dark lter aside-md hidden-print" id="nav">          
           <section class="vbox">
             <header class="header lter text-center clearfix" style="background-color:#1ABC9C">
@@ -43,7 +43,7 @@
                         </span>
                         <span>Records</span>
                       </a>
-                       @role(['Medical Records Manager','Medical Records Assistant','System Admin','Nurse','Special Admin'])
+                       @role(['Medical Records Manager','Medical Records Assistant','System Admin','Nurse','Nurse Assistant','Special Admin','Claims Manager'])
                       <ul class="nav lt">
                         <li >
                           <a href="/active-patients" >  
@@ -56,7 +56,7 @@
                       </ul>
                       @endrole
 
-                      @role(['Receptionist','Medical Records Manager','Medical Records Assistant','System Admin','Nurse','Special Admin'])
+                      @role(['Receptionist','Medical Records Manager','Medical Records Assistant','System Admin','Nurse','Special Admin','Claims Manager'])
                       <ul class="nav lt">
                         <li >
                           <a href="/new-opd" >  
@@ -178,7 +178,7 @@
                     </li>
                     @endrole
                   
-                    @role(['Billing','System Admin','Cashier','Special Admin'])
+                    @role(['Billing','System Admin','Cashier','Special Admin','Pharmacist','Pharmacy Technician'])
                      <li >
                       <a href="/billing-index"  >
                        
@@ -190,7 +190,7 @@
                     </li>
                     @endrole
 
-                     @role(['Billing','System Admin','Cashier'])
+                     @role(['Billing','System Admin','Cashier','Claims Manager'])
                      <li >
                       <a href="/insurance-claims-portal"  >
                        

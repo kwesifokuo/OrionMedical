@@ -9,7 +9,7 @@
 
                                      <div class="form-group">
                                       <label>Description</label>
-                                      <input type="text" id="description" name="description" data-required="true" class="form-control" placeholder="">
+                                      <input type="text" id="description" name="description"  class="form-control" placeholder="">
                                     </div>
 
                                      <div class="form-group">
@@ -33,7 +33,7 @@
                               <div class="col-sm-3">
                                 <div class="form-group{{ $errors->has('corporate_margin') ? ' has-error' : ''}}">
                                   <label>Corporate Sale Margin</label>
-                                  <input type="text" rows="3" data-required="true" class="form-control" id="corporate_margin" name="corporate_margin" value="{{ Request::old('corporate_margin') ?: '' }}">      
+                                  <input type="text" rows="3" data-required="true" class="form-control" data-required="true" id="corporate_margin" name="corporate_margin" value="{{ Request::old('corporate_margin') ?: '' }}">      
                                  @if ($errors->has('corporate_margin'))
                                 <span class="help-block">{{ $errors->first('corporate_margin') }}</span>
                                  @endif    
@@ -44,8 +44,8 @@
                                 
                               <div class="col-sm-3">
                                 <div class="form-group{{ $errors->has('insurance_margin') ? ' has-error' : ''}}">
-                                  <label>Normal Insurance Sale Margin</label>
-                                  <input type="text" rows="3" data-required="true" class="form-control" id="insurance_margin" name="insurance_margin" value="{{ Request::old('insurance_margin') ?: '' }}">      
+                                  <label>Phoenix Sale Margin</label>
+                                  <input type="text" rows="3" data-required="true" class="form-control" data-required="true" id="insurance_margin" name="insurance_margin" value="{{ Request::old('insurance_margin') ?: '' }}">      
                                  @if ($errors->has('insurance_margin'))
                                 <span class="help-block">{{ $errors->first('insurance_margin') }}</span>
                                  @endif    
@@ -69,7 +69,7 @@
                               <div class="col-sm-3">
                                 <div class="form-group{{ $errors->has('premier_margin') ? ' has-error' : ''}}">
                                   <label>Premier Sale Margin</label>
-                                  <input type="text" rows="3" data-required="true" class="form-control" id="premier_margin" name="premier_margin" value="{{ Request::old('premier_margin') ?: '' }}">      
+                                  <input type="text" rows="3" data-required="true" class="form-control" data-required="true" id="premier_margin" name="premier_margin" value="{{ Request::old('premier_margin') ?: '' }}">      
                                  @if ($errors->has('premier_margin'))
                                 <span class="help-block">{{ $errors->first('premier_margin') }}</span>
                                  @endif    
@@ -93,6 +93,43 @@
                           <div class="form-group pull-in clearfix">
                                <div class="col-sm-3">
                                 <div class="form-group{{ $errors->has('cosmopolitan_margin') ? ' has-error' : ''}}">
+                                  <label>Nationwide Sale Margin</label>
+                                   <input type="text" class="form-control" class="text-success" data-required="true" id="nationwide_margin" name="nationwide_margin" value="{{ Request::old('nationwide_margin') ?: '' }}"  >       
+                                 @if ($errors->has('cosmopolitan_margin'))
+                                <span class="help-block">{{ $errors->first('cosmopolitan_margin') }}</span>
+                                 @endif    
+                                </div>   
+                              </div>
+
+                                 
+                              <div class="col-sm-3">
+                                <div class="form-group{{ $errors->has('premier_margin') ? ' has-error' : ''}}">
+                                  <label>Universal Sale Margin</label>
+                                  <input type="text" rows="3" data-required="true" class="form-control" id="universal_margin" name="universal_margin" value="{{ Request::old('universal_margin') ?: '' }}">      
+                                 @if ($errors->has('premier_margin'))
+                                <span class="help-block">{{ $errors->first('premier_margin') }}</span>
+                                 @endif    
+                                </div>   
+                              </div>
+                        
+
+                                
+                              <div class="col-sm-3">
+                                <div class="form-group{{ $errors->has('insurance_margin') ? ' has-error' : ''}}">
+                                  <label>Apex Sale Margin</label>
+                                  <input type="text" rows="3" data-required="true" class="form-control" id="apex_margin" name="apex_margin" value="{{ Request::old('apex_margin') ?: '' }}">      
+                                 @if ($errors->has('special_margin'))
+                                <span class="help-block">{{ $errors->first('special_margin') }}</span>
+                                 @endif    
+                                </div>   
+                              </div>
+                        </div>
+
+
+
+                         <div class="form-group pull-in clearfix">
+                               <div class="col-sm-3">
+                                <div class="form-group{{ $errors->has('cosmopolitan_margin') ? ' has-error' : ''}}">
                                   <label>Metropolitan Sale Margin</label>
                                    <input type="text" class="form-control" class="text-success" data-required="true" id="metropolitan_margin" name="metropolitan_margin" value="{{ Request::old('metropolitan_margin') ?: '' }}"  >       
                                  @if ($errors->has('cosmopolitan_margin'))
@@ -114,7 +151,7 @@
                         
 
                                 
-                              <div class="col-sm-3">
+                             {{--  <div class="col-sm-3">
                                 <div class="form-group{{ $errors->has('insurance_margin') ? ' has-error' : ''}}">
                                   <label>Apex Sale Margin</label>
                                   <input type="text" rows="3" data-required="true" class="form-control" id="apex_margin" name="apex_margin" value="{{ Request::old('special_margin') ?: '' }}">      
@@ -122,7 +159,7 @@
                                 <span class="help-block">{{ $errors->first('special_margin') }}</span>
                                  @endif    
                                 </div>   
-                              </div>
+                              </div> --}}
                         </div>
 
 

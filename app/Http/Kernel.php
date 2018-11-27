@@ -63,5 +63,9 @@ class Kernel extends HttpKernel
         'role' => \Zizaco\Entrust\Middleware\EntrustRole::class,
         'permission' => \Zizaco\Entrust\Middleware\EntrustPermission::class,
         'ability' => \Zizaco\Entrust\Middleware\EntrustAbility::class,
+        'basicAuth' => \OrionMedical\Http\Middleware\BasicAuth::class, //Registering New Middleware
+        'revalidate' => \OrionMedical\Http\Middleware\RevalidateBackHistory::class,
+        'prevent-back-history' => \OrionMedical\Http\Middleware\PreventBackHistory::class,
+        'disablepreventback' => \OrionMedical\Http\Middleware\DisablePreventBack::class,
     ];
 }

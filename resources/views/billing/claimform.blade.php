@@ -69,7 +69,7 @@
                     <td>GHS {{ $visit->bills->sum('total_price') }}  </td>
                   </tr>
                   <tr>
-                    <td colspan="4" class="text-right no-border"><strong>Paid</strong></td>
+                    <td colspan="4" class="text-right no-border"><strong>Paid (Top Up)</strong></td>
                     <td>GHS {{  $visit->payments->sum('total_price') }}</td>
                   </tr>
                   <tr>

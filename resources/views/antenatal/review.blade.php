@@ -554,13 +554,25 @@
                       </section>
                   </div>
 
-                    <div class="tab-pane" id="review-diagnosis">
+                   <div class="tab-pane" id="review-diagnosis">
                           <section class="panel panel-default">
                             <header class="panel-heading font-bold">
                                  <a href="#new-diagnosis" class="bootstrap-modal-form-open" data-toggle="modal"><span class="badge bg-danger pull-right">Select from ICD 10 +</span></a>
                                 </header>
                       <div class="panel-body">
                
+                       <div class="form-group pull-in clearfix">
+                          <div class="col-sm-12">
+                           <select id="diagnosis_type" name="diagnosis_type" rows="3" tabindex="1" data-placeholder="Search diagnosis ..." class="form-control m-b">
+                           <option value="">-- Select Diagnosis Type --</option>
+                            <option value="Differential Diagnosis">Differential Diagnosis</option>
+                             <option value="Provisional Diagnosis">Provisional Diagnosis</option>
+                             <option value="Final Diagnosis">Final Diagnosis</option>
+                        </select>         
+                          </div>
+                        </div>
+
+
                        <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
                            <select id="diagnosis" name="diagnosis[]" multiple rows="3" tabindex="1" data-placeholder="Search diagnosis ..." style="width:100%">
@@ -576,7 +588,7 @@
                           <div class="col-sm-12">
                             <label>Remarks</label> 
                             <div class="form-group{{ $errors->has('diagnosis_remark') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="3" class="form-control" id="diagnosis_remark" name="investigation_remark" value="{{ Request::old('diagnosis_remark') ?: '' }}"></textarea>   
+                            <textarea type="text" rows="3" class="form-control" id="diagnosis_remark" name="diagnosis_remark" value="{{ Request::old('diagnosis_remark') ?: '' }}"></textarea>   
                            @if ($errors->has('diagnosis_remark'))
                           <span class="help-block">{{ $errors->first('diagnosis_remark') }}</span>
                            @endif    
@@ -585,7 +597,10 @@
                         </div>
                       </div>
                       <footer class="panel-footer text-right bg-light lter">
+                       @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
                         <button type="button" onclick="addDiagnosis()" class="btn btn-success btn-s-xs">Add Diagnosis</button>
+                        @else
+                        @endif
                       </footer>
                     </section>
                      <img src="/images/426394.svg" width="10%" align="right"> 
@@ -596,9 +611,10 @@
                       <table id="diagnosisTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
                           <thead>
                             <tr>
-                          
+                              <th>Type</th>
                               <th>Diagnosis</th>
-                              <th></th>
+                              <th> Remark </th>
+                              <th> By</th>
                               <th>Date</th>
                               <th></th>
                             </tr>
@@ -611,6 +627,7 @@
                     </div>
                     </section>
                   </div>
+
 
 
                   
@@ -1583,269 +1600,7 @@
  
  
 
-                   <div class="tab-pane" id="review-plan">
-                          <section class="panel panel-default">
-                      <div class="panel-body">
-                          <div class="form-group pull-in clearfix">
-  
-                          <div class="col-sm-3">
-                            <label>Gestation By Date</label> 
-                            <div class="form-group{{ $errors->has('gestation_by_date') ? ' has-error' : ''}}">
-                             <select id="gestation_by_date" name="gestation_by_date" rows="1" tabindex="1" data-placeholder="Select here.." class="form-control m-b">
-                          <option value="">-- Not set --</option>
-                          @foreach($gestationperiods as $gestationperiod)
-                        <option value="{{ $gestationperiod->week }}">{{ $gestationperiod->week }}</option>
-                          @endforeach
-                        </select>            
-                           @if ($errors->has('gestation_by_date'))
-                          <span class="help-block">{{ $errors->first('gestation_by_date') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-
-                          <div class="col-sm-3">
-                            <label>Lie</label> 
-                            <div class="form-group{{ $errors->has('lie') ? ' has-error' : ''}}">
-                             <select id="lie" name="lie[]" rows="1" tabindex="1" multiple data-placeholder="Select here.." style="width:100%">
-                          <option value="">-- Not set --</option>
-                          @foreach($lie as $lie)
-                        <option value="{{ $lie->type }}">{{ $lie->type }}</option>
-                          @endforeach
-                        </select>            
-                           @if ($errors->has('lie'))
-                          <span class="help-block">{{ $errors->first('lie') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-
-
-                              <div class="col-sm-3">
-                            <label>Presentation</label> 
-                            <div class="form-group{{ $errors->has('presentation') ? ' has-error' : ''}}">
-                             <select id="presentation" name="presentation[]" multiple rows="1" tabindex="1" data-placeholder="Select here.." style="width:100%">
-                          <option value="">-- Not set --</option>
-                          @foreach($presentations as $presentation)
-                        <option value="{{ $presentation->type }}">{{ $presentation->type }}</option>
-                          @endforeach
-                        </select>            
-                           @if ($errors->has('presentation'))
-                          <span class="help-block">{{ $errors->first('presentation') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-
-
-
-                          <div class="col-sm-3">
-                            <label>Engagement</label> 
-                            <div class="form-group{{ $errors->has('engagement') ? ' has-error' : ''}}">
-                             <select id="engagement" name="engagement[]" rows="1" multiple tabindex="1" data-placeholder="Select here.." style="width:100%">
-                          <option value="">-- Not set --</option>
-                          
-                            <option value="Not Engaged">Not Engaged</option>
-                            <option value="Fully Engaged">Fully Engaged</option>
-                             <option value="Not Applicable">Not Applicable</option>
-                        
-                        </select>            
-                           @if ($errors->has('engagement'))
-                          <span class="help-block">{{ $errors->first('engagement') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-                          </div>
-
-
-
-
-                         <div class="form-group pull-in clearfix">
-                        <div class="col-sm-3">
-                            <label>Fundal Height</label> 
-                          <input type="text" class="form-control" id="fh_fm"  value="{{ Request::old('fh_fm') ?: '' }}"  name="fh_fm">
-                          @if ($errors->has('fh_fm'))
-                          <span class="help-block">{{ $errors->first('fh_fm') }}</span>
-                           @endif   
-                          </div>
-
-                           <div class="col-sm-3">
-                            <label>Fetus</label> 
-                            <div class="form-group{{ $errors->has('fetus') ? ' has-error' : ''}}">
-                             <select id="fetus" name="fetus" rows="1" tabindex="1" data-placeholder="Select here.." class="form-control m-b">
-                          <option value="">-- Not set --</option>
-                          @foreach($fetus as $fetus)
-                        <option value="{{ $fetus->type }}">{{ $fetus->type }}</option>
-                          @endforeach
-                        </select>            
-                           @if ($errors->has('fetus'))
-                          <span class="help-block">{{ $errors->first('fetus') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-
-                          
-
-                           <div class="col-sm-3">
-                            <label>Position</label> 
-                            <div class="form-group{{ $errors->has('position') ? ' has-error' : ''}}">
-                             <select id="position" name="position[]" rows="1" multiple tabindex="1" data-placeholder="Select here.." style="width:100%">
-                          <option value="">-- Not set --</option>
-                           @foreach($position as $position)
-                        <option value="{{ $position->type }}">{{ $position->type }}</option>
-                          @endforeach 
-                        </select>            
-                           @if ($errors->has('position'))
-                          <span class="help-block">{{ $errors->first('position') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-
-                           <div class="col-sm-3">
-                            <label>Oedema</label> 
-                      <input type="text" class="form-control" id="oedema"  value="{{ Request::old('oedema') ?: '' }}"  name="oedema">
-                          @if ($errors->has('oedema'))
-                          <span class="help-block">{{ $errors->first('oedema') }}</span>
-                           @endif   
-                          </div>
-
-                        </div>
-
-
-
-                          <div class="form-group pull-in clearfix">
-                        <div class="col-sm-3">
-                            <label>Urine Sugar</label> 
-                          <input type="text" class="form-control" id="urine_sugar"  value="{{ Request::old('urine_sugar') ?: '' }}"  name="urine_sugar">
-                          @if ($errors->has('urine_sugar'))
-                          <span class="help-block">{{ $errors->first('urine_sugar') }}</span>
-                           @endif   
-                          </div>
-
-                           <div class="col-sm-3">
-                            <label>Urine Protein</label> 
-                            <div class="form-group{{ $errors->has('urine_protein') ? ' has-error' : ''}}">
-                            <input type="text" class="form-control" id="urine_protein"  value="{{ Request::old('urine_protein') ?: '' }}"  name="urine_protein">
-                           @if ($errors->has('urine_protein'))
-                          <span class="help-block">{{ $errors->first('urine_protein') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-
-                          
-
-                           <div class="col-sm-3">
-                            <label>EDD/EDC</label> 
-                            <div class="form-group{{ $errors->has('edd') ? ' has-error' : ''}}">
-                             <input type="text" class="form-control" id="edd"  value="{{ Request::old('edd') ?: '' }}"  name="edd">
-                           @if ($errors->has('edd'))
-                          <span class="help-block">{{ $errors->first('edd') }}</span>
-                           @endif    
-                          </div>
-                          </div>
-
-                           <div class="col-sm-3">
-                            <label>Blood Type</label> 
-                      <input type="text" class="form-control" id="bloodtype"  value="{{ Request::old('bloodtype') ?: '' }}"  name="bloodtype">
-                          @if ($errors->has('bloodtype'))
-                          <span class="help-block">{{ $errors->first('bloodtype') }}</span>
-                           @endif   
-                          </div>
-
-                        </div>
-
-
-                        <div class="form-group pull-in clearfix">
-                        <div class="col-sm-3">
-                            <label>G6PD</label> 
-                          <input type="text" class="form-control" id="g6pd"  value="{{ Request::old('g6pd') ?: '' }}"  name="g6pd">
-                          @if ($errors->has('g6pd'))
-                          <span class="help-block">{{ $errors->first('g6pd') }}</span>
-                           @endif   
-                          </div>
-
-                            <div class="col-sm-3">
-                            <label>TT</label> 
-                      <input type="text" class="form-control" id="tt"  value="{{ Request::old('tt') ?: '' }}"  name="tt">
-                          @if ($errors->has('tt'))
-                          <span class="help-block">{{ $errors->first('tt') }}</span>
-                           @endif   
-                          </div>
-
-                          
-                           <div class="col-sm-3">
-                            <label>SP</label> 
-                      <input type="text" class="form-control" id="sp"  value="{{ Request::old('sp') ?: '' }}"  name="sp">
-                          @if ($errors->has('sp'))
-                          <span class="help-block">{{ $errors->first('sp') }}</span>
-                           @endif   
-                          </div>
-
-                          <div class="col-sm-3">
-                            <label>Fetal Heart Tone</label> 
-                      <input type="text" class="form-control" id="fetal_heart_tone"  value="{{ Request::old('fetal_heart_tone') ?: '' }}"  name="fetal_heart_tone">
-                          @if ($errors->has('fetal_heart_tone'))
-                          <span class="help-block">{{ $errors->first('fetal_heart_tone') }}</span>
-                           @endif   
-                          </div>
-
-                        </div>
-
-                  
-
-                        <div class="form-group pull-in clearfix">
-                        <div class="col-sm-12">
-                            <label>Remarks (Comment on the size / shape / appearance of the abdomen / Fetal movements / Linea Nigra / Striae Gravidarum)</label> 
-                           <textarea type="text" class="form-control" rows="5" id="antenatal_remarks"  value="{{ Request::old('antenatal_remarks') ?: '' }}"  name="antenatal_remarks"></textarea>
-                          @if ($errors->has('antenatal_remarks'))
-                          <span class="help-block">{{ $errors->first('antenatal_remarks') }}</span>
-                           @endif   
-                          </div>
-
-                           
-                        </div>
-
-
-                      <img src="">
-                      </div>
-                     
-                      <footer class="panel-footer text-right bg-light lter">
-                        <button type="button" onclick="addAntenatal()" class="btn btn-success btn-s-xs">Add Record</button>
-                      </footer>
-                    </section>
-                {{--     <img src="/images/361463.svg" width="7%" align="right">  --}}
-                        <section class="panel panel-info">
-                                <header class="panel-heading font-bold">Antenatal Attendance Chart</header>
-                                <div class="panel-body">
-                                      <div class="table-responsive" style="overflow-y: scroll;">
-                       <table id="AntenatalTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Gest Date</th>
-                              <th>Pos.</th>
-                              <th>Pres.</th>
-                              <th>Eng.</th>
-                              <th>FH</th>
-                              <th>Lie</th>
-                              <th>Fetus</th>
-                              <th>Urine Sugar</th>
-                              <th>Urine Protein</th>
-                              <th>EDD/EDC</th>
-                              <th>Bloodtype</th>
-                              <th>G6PD</th>
-                              <th>TT</th>
-                              <th>SP</th>
-                              <th>FHT</th>
-                              <th>Remark</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            
-                          </tbody>
-                        </table>
-                    </div>
-                    </div>
-                    </section>
-                  </div>
+                   
 
 
                   <div class="tab-pane" id="review-medication">
@@ -2189,14 +1944,16 @@
                   </div>
 
 
-                  <div class="tab-pane" id="review-assessment">
+                   <div class="tab-pane" id="review-assessment">
                           <section class="panel panel-default">
                       <div class="panel-body">
                          <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
                             <label class="badge bg-default">Plan</label> 
                             <div class="form-group{{ $errors->has('assessment') ? ' has-error' : ''}}">
-                            <textarea type="text" rows="10" class="form-control" id="assessment" name="assessment" value="{{ Request::old('assessment') ?: '' }}"></textarea>   
+                           <div id="assessment" name="assessment" class="form-control" style="overflow:scroll;height:300px;max-height:300px" contenteditable="true"> @foreach($myplan as $plan)
+                                 <a>{!!$plan->assessment!!}</a>
+                               @endforeach</div>   
                            @if ($errors->has('assessment'))
                           <span class="help-block">{{ $errors->first('assessment') }}</span>
                            @endif    
@@ -2206,7 +1963,10 @@
 
                       </div>
                       <footer class="panel-footer text-right bg-light lter">
+                        @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
                         <button type="button" onclick="addAssessment()" class="btn btn-success btn-s-xs">Add Plan</button>
+                        @else
+                        @endif
                       </footer>
                     </section>
 
@@ -2231,6 +1991,35 @@
                         </table>
                     </div>
                     </div>
+                    </section>
+                  </div>
+
+
+
+                   <div class="tab-pane" id="review-continuation">
+                          <section class="panel panel-default">
+                      <div class="panel-body">
+                         <div class="form-group pull-in clearfix">
+                          <div class="col-sm-12">
+                            <label class="badge bg-default">Continuation Sheet / SOAP Notes</label> 
+                            <div class="form-group{{ $errors->has('assessment') ? ' has-error' : ''}}">
+                           <div id="continuation_sheet" name="continuation_sheet" class="form-control" style="overflow:scroll;height:500px;max-height:500px" contenteditable="true"> @foreach($myplan as $plan)
+                                 <a>{!!$plan->continuation!!}</a>
+                               @endforeach</div>   
+                           @if ($errors->has('continuation_sheet'))
+                          <span class="help-block">{{ $errors->first('continuation_sheet') }}</span>
+                           @endif    
+                          </div>
+                          </div>
+                        </div>
+
+                      </div>
+                      <footer class="panel-footer text-right bg-light lter">
+                        @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
+                        <button type="button" onclick="addContinuation()" class="btn btn-success btn-s-xs">Add Note</button>
+                        @else
+                        @endif
+                      </footer>
                     </section>
                   </div>
 
@@ -2948,14 +2737,14 @@ if($('#treament_plan').val()!= "")
 
 function addAssessment()
 {
-if($('#assessment').val()!= "")
+if($('#assessment').html()!= "")
 {
 
   //alert($('#complaint').val());
     $.get('/add-assessment',
         {
           "opd_number": $('#opd_number').val(),
-          "assessment": $('#assessment').val()
+          "assessment": $('#assessment').html()
                          
         },
         function(data)
@@ -3127,6 +2916,41 @@ if($('#procedure').val()!= "" && $('#procedure_quanity').val()!= "")
 }
 
 
+function addContinuation()
+{
+if($('#continuation_sheet').html()!= "")
+{
+
+  //alert($('#complaint').val());
+    $.get('/add-assessment',
+        {
+          "opd_number": $('#opd_number').val(),
+          "continuation": $('#continuation_sheet').html()
+                         
+        },
+        function(data)
+        { 
+          
+          $.each(data, function (key, value) {
+        if(data["OK"])
+        {
+          
+          loadAssessment();
+          sweetAlert("Note saved successfully!");
+        }
+        else
+        {
+          sweetAlert("Note failed to be added!");
+        }
+      });
+                                        
+        },'json');
+  }
+  else
+    {sweetAlert("Please add a Note!");}
+}
+
+
 function addDiagnosis()
 {
 if($('#diagnosis').val()!= "")
@@ -3137,7 +2961,8 @@ if($('#diagnosis').val()!= "")
           "patient_id": $('#patient_id').val(),
           "opd_number": $('#opd_number').val(),
           "diagnosis":  $('#diagnosis').val(),
-          "code":       $('#diagnosis_remark').val(),
+          "diagnosis_type":  $('#diagnosis_type').val(),
+          "diagnosis_remark":$('#diagnosis_remark').val(),
           "fullname":  $('#fullname').val()                      
         },
         function(data)
@@ -3160,6 +2985,7 @@ if($('#diagnosis').val()!= "")
   else
     {sweetAlert("Please select a Diagnosis!");}
 }
+
 
  function loadDiagnosisDescription()
     {
@@ -3299,7 +3125,7 @@ function loadAntenatal()
     {
        $.get('/get-antenatal-records',
           {
-            "visit_id": $('#opd_number').val()
+            "patient_id": $('#patient_id').val()
           },
           function(data)
           { 
@@ -3320,6 +3146,7 @@ if($('#gestation_by_date').val()!= "" && $('#presentation').val()!="")
     $.get('/add-antenatal-records',
         {
           "opd_number": $('#opd_number').val(),
+          "patient_id": $('#patient_id').val(),
           "review_date": $('#review_date').val(),
           "gestation_by_date": $('#gestation_by_date').val(),
           "fetus":  $('#fetus').val(),
@@ -3531,10 +3358,10 @@ function loadDiagnosis()
           function(data)
           { 
 
-            $('#diagnosisTable tbody').empty();
+          $('#diagnosisTable tbody').empty();
             $.each(data, function (key, value) 
             {           
-            $('#diagnosisTable tbody').append('<tr><td>'+ value['diagnosis'] +'</td><td>'+ value['date'] +'</td><td><a a href="#"><i onclick="removediagnosis('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
+            $('#diagnosisTable tbody').append('<tr><td>'+ value['diagnosis_type'] +'</td><td>'+ value['diagnosis'] +'</td><td>'+ value['diagnosis_remark'] +'</td><td>'+ value['created_by'] +'</td><td>'+ value['date'] +'</td><td><a a href="#"><i onclick="removediagnosis('+value['id']+')" class="fa fa-trash-o"></i></a></td></tr>');
             });
                                           
          },'json');      

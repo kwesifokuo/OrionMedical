@@ -47,7 +47,7 @@
                       </div>
                     </div>
                      <footer class="panel-footer text-right bg-light lter">
-                        <button type="submit" class="btn btn-success btn-s-xs">Generate</button>
+                        <button type="submit" class="btn btn-success btn-s-xs">Generate Claim Slip</button>
                       </footer>
 
                     </form>
@@ -56,55 +56,6 @@
                     </div>
 
               </div>
-
-
-
-              <div class="row">
-              <div class="col-sm-12">
-               <section class="panel panel-default">
-                <header class="panel-heading font-bold">
-                  Claims Summary
-                </header>
-                <div class="panel-body">
-                  <form id="claimsummary" class="form-horizontal" action="/claim-form-summary" method="get" >
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label"> Date From</label>
-                      <div class="col-sm-10">
-                        <input type="text" id="datefrom" name="datefrom" value="" class="form-control rounded">                        
-                      </div>
-                    </div>
-                    <div class="line line-dashed line-lg pull-in"></div>
-                     <div class="form-group">
-                      <label class="col-sm-2 control-label">Date To</label>
-                      <div class="col-sm-10">
-                        <input type="text" id="dateto" name="dateto" value="" class="form-control rounded">                        
-                      </div>
-                    </div>
-                    <div class="line line-dashed line-lg pull-in"></div>
-                     <div class="form-group">
-                      <label class="col-sm-2 control-label">Provider / Company</label>
-                      <div class="col-sm-10">
-                        <select id="care_provider" name="care_provider" rows="3" data-required="true" tabindex="1" data-placeholder="Select here.." class="form-control sm-3">
-                          <option value=""> -- Select Provider -- </option>
-                          @foreach($providers as $provider)
-                        <option value="{{ $provider->care_provider }}">{{ $provider->care_provider }}</option>
-                          @endforeach
-                        </select>                        
-                      </div>
-                    </div>
-                     <footer class="panel-footer text-right bg-light lter">
-                        <button type="submit" class="btn btn-success btn-s-xs">Generate</button>
-                      </footer>
-
-                    </form>
-                    </div>
-                    </section>
-                    </div>
-
-              </div>
-              
-
-     
             </section>
           </section>
           <a href="#" class="hide nav-off-screen-block" data-toggle="class:nav-off-screen" data-target="#nav"></a>
@@ -160,4 +111,3 @@ $(function () {
 </script>
 
 
-</script>

@@ -1,5 +1,4 @@
 <?php
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,6 +13,11 @@
 // Route::get('/', function () {
 //     return view('welcome');
 // });
+
+//Route::middleware(['basicAuth'])->group(function () {
+
+Route::group(['middleware' => 'disablepreventback'],function(){
+
 Auth::routes();
 
 
@@ -119,6 +123,11 @@ Route::get('/print-treatment-plan/{id}',
 	'as' => 'print-treatment-plan/',]);
 
 
+Route::get('/dental-cavity', 
+	['uses' => '\OrionMedical\Http\Controllers\DoctorController@dentalCavity',
+	'as' => 'dental-cavity',]);
+
+
 Route::get('/print-eye-plan/{id}', 
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@printEyeTreatmentPlan',
 	'as' => 'print-eye-plan/',]);
@@ -222,8 +231,14 @@ Route::get('/register-start',
 
 Route::get('welcome-email', 'KYCController@pushEmail');
 
-Route::post('/create-patient',
-	['uses' => '\OrionMedical\Http\Controllers\KYCController@postNewCustomer',]);
+// Route::post('/create-patient',
+// 	['uses' => '\OrionMedical\Http\Controllers\KYCController@postNewCustomer',]);
+
+Route::get('/create-patient', 
+	['uses' => '\OrionMedical\Http\Controllers\KYCController@postNewCustomer',
+	'as' => 'create-patient',]);
+
+
 
 Route::get('/edit-patient', 
 	['uses' => '\OrionMedical\Http\Controllers\KYCController@editCustomer',
@@ -926,6 +941,30 @@ Route::get('/add-assessment',
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@addAssessment',
 	'as' => 'add-assessment',]);
 
+
+Route::get('/add-continuation', 
+	['uses' => '\OrionMedical\Http\Controllers\DoctorController@addContinuation',
+	'as' => 'add-continuation',]);
+
+
+Route::get('/add-doctor-referal', 
+	['uses' => '\OrionMedical\Http\Controllers\DoctorController@addReferalNote',
+	'as' => 'dd-doctor-referal',]);
+
+
+Route::get('/add-nurse-plan', 
+	['uses' => '\OrionMedical\Http\Controllers\NurseController@addNursePlan',
+	'as' => 'add-nurse-plan',]);
+
+Route::get('/add-nurse-note', 
+	['uses' => '\OrionMedical\Http\Controllers\NurseController@addNurseNote',
+	'as' => 'add-nurse-note',]);
+
+
+
+
+
+
 Route::get('/add-plan', 
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@addPlan',
 	'as' => 'add-plan',]);
@@ -1056,6 +1095,13 @@ Route::get('/delete-procedure',
 Route::get('/delete-future-procedure', 
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@excludeProcedurePlan',
 	'as' => 'delete-future-procedure',]);
+
+
+Route::get('/do-future-procedure', 
+	['uses' => '\OrionMedical\Http\Controllers\DoctorController@doProcedurePlan',
+	'as' => 'do-future-procedure',]);
+
+
 
 Route::get('/delete-diagnosis', 
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@excludeDiagnosis',
@@ -1418,6 +1464,16 @@ Route::get('/delete-drug',
 	['uses' => '\OrionMedical\Http\Controllers\DrugController@deletedrugfromstore',
 	'as' => 'delete-drug',]);
 
+Route::get('/activate-drug', 
+	['uses' => '\OrionMedical\Http\Controllers\DrugController@activateDrug',
+	'as' => 'activate-drug',]);
+
+Route::get('/deactivate-drug', 
+	['uses' => '\OrionMedical\Http\Controllers\DrugController@deactivateDrug',
+	'as' => 'deactivate-drug',]);
+
+
+
 Route::get('/delete-consumable', 
 	['uses' => '\OrionMedical\Http\Controllers\DrugController@deleteconsumablefromstore',
 	'as' => 'delete-consumable',]);
@@ -1443,6 +1499,12 @@ Route::get('/get-consumable-info',
 Route::get('/get-drug-availability', 
 	['uses' => '\OrionMedical\Http\Controllers\DrugController@getDrugCount',
 	'as' => 'get-drug-availability',]);
+
+Route::get('/get-diagnosis-state', 
+	['uses' => '\OrionMedical\Http\Controllers\DoctorController@getDiagnosisState',
+	'as' => 'get-diagnosis-state',]);
+
+
 
 Route::get('/find-prescription', 
 	['uses' => '\OrionMedical\Http\Controllers\DrugController@findPrescription', 
@@ -1705,12 +1767,13 @@ Route::get('/saved-documents',
 	['uses' => '\OrionMedical\Http\Controllers\ImageController@getSavedDocuments',
 	 'as' => 'saved-documents', ]);
 
+Route::get('/home', 'HomeController@index')->name('home');
 
  //  Event::listen('illuminate.query', function($query)
  // {
  //     var_dump($query);
  // });
 
-
+});
 
 

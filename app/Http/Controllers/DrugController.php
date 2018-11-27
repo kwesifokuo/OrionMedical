@@ -44,7 +44,7 @@ class DrugController extends Controller
 	public function __construct()
     {
          $this->middleware('auth');
-        $this->middleware('role:Pharmacist|System Admin|Doctor|Nurse|Nurse Assistant|Dentist|Laboratory|Pharmacy Technician|Dental Nurse|Ophthalmologist|Special Admin');
+        $this->middleware('role:Pharmacist|System Admin|Doctor|Imaging|Nurse|Nurse Assistant|Dentist|Laboratory|Pharmacy Technician|Dental Nurse|Ophthalmologist|Special Admin');
        
     }
     
@@ -914,6 +914,11 @@ class DrugController extends Controller
 
 
                  $affectedRows = Prescription::where('id',$drug_checked)->first();
+                $checkavailability = Drug::where('name', '=', $affectedRows->drug_name)->first();
+
+                if($checkavailability->stock > 0)
+                {  
+
                    if($affectedRows->drug_quantity == 0)
                    {
 
@@ -932,7 +937,15 @@ class DrugController extends Controller
                             ));
 
                 $drug = Prescription::where('id', $drug_checked)->first();
-                $stocks = Drug::where('name', '=', $drug->drug_name)->decrement('stock',$drug->drug_quantity);
+                $stocks = Drug::where('id', $drug->drug_id)->decrement('stock',$drug->drug_quantity);
+
+              }
+
+              }
+              else
+              {
+                 return redirect()->back()->with('error',$affectedRows->drug_name. ' has no stock');
+
               }
           }
 
@@ -1235,6 +1248,67 @@ public function getReturnedMedication(Request $request)
                 }
 
         }
+
+
+         public function activateDrug()
+
+        {
+            if(Input::get("ID"))
+            {
+                    $ID = Input::get("ID");
+                    $affectedRows = Drug::where('ID', '=', $ID)->update(array('status'=> 'Active'));
+
+                   
+
+                if($affectedRows > 0)
+                {
+                    $ini   = array('OK'=>'OK');
+                    return  Response::json($ini);
+                }
+            
+                 else
+                {
+                    $ini   = array('No Data'=>$ID);
+                    return  Response::json($ini);
+                }
+            }
+                else
+               {
+                    $ini   = array('No Data'=>'No Data');
+                    return  Response::json($ini);
+                }
+
+        }
+
+         public function deactivateDrug()
+
+        {
+            if(Input::get("ID"))
+            {
+                    $ID = Input::get("ID");
+                    $affectedRows = Drug::where('ID', '=', $ID)->update(array('status'=> 'Deactive'));
+
+                if($affectedRows > 0)
+                {
+                    $ini   = array('OK'=>'OK');
+                    return  Response::json($ini);
+                }
+            
+                 else
+                {
+                    $ini   = array('No Data'=>$ID);
+                    return  Response::json($ini);
+                }
+            }
+                else
+               {
+                    $ini   = array('No Data'=>'No Data');
+                    return  Response::json($ini);
+                }
+
+        }
+
+
 
 
         public function deleteconsumablefromstore()
@@ -2091,7 +2165,6 @@ public function getStockDetails()
                      ->orWhere('invoice_number', 'like', "%$search%")
                       ->orWhere('supplier', 'like', "%$search%")
                      ->groupBy('invoice_number')
-                     ->orderBy('date','desc')
                       ->paginate(30);
    
  
@@ -2107,7 +2180,7 @@ public function getStockDetails()
            
 
             $items = DrugStock::where('invoice_number', 'like', "%$search%")
-            ->whereBetween('invoice_date',array($from,$to))
+            ->whereBetween('invoice_date',array($from." 00:00:00",$to." 23:59:59"))
             ->groupBy('invoice_number')
             ->orderBy('created_on','desc')
             ->paginate(200)

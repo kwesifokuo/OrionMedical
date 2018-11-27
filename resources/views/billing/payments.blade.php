@@ -101,11 +101,11 @@
                           </tr>
                         </thead>
                         <tbody>
-                        @foreach($payments as $bill )
+                        @foreach($bills as $bill )
                           <tr>
                             
                             <td><a href="#" class="text-danger">RT-{{ $bill->PaymentID }}</a></td>
-                           // <td>{{ $bill->invoices->fullname)) }}</td>
+                            <td>{{ $bill->invoices->fullname }}</td>
                             <td>{{ $bill->invoices->copayer }}</td>
                             <td>{{ $bill->invoices->item_name }}</td>
                             <td>{{ $bill->CreateDate }}</td>

@@ -29,7 +29,7 @@ class AuthController extends Controller
    // use AuthenticatesAndRegistersUsers, ThrottlesLogins;
 
 
-    protected $redirectTo = '/';
+    
 
  
      public function getSignup()
@@ -237,9 +237,9 @@ class AuthController extends Controller
     public function getSignOut()
     {
         Auth::logout();
-        return redirect()
-            ->route('auth.signin')
-            ->with('info','Logout successfully');
+        Session::flush();
+        Redirect::back();
+        return redirect(\URL::previous());
 
     }
 }

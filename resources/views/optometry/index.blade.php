@@ -89,7 +89,7 @@
                              <th>Practioner</th>
                              <th>Care Provider</th>
                             <th width="30"></th>
-                            <th width="30"></th>
+                            
                             
                           </tr>
                         </thead>
@@ -106,13 +106,12 @@
                               <td>{{$patient->payercode }} , {{ $patient->care_provider }}</td>
                               
                               @role(['Ophthalmologist','System Admin','Nurse'])
-                              @if($patient->consultation_type=='DENTAL CONSULTATION')
+                              @if($patient->consultation_type=='OPTOMETRIST CONSULTATION (EYE)')
                              <td><a href="/ophthalmology-review/{{ $patient->opd_number }}" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
                               @else
                               <td><a href="/ophthalmology-review/{{ $patient->opd_number }}" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
                               @endif
-                                <td><a href="/patient-profile/{{ $patient->patient_id }}"  class="btn btn-rounded btn-sm btn-warning" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-folder-open" data-toggle="tooltip" data-placement="top" title="" data-original-title="View History"> </i> History </a>
-                               </td>
+                              
 
                             @endrole
 

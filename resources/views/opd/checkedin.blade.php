@@ -85,6 +85,7 @@
                              <th>Practioner</th>
                             <th>Area</th>
                              <th>Care Provider</th>
+                              <th>Branch</th>
                             <th></th>
                             <th></th>
                             <th></th>
@@ -102,6 +103,7 @@
                             <td>{{ $patient->referal_doctor }}</td>
                             <td>{{ $patient->location }}</td>
                             <td>{{$patient->payercode }}, {{ $patient->care_provider }}</td>
+                            <td>{{ $patient->branch }}</td>
 
                             
                            <td><a href="#edit-visit" class="bootstrap-modal-form-open" onclick="getDetails('{{ $patient->opd_number }}')" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-pencil" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit Visit Detail"></i></a></td>
@@ -356,6 +358,7 @@ function getDetails(acct_no)
                 $('#edit-visit input[name="fullname"]').val(json.fullname);
                 $('#edit-visit input[name="opd_number"]').val(json.opd_number);
                 $('#edit-visit select[name="accounttype"]').val(json.accounttype);
+                 $('#edit-visit select[name="location"]').val(json.branch);
                 $('#edit-visit img[name="imagePreview"]').attr("src", '/images/'+json.image);
                 $('#edit-visit input[name="uuid"]').val(json.uuid);
                 $('#edit-visit select[name="consultation_type"]').val(json.consultation_type);
@@ -364,6 +367,7 @@ function getDetails(acct_no)
                 $('#edit-visit select[name="referal_doctor"]').select2();
                 $('#edit-visit select[name="consultation_type"]').select2();
                 $('#edit-visit select[name="visit_type"]').select2();
+                $('#edit-visit select[name="location"]').select2();
                 
                 getAge();
                 //loadRisk();

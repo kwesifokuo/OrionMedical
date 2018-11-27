@@ -132,6 +132,14 @@
 
                              <td><a href="#new-expired-drug" class="bootstrap-modal-form-open" onclick="getdrugdetail('{{ $drug->id }}','{{ $drug->name }}')"  id="delete" name="delete" data-toggle="modal" alt="edit"><i class="fa fa-sign-out" data-toggle="tooltip" data-placement="top" title="" data-original-title="Report Expired"></i></a></td>
 
+                             <td>
+                             @if($drug->status == 'Active')
+                              <a href="#" class="" onclick="deactivateDrug('{{ $drug->id }}','{{ $drug->name }}')" data-toggle="class"><i class="fa fa-thumbs-up text-success" data-toggle="tooltip" data-placement="top" title="" data-original-title="Deactivate"></i> </a>
+                              @else
+                             <a href="#" class="" onclick="activateDrug('{{ $drug->id }}','{{ $drug->name }}')" data-toggle="class"><i class="fa fa-thumbs-down text-danger" data-toggle="tooltip" data-placement="top" title="" data-original-title="Activate"></i></a>
+                             @endif
+                            </td>
+
                             <td><a href="#" class="bootstrap-modal-form-open" onclick="deletedrug('{{ $drug->id }}','{{ $drug->name }}')"  id="delete" name="delete" data-toggle="modal" alt="edit"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete"></i></a></td>
                              @endrole
                           </tr>
@@ -359,6 +367,107 @@ function deletedrug(id,name)
              } 
         else {     
           swal("Cancelled", name +" failed to delete.", "error");   
+        } });
+
+  }
+
+
+  function activateDrug(id,name)
+  {
+
+      //alert(id);
+
+      swal({   
+        title: "Are you sure?",   
+        text: "Do you want to activate "+name+" ?",   
+        type: "warning",   
+        showCancelButton: true,   
+        confirmButtonColor: "#DD6B55",   
+        confirmButtonText: "Yes, delete it!",   
+        cancelButtonText: "No, cancel !",   
+        closeOnConfirm: false,   
+        closeOnCancel: false }, 
+        function(isConfirm){   
+          if (isConfirm) 
+          { 
+          $.get('/activate-drug',
+          {
+             "ID": id 
+          },
+          function(data)
+          { 
+            
+            $.each(data, function (key, value) 
+            {
+            if(value == "OK")
+            {
+              swal("Deleted!", name +" was successfully activated in store.", "success"); 
+              location.reload(true);
+             }
+            else
+            { 
+              swal("Cancelled", name +" failed to activate.", "error");
+              
+            }
+           
+        });
+                                          
+          },'json');    
+           
+             } 
+        else {     
+          swal("Cancelled", name +" failed to activate.", "error");   
+        } });
+
+  }
+
+
+
+  function deactivateDrug(id,name)
+  {
+
+      //alert(id);
+
+      swal({   
+        title: "Are you sure?",   
+        text: "Do you want to delete "+name+" ?",   
+        type: "warning",   
+        showCancelButton: true,   
+        confirmButtonColor: "#DD6B55",   
+        confirmButtonText: "Yes, delete it!",   
+        cancelButtonText: "No, cancel !",   
+        closeOnConfirm: false,   
+        closeOnCancel: false }, 
+        function(isConfirm){   
+          if (isConfirm) 
+          { 
+          $.get('/deactivate-drug',
+          {
+             "ID": id 
+          },
+          function(data)
+          { 
+            
+            $.each(data, function (key, value) 
+            {
+            if(value == "OK")
+            {
+              swal("Deleted!", name +" was successfully deactivated from store.", "success"); 
+              location.reload(true);
+             }
+            else
+            { 
+              swal("Cancelled", name +" failed to deactivate.", "error");
+              
+            }
+           
+        });
+                                          
+          },'json');    
+           
+             } 
+        else {     
+          swal("Cancelled", name +" failed to deactivate.", "error");   
         } });
 
   }

@@ -66,14 +66,16 @@
 
                       <table class="table table-striped m-b-none text-sm" width="100%">
                            <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>Patient ID</th>
+                          <tr><th></th>
+                             <th >Patient Record # </th>
                             <th>Name</th>
-                            <th>Gender</th>
-                            <th>Age</th>
-                             <th>Co Payer</th>
-                            <th>Date Registered</th>
+                            <th>Sex</th>
+                            <th>Birthday</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                             <th>Account Type</th>
+{{--                             <th>Date Registered</th> --}}
+                            <th>Copayer</th>
                             <th width="30"></th>
                           </tr>
                         </thead>
@@ -82,15 +84,21 @@
                           <tr>
                             <td>{{ ++$keys }}</td>
                            
-                            <td><a href="/patient-profile-limited/{{ $patient->patient_id }}"  id="edit" name="edit" data-toggle="modal" alt="edit">{{ $patient->patient_id }}</a></td>
-                            <td>{{ ucwords(strtolower($patient->fullname)) }}</td>
-                            <td>{{ $patient->gender }}</td>
-                            <td>{{ $patient->date_of_birth->age }}</td>
-                             <td>@if($patient->accounttype='Corporate') {{ $patient->company }} @else {{ $patient->insurance_company }} @endif</td>
-                            <td>{{ $patient->created_at }}</td>
+                            <td><a href="/patient-profile-limited/{{ $patient->patient_id }}"  id="edit" name="edit" data-toggle="modal" alt="edit">{{ $patient->ref_code }}</a></td>
+                            <td>{{  ucwords(strtolower($patient->fullname)) }}</td>
+                             <td>{{ $patient->gender }}</td>
+                              <td>{{ $patient->date_of_birth->format('Y-m-d')  }} <span class="badge badge-info"> {{$patient->date_of_birth->age}} year(s) </span></td>
+                            <td>{{ $patient->mobile_number }}</td>
+                             <td>{{  ucwords(strtolower($patient->residential_address)) }}</td>
+                             <td>{{  ucwords(strtolower($patient->accounttype)) }}</td>
+ {{--                            {{ Carbon\Carbon::parse($customerlist->created_at)->diffForHumans() }}</td> --}}
+                             <td>@if($patient->accounttype=='Corporate')  {{ str_limit($patient->company,15) }}
+                              @elseif($patient->accounttype=='Health Insurance') {{ str_limit($patient->insurance_company,15) }} 
+                              @else 
+                              @endif</td>
                             <td>
                               
-                                 <a href="#modal_check_in" class="btn btn-s-sm btn-primary btn-rounded bootstrap-modal-form-open" onclick="getDetails('{{ $patient->id }}')"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope"> </i> Check In </a>
+                                 <a href="/patient-profile-limited/{{ $patient->patient_id }}" class="btn btn-s-sm btn-primary btn-rounded"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope"> </i> Check In </a>
                                
                             </td>
                             
@@ -108,7 +116,7 @@
             </section>
              <footer class="footer bg-white b-t">
 
-             <a href="#new-service-request" class="bootstrap-modal-form-open float" data-toggle="modal">
+             <a href="/register-start" class="bootstrap-modal-form-open float" data-toggle="modal">
 <i class="fa fa-plus my-float"></i><i class="fa fa-tags my-float"></i>
 </a>
                   <div class="row text-center-xs">
@@ -194,6 +202,7 @@ function getDetails(acct_no)
                 $('#modal_check_in select[name="referal_doctor"]').select2();
                 $('#modal_check_in select[name="consultation_type"]').select2();
                 $('#modal_check_in select[name="visit_type"]').select2();
+                $('#modal_check_in select[name="location"]').select2();
                 $('#modal_check_in select[name="anaesthetist"]').select2();
                 $('#modal_check_in select[name="sponsor"]').select2();
                 

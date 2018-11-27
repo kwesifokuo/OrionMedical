@@ -11,6 +11,7 @@ use OrionMedical\Models\ServiceCharge;
 use OrionMedical\Models\VisitType;
 use OrionMedical\Models\AccountType;
 use OrionMedical\Models\AppointmentStatus;
+use OrionMedical\Models\Branch;
 use OrionMedical\Http\Requests;
 use OrionMedical\Http\Controllers\Controller;
 use DateTime;
@@ -41,13 +42,14 @@ class EventController extends Controller
        $servicetype = ServiceCharge::where('department','OPD')->orwhere('department','Specialist')->orderby('type','asc')->get(); 
        $visittypes  = VisitType::get();
        $billingaccounts = AccountType::get();
+       $branches = Branch::get();
 
 
         $today = Carbon::now()->format('Y-m-d').'%';
         $yesterday = Carbon::yesterday();
         $tomorrow = Carbon::tomorrow();
          $events  = Event::where('doctor','not like','%Nurse%')->where('start_time','>',$today)->orderBy('start_time','asc')->paginate(30);
-        return view('event/list', compact('events','billingaccounts','servicetype','doctors','visittypes','patients','statuses'));
+        return view('event/list', compact('events','branches','billingaccounts','servicetype','doctors','visittypes','patients','statuses'));
     }
 
      public function calendar()
@@ -58,9 +60,10 @@ class EventController extends Controller
        $servicetype = ServiceCharge::where('department','OPD')->orwhere('department','Specialist')->orderby('type','asc')->get(); 
        $doctorevents  = Event::orderBy('start_time')->get();
        $visittypes      = VisitType::get();
+       $branches = Branch::get();
        //dd($doctorevents->doctor);
 
-       return view('event/calendar', compact('doctorevents','doctors','servicetype','patients','visittypes'))
+       return view('event/calendar', compact('doctorevents','branches','doctors','servicetype','patients','visittypes'))
            ->with('doctors',$doctors)
             ->with('servicetype',$servicetype);
     }
@@ -73,9 +76,10 @@ class EventController extends Controller
         $servicetype = ServiceCharge::where('department','OPD')->orwhere('department','Specialist')->orderby('type','asc')->get(); 
        $doctorevents  = Event::orderBy('start_time')->get();
        $visittypes      = VisitType::get();
+       $branches = Branch::get();
        //dd($doctorevents->doctor);
 
-       return view('event/nurse', compact('doctorevents','doctors','servicetype','patients','visittypes'))
+       return view('event/nurse', compact('doctorevents','branches','doctors','servicetype','patients','visittypes'))
            ->with('doctors',$doctors)
             ->with('servicetype',$servicetype);
     }
@@ -86,9 +90,10 @@ class EventController extends Controller
        $doctors     = Doctor::get();
         $servicetype = ServiceCharge::where('department','OPD')->orwhere('department','Specialist')->orderby('type','asc')->get(); 
        $genders  = Gender::get();
+       $branches = Branch::get();
        $visittypes      = VisitType::get();
 
-        return view('event/appointment',compact('doctors','servicetype','genders','patients','visittypes'));
+        return view('event/appointment',compact('doctors','branches','servicetype','genders','patients','visittypes'));
     }
 
     public function doctorappointment($id)
@@ -100,9 +105,10 @@ class EventController extends Controller
        $servicetype = ServiceCharge::where('department','OPD')->orwhere('department','Specialist')->orderby('type','asc')->get();  
        $doctorevents  = Event::orderBy('start_time')->get();
        $visittypes      = VisitType::get();
+       $branches = Branch::get();
        //dd($doctorevents->doctor);
 
-       return view('event/doctor', compact('doctorevents','doctors','servicetype','result','patients','visittypes'))
+       return view('event/doctor', compact('doctorevents','branches','doctors','servicetype','result','patients','visittypes'))
            ->with('doctors',$doctors)
             ->with('servicetype',$servicetype);
     }
@@ -459,6 +465,7 @@ class EventController extends Controller
         $servicetype = ServiceCharge::where('department','OPD')->orwhere('department','Specialist')->orderby('type','asc')->get(); 
        $visittypes      = VisitType::get();
        $billingaccounts = AccountType::get();
+       $branches = Branch::get();
 
 
 

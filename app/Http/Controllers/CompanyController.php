@@ -157,17 +157,20 @@ class CompanyController extends Controller
            $service->type = strtoupper($request->input('service'));
            $service->remark = $request->input('description');
            $service->charge = $request->input('charge');
+           
            $service->walkin = $request->input('charge');
            $service->corporate = $request->input('corporate_margin');
            $service->insurance = $request->input('insurance_margin');
-           
+           $service->phoenix = $request->input('insurance_margin');
            $service->glico = $request->input('glico_margin');
            $service->cosmopolitan = $request->input('cosmopolitan_margin');
            $service->premier = $request->input('premier_margin');
-
            $service->metropolitan = $request->input('metropolitan_margin');
            $service->apex = $request->input('apex_margin');
            $service->acacia = $request->input('acacia_margin');
+           $service->universal = $request->input('universal_margin');
+           $service->nationwide = $request->input('nationwide_margin');
+           
 
 
 
@@ -203,16 +206,21 @@ class CompanyController extends Controller
     $user = ServiceCharge::find($itemid);
     $data = Array(
         
-        'myoldid'          => $user->id,
-        'service'          => $user->type,
-        'remark'      =>$user->remark,
-        'charge'        =>$user->walkin,
-        'corporate_margin'   =>$user->corporate,
-        'insurance_margin'   =>$user->insurance,
-        'glico_margin'       =>$user->glico,
-        'cosmopolitan_margin'  =>$user->cosmopolitan,
-        'premier_margin'       =>$user->premier,
-        'department'           =>$user->department,
+        'myoldid'             =>$user->id,
+        'service'             =>$user->type,
+        'remark'              =>$user->remark,
+        'charge'              =>$user->walkin,
+        'corporate_margin'    =>$user->corporate,
+        'insurance_margin'    =>$user->insurance,
+        'glico_margin'        =>$user->glico,
+        'apex_margin'         =>$user->apex,
+        'cosmopolitan_margin' =>$user->cosmopolitan,
+        'metropolitan_margin' =>$user->metropolitan,
+        'acacia_margin'       =>$user->acacia,
+        'premier_margin'      =>$user->premier,
+        'nationwide_margin'   =>$user->nationwide,
+        'universal_margin'    =>$user->universal,
+        'department'          =>$user->department,
     );
     return Response::json($data);
 
@@ -224,19 +232,21 @@ class CompanyController extends Controller
          
              $affectedRows = ServiceCharge::where('id', Input::get('myoldid'))
             ->update(array(
-                          'department'             => Input::get('department'),
-                           'type'             => Input::get('service'),
-                           'remark'               => Input::get('remark'), 
-                           'charge'                => Input::get('charge'), 
-                           'walkin'               => Input::get('walk_margin'),
-                           'corporate'        => Input::get('corporate_margin'), 
-                           'insurance'           => Input::get('insurance_margin'),
-                           'premier'        => Input::get('premier_margin'),
+                          'department'          => Input::get('department'),
+                           'type'               => Input::get('service'),
+                           'remark'             => Input::get('remark'), 
+                           'charge'             => Input::get('charge'), 
+                           'walkin'             => Input::get('walk_margin'),
+                           'corporate'          => Input::get('corporate_margin'), 
+                           'insurance'          => Input::get('insurance_margin'),
+                           'premier'            => Input::get('premier_margin'),
                            'cosmopolitan'       => Input::get('cosmopolitan_margin'),
-                           'glico'               => Input::get('glico_margin'),
-                           'apex'        => Input::get('apex_margin'),
+                           'glico'              => Input::get('glico_margin'),
+                           'apex'               => Input::get('apex_margin'),
+                           'universal'          => Input::get('universal_margin'),
+                           'nationwide'         => Input::get('nationwide_margin'),
                            'metropolitan'       => Input::get('metropolitan_margin'),
-                           'acacia'               => Input::get('acacia_margin')
+                           'acacia'             => Input::get('acacia_margin')
                            ));
 
             if($affectedRows > 0)

@@ -28,6 +28,7 @@ use OrionMedical\Models\IdentificationType;
 use OrionMedical\Models\Nationality; 
 use OrionMedical\Models\VisitType; 
 use OrionMedical\Models\ServiceCharge;
+use OrionMedical\Models\Branch;
 use OrionMedical\Http\Requests;
 use OrionMedical\Http\Controllers\Controller;
 use Input;
@@ -77,11 +78,12 @@ class KYCController extends Controller
       $titles      = PatientTitle::get();
       $relationships  = Relationships::get();
       $identifications = IdentificationType::get();
+      $branches = Branch::get();
 
       $nationalities = Nationality::get();
       $customerlists =  Customer::where('status','Active')->orderBy('created_at', 'DESC')->paginate(30);
       
-    return view('patient.register', compact('customerlists','nationalities','relationships'))
+    return view('patient.register', compact('customerlists','branches','nationalities','relationships'))
    
     ->with('accounttype',$accounttype)
     ->with('images',$images)
@@ -116,12 +118,13 @@ class KYCController extends Controller
       $relationships  = Relationships::get();
       $identifications = IdentificationType::get();
       $billingaccounts = AccountType::get();
+      $branches = Branch::get();
 
       $nationalities = Nationality::get();
       $today =        Carbon::now()->format('Y-m-d').'%';
       $customerlists =  Customer::where('status','Active')->where('created_at', 'like', $today)->orderBy('created_at', 'DESC')->paginate(30);
       
-    return view('patient.index', compact('customerlists','billingaccounts','nationalities','relationships','departments','doctors','visittypes'))
+    return view('patient.index', compact('customerlists','branches','billingaccounts','nationalities','relationships','departments','doctors','visittypes'))
    
     ->with('accounttype',$accounttype)
     ->with('images',$images)
@@ -155,10 +158,11 @@ class KYCController extends Controller
       $titles      = PatientTitle::get();
       $nationalities = Nationality::get();
       $billingaccounts = AccountType::get();
+      $branches = Branch::get();
 
       $customerlists =  Customer::where('status','Deactive')->orderBy('created_at', 'DESC')->paginate(30);
       //
-    return view('patient.index', compact('customerlists','billingaccounts','nationalities','relationships','departments','doctors','visittypes'))
+    return view('patient.index', compact('customerlists','branches','billingaccounts','nationalities','relationships','departments','doctors','visittypes'))
    
     ->with('accounttype',$accounttype)
     ->with('images',$images)
@@ -192,6 +196,7 @@ public function getSearchResults(Request $request)
       $nationalities = Nationality::get();
        $relationships  = Relationships::get();
        $billingaccounts = AccountType::get();
+       $branches = Branch::get();
 
 
         $this->validate($request, [
@@ -212,7 +217,7 @@ public function getSearchResults(Request $request)
         ;
 
 
-           return view('patient.index', compact('customerlists','billingaccounts','nationalities','relationships','departments','doctors','visittypes'))
+           return view('patient.index', compact('customerlists','branches','billingaccounts','nationalities','relationships','departments','doctors','visittypes'))
     ->with('accounttype',$accounttype)
     ->with('images',$images)
     ->with('gender',$gender)
@@ -288,173 +293,195 @@ public function doGenerateBulkID()
 
     }
     
-    public function postNewCustomer(Request $request)
+    public function postNewCustomer()
     {
         
 
-        try
-        {
-          //dd($request->all());
-
-            
-             
-            $this->validate($request, [
-            //'patient_id'=> 'required|unique:patient|max:50',
-            'fullname'=> 'required',
-            'date_of_birth'=> 'required',
-            'gender'=> 'required',
-            'mobile_number'=>'required',
-            ]); 
+       
            
-
-           
-          $filename=null;
-          if($request->hasFile('image'))
-           {
-
-           $image = Input::file('image');
-           $profile= $request->input('patient_id');
-           $filename = $profile. '.jpg';
-           $path = public_path('images/' . $filename);
-           Image::make($image->getRealPath())->resize(500, 500)->save($path);
-
-            }
-
-            else
-            {
-
               $filename  = 'avatar_default.jpg';
 
-            }
-
+           
             $patient_number = $this->generatePatientId(ucwords(strtolower(Input::get('fullname'))));
             $transactionid = uniqid(20);
             
 
            $patient                      = new Customer;
            $patient->patient_id          = $patient_number;
-           $patient->fullname            = ucwords(strtolower($request->input('fullname')));
-           $patient->accounttype         = $request->input('accounttype');
-           $patient->blood_group         = $request->input('blood_group');
-           $patient->postal_address      = ucwords(strtolower($request->input('postal_address')));
-           $patient->residential_address = ucwords(strtolower($request->input('residential_address')));
-           $patient->email               = strtolower($request->input('email'));
-           $patient->mobile_number       = $request->input('mobile_number');
-           $patient->date_of_birth       = Carbon::createFromFormat('d/m/Y', $request->input('date_of_birth'));
-           $patient->occupation          = ucwords(strtolower($request->input('occupation')));
-           $patient->place_of_birth      = ucwords(strtolower($request->input('place_of_birth')));
-           $patient->gender              = $request->input('gender');
-           $patient->occupation          = ucwords(strtolower($request->input('occupation')));
-           $patient->insurance_company   = $request->input('insurance_company');
-           $patient->company             = $request->input('company');
-           $patient->nationality         = $request->input('nationality');
-           $patient->insurance_id        = $request->input('insurance_id');
-           $patient->civil_status        = $request->input('civil_status');
-           $patient->id_type             = $request->input('id_type');
-           $patient->id_number           = strtoupper($request->input('id_number'));
+           $patient->fullname            = ucwords(strtolower(Input::get('fullname')));
+           $patient->accounttype         = Input::get('accounttype');
+           $patient->blood_group         = Input::get('blood_group');
+           $patient->postal_address      = ucwords(strtolower(Input::get('postal_address')));
+           $patient->residential_address = ucwords(strtolower(Input::get('residential_address')));
+           $patient->email               = strtolower(Input::get('email'));
+           $patient->mobile_number       = Input::get('mobile_number');
+           $patient->date_of_birth       = Carbon::createFromFormat('d/m/Y', Input::get('date_of_birth'));
+           $patient->occupation          = ucwords(strtolower(Input::get('occupation')));
+           $patient->place_of_birth      = ucwords(strtolower(Input::get('place_of_birth')));
+           $patient->gender              = Input::get('gender');
+           $patient->occupation          = ucwords(strtolower(Input::get('occupation')));
+           $patient->insurance_company   = Input::get('insurance_company');
+           $patient->company             = Input::get('company');
+           $patient->nationality         = Input::get('nationality');
+           $patient->insurance_id        = Input::get('insurance_id');
+           $patient->civil_status        = Input::get('civil_status');
+           $patient->id_type             = Input::get('id_type');
+           $patient->id_number           = strtoupper(Input::get('id_number'));
            $patient->ref_code             = $patient_number;
            $patient->image               = $filename;
            $patient->created_by          = Auth::user()->getNameOrUsername();
-           $patient->kin_name             = $request->input('kin_name');
-           $patient->kin_phone            = $request->input('kin_phone');
-           $patient->kin_relationship     = $request->input('kin_relationship');
-           $patient->insurance_cover     = $request->input('insurance_cover');
-            $patient->insurance_eligibility = $request->input('insurance_eligibility');
-            $patient->parent_id = $request->input('parent_id');
-            $patient->link_type = $request->input('link_type');
-          $patient->expiry_date          = Carbon::createFromFormat('d/m/Y',$request->input('expiry_date'));
-           
-           if($patient->save())
-          {
+           $patient->kin_name            = Input::get('kin_name');
+           $patient->kin_phone           = Input::get('kin_phone');
+           $patient->kin_relationship    = Input::get('kin_relationship');
+           $patient->insurance_cover     = Input::get('insurance_cover');
+           $patient->insurance_eligibility = Input::get('insurance_eligibility');
+           $patient->parent_id = Input::get('parent_id');
+           $patient->link_type = Input::get('link_type');
+           $patient->expiry_date          = Carbon::createFromFormat('d/m/Y',Input::get('expiry_date'));
+          
 
+          
+           switch(Input::get('accounttype')) 
+                    {
 
- $mycopayer = Customer::where('patient_id',$patient_number)->first();
+                     case 'Health Insurance':
 
- //dd($mycopayer);
-    switch($request->input('accounttype')) 
-    {
+                      $savecopayer =  Input::get('insurance_company');
+                      $myaccounttype = 'Health Insurance';
 
-        case 'Health Insurance':
-             if($care_provider=='Glico Health Care')
+                     if(Input::get('insurance_company')=='Glico Health Care')
                        {
                          $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('glico');
                          
                        }
 
-                    elseif($care_provider=='Cosmopolitan Health Insurance')
+                       if(Input::get('insurance_company')=='Glico Tpa Barclays')
                        {
-                         $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('cosmopolitan');
+                         $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('glico');
                          
                        }
 
-                     elseif($care_provider=='Premier Mutual Health')
+                       if(Input::get('insurance_company')=='Phoenix Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('phoenix');
+                         
+                       }
+
+                       elseif(Input::get('insurance_company')=='Nationwide Mutual Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('nationwide');
+                         
+                       }
+
+                       elseif(Input::get('insurance_company')=='Metropolitan Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('metropolitan');
+                         
+                       }
+
+                       elseif(Input::get('insurance_company')=='Premier Mutual Health')
                        {
                          $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('premier');
                          
                        }
 
+                       elseif(Input::get('insurance_company')=='Acacia Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('acacia');
+                         
+                       }
+
+                        elseif(Input::get('insurance_company')=='Universal Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('universal');
+                         
+                       }
+
+                        elseif(Input::get('insurance_company')=='Apex Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('apex');
+                         
+                       }
+
+
+                      elseif(Input::get('insurance_company')=='Cosmopolitan Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('cosmopolitan');
+                         
+                       }
                        else
                        {
                          $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('insurance');
-                          
                        }
-              $savecopayer =  $mycopayer->insurance_company;
-            break;
-        case 'Corporate':
-             $registration_amount = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('corporate');
-             $savecopayer =  $mycopayer->company;
-            break;
-        case 'Private':
-             $registration_amount = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('walkin');
-             $savecopayer =  'Private';
-            break;
-        case 'Non-Ghanaian':
-             $registration_amount = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('charge');
-              $savecopayer =  'Private';
-            break;
-      }
-          
-         // dd($request->input('accounttype'));
-           $bill              = new Bill;
-           $bill->patient_id  = $patient_number;
-           $bill->visit_id    = 0;
-           $bill->fullname    = $request->input('fullname');
-           $bill->item_name   = 'REGISTRATION OF PATIENT';
-           $bill->quantity    = 1;
-           $bill->rate        = $registration_amount;
-           $bill->amount      = $registration_amount;
-           $bill->note        = 'Unpaid';
-           $bill->created_by  = Auth::user()->getNameOrUsername();
-           $bill->date        = Carbon::now();
-           $bill->category    = 'OPD';
-           $bill->copayer    = $savecopayer;
-           $bill->payercode  = $request->input('accounttype');
-           $bill->uuid        = $transactionid;
-           $bill->save(); 
 
-        //dd($bill->save());
-            return redirect()
-            ->back()
-            ->with('success','Patient has successfully been created!');
+                       
+                      
+                            break;
+                        case 'Corporate':
+                             $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('corporate');
+                             $savecopayer =  $mycopayer->company;
+                             $myaccounttype = 'Corporate';
+                            break;
+                        case 'Private':
+                             $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('walkin');
+                             $savecopayer =  'Private';
+                             $myaccounttype = 'Private';
+                            break;
+                        case 'Walkin':
+                             $service_charge = 0;
+                             $savecopayer =  'Private';
+                             $myaccounttype = 'Private';
+                            break;
+                        case 'Non-Ghanaian':
+                             $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('charge');
+                             $savecopayer =  'Private';
+                             $myaccounttype = 'Private';
+                            break;
+                          }
+          
+                         // dd($request->input('accounttype'));
+                           $bill              = new Bill;
+                           $bill->patient_id  = $patient_number;
+                           $bill->visit_id    = 0;
+                           $bill->fullname    = Input::get('fullname');
+                           $bill->item_name   = 'REGISTRATION OF PATIENT';
+                           $bill->quantity    = 1;
+                           $bill->rate        = $service_charge;
+                           $bill->amount      = $service_charge;
+                           $bill->note        = 'Unpaid';
+                           $bill->created_by  = Auth::user()->getNameOrUsername();
+                           $bill->date        = Carbon::now();
+                           $bill->category    = 'OPD';
+                           $bill->copayer    = $savecopayer;
+                           $bill->payercode  = $myaccounttype;
+                           $bill->uuid        = $transactionid;
+                           
+           
+           if($patient->save() & $bill->save())
+          {
+
+
+                    
+ //dd($mycopayer);
+                   
+          
+        // //dd($bill->save());
+        //     if($bill->save())
+        //   {
+
+            
+             $added_response = array('OK'=>'OK','ReferenceNumber'=>$patient_number);
+             return  Response::json($added_response);
           }
 
           else
           {
-
-             return redirect()
-            ->back()
-            ->with('error','Account failed to create!'.$e->getMessage());
-          }
-
-}
-
-    catch (\Exception $e) {
-           
-           echo $e->getMessage();
             return redirect()
             ->route('active-patients')
-            ->with('warning','Account failed to create!'.$e->getMessage());
-        }
+            ->with('error','Account failed to create!');
+          }
+
+
 
     }
 

@@ -48,7 +48,7 @@
                 </div> --}}
 
                   <div>
-                <a href="#new-appointment-request"  data-toggle="modal" class="btn btn-sm btn-info bootstrap-modal-form-open"> <i class="fa fa-plus"></i> Quick Appointment </a>
+                <a href="#new-appointment-request"  data-toggle="modal" class="btn btn-sm btn-info bootstrap-modal-form-open"> <i class="fa fa-plus"></i> Create An Appointment </a>
                 </div>
 
                  <div class="line"></div>

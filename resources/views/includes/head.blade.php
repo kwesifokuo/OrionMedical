@@ -4,7 +4,9 @@
   <meta name="description" content="app, web app, responsive, admin dashboard, admin, flat, flat ui, ui kit, off screen nav" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /> 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-
+<meta http-equiv="cache-control" content="private, max-age=0, no-cache">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
   
   <link rel="stylesheet" href="{{ asset('/css/bootstrap.css')}}" type="text/css" />
   <link rel="stylesheet" href="{{ asset('/css/print.css')}}" type="text/css" media="print" />
