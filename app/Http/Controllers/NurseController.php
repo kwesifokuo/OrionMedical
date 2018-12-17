@@ -105,6 +105,7 @@ class NurseController extends Controller
 
         $mynursenotes = NurseNote::where('visit_id' ,'=', $id)->first() ?: new NurseNote;
         $mynurseplan = NursePlan::where('visit_id' ,'=', $id)->first() ?: new NursePlan;
+        $mydoctorplan = PatientAssessment::where('visit_id' ,'=', $id)->first() ?: new PatientAssessment;
 
         $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
         $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
@@ -229,7 +230,7 @@ class NurseController extends Controller
 
 
 
-       return view('nurse.review', compact('patients','availabledrugs','mynurseplan','mynursenotes','myplan','oldvisits','mype','mycomplaints','defaultheight','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','vitalcharts','review_skin','review_neuro','review_gynae','review_nutrition','review_cardio','review_gastro','visit_details','review_ent','review_respiratory'))
+       return view('nurse.review', compact('patients','mydoctorplan','availabledrugs','mynurseplan','mynursenotes','myplan','oldvisits','mype','mycomplaints','defaultheight','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','vitalcharts','review_skin','review_neuro','review_gynae','review_nutrition','review_cardio','review_gastro','visit_details','review_ent','review_respiratory'))
         ->with('doctors',$doctors)
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)

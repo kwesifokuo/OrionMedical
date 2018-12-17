@@ -102,6 +102,23 @@ Route::get('/visits-by-doctor',
 	  ]);
 
 
+Route::get('/whatsapp-messages',
+	['uses' => '\OrionMedical\Http\Controllers\OPDController@getWhatsappMessagestoSend',
+	 'as' => 'whatsapp-messages',
+	  ]);
+
+Route::get('/loyalty-messages',
+	['uses' => '\OrionMedical\Http\Controllers\OPDController@getLoyaltyMessages',
+	 'as' => 'loyalty-messages',
+	  ]);
+
+
+Route::get('/update-whatsapp-status', 
+	['uses' => '\OrionMedical\Http\Controllers\OPDController@updateWhatsAppStatus', 
+	'as' => 'update-whatsapp-status', ]);
+
+
+
 
 Route::get('/customer-type',
 	['uses' => '\OrionMedical\Http\Controllers\ChartsController@customerType',
@@ -260,6 +277,14 @@ Route::get('/patient-profile/{id}',
 	['uses' => '\OrionMedical\Http\Controllers\OPDController@getPatientProfileOPD',
 	'as' => 'patient-profile',]);
 
+Route::get('/get-sticker-availability', 
+	['uses' => '\OrionMedical\Http\Controllers\OPDController@getStickerCount',
+	'as' => 'get-sticker-availability',]);
+
+
+
+
+
 Route::get('/patient-profile-limited/{id}', 
 	['uses' => '\OrionMedical\Http\Controllers\OPDController@getPatientProfileOPD',
 	'as' => 'patient-profile-limited',]);
@@ -322,6 +347,8 @@ Route::get('/get-visit-details-laboratory',
 Route::post('/create-opd',
 	['uses' => '\OrionMedical\Http\Controllers\OPDController@createOPD',]);
 
+Route::post('/create-ipd-opd',
+	['uses' => '\OrionMedical\Http\Controllers\OPDController@createIPDfromOPD',]);
 
 Route::post('/create-opd-walkin',
 	['uses' => '\OrionMedical\Http\Controllers\OPDController@createOPDWalkin',]);
@@ -1055,6 +1082,10 @@ Route::get('/delete-medication',
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@excludeMedication',
 	'as' => 'delete-medication',]);
 
+Route::get('/exclude-medication', 
+	['uses' => '\OrionMedical\Http\Controllers\DoctorController@excludeMedicationKeepFolder',
+	'as' => 'exclude-medication',]);
+
 Route::get('/delete-treatment-sheet', 
 	['uses' => '\OrionMedical\Http\Controllers\NurseController@excludeTreatment',
 	'as' => 'delete-treatment-sheet',]);
@@ -1147,6 +1178,12 @@ Route::get('/update-appointment-status',
 
 Route::post('/create-event',
 	['uses' => '\OrionMedical\Http\Controllers\EventController@store',]);
+
+
+Route::post('/create-event-new',
+	['uses' => '\OrionMedical\Http\Controllers\EventController@storeNoCustomer',]);
+
+
 
 Route::post('/create-event-nurse',
 	['uses' => '\OrionMedical\Http\Controllers\EventController@NurseNote',]);

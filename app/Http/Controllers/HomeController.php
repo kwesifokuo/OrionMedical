@@ -32,7 +32,7 @@ class HomeController extends Controller
         $corporate     = Customer::where('accounttype', 'Corporate')->where('status','Active')->count();
         $private       = Customer::where('accounttype', 'Private')->where('status','Active')->count();
         $insurance     = Customer::where('accounttype', 'Health Insurance')->where('status','Active')->count();
-        $expatraite    = Customer::where('accounttype', 'Non-Ghanaian')->where('status','Active')->count();
+        $expatraite    = Customer::where('accounttype', 'Gratis')->where('status','Active')->count();
         $gratis        = Customer::where('accounttype', 'Gratis')->where('status','Active')->count();
         $total         = Customer::where('status','Active')->count();
        
@@ -49,7 +49,7 @@ class HomeController extends Controller
         ->name('pieChartTest')
         ->type('doughnut')
         ->size(['width' => 1000, 'height' => 300])
-        ->labels(['Corporate', 'Private','Health Insurance','Non-Ghanaian','Gratis'])
+        ->labels(['Corporate', 'Private','Health Insurance','Gratis','Gratis'])
         ->datasets([
             [
                 'backgroundColor' => ['rgb(255, 99, 132)', 'rgb(255, 159, 64)', 'rgb(255, 206, 86)', 'rgb(75, 192, 192)', 'rgb(153, 102, 255)'],
@@ -995,7 +995,7 @@ class HomeController extends Controller
         $corporate       = Customer::where('accounttype', 'Corporate')->where('status','Active')->count();
         $private         = Customer::where('accounttype', 'Private')->where('status','Active')->count();
         $insurance       = Customer::where('accounttype', 'Health Insurance')->where('status','Active')->count();
-        $expatraite      = Customer::where('accounttype', 'Non-Ghanaian')->where('status','Active')->count();
+        $expatraite      = Customer::where('accounttype', 'Gratis')->where('status','Active')->count();
         $gratis          = Customer::where('accounttype', 'Gratis')->where('status','Active')->count();
         $total           = Customer::where('status','Active')->count();
        

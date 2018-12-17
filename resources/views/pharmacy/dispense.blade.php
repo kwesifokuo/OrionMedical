@@ -311,11 +311,11 @@ $(document).ready(function () {
 
 </script>
   <script type="text/javascript">
-  function deletedrug(id,name)
+  function removeMedication(id,name)
    {
       swal({   
         title: "Are you sure?",   
-        text: "Do you want to remove "+name+" from the prescription list?",   
+        text: "Do you want to exclude "+name+" from the prescription list?",   
         type: "warning",   
         showCancelButton: true,   
         confirmButtonColor: "#DD6B55",   
@@ -326,7 +326,7 @@ $(document).ready(function () {
         function(isConfirm){   
           if (isConfirm) 
           { 
-          $.get('/delete-medication',
+          $.get('/exclude-medication',
           {
              "ID": id 
           },

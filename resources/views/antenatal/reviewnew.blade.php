@@ -233,7 +233,7 @@
                              <div class="col-sm-3">
                             <label>LMP</label> 
                             <div class="form-group{{ $errors->has('lmp') ? ' has-error' : ''}}">
-                             <input type="text" class="form-control" id="lmp"  value="{{ Request::old('lmp') ?: '' }}"  name="lmp">
+                             <input type="text" class="form-control" id="lmp"  value="{{ $antenatalcharts->lmp->format('d-m-Y') }}"  name="lmp">
                            @if ($errors->has('edd'))
                           <span class="help-block">{{ $errors->first('edd') }}</span>
                            @endif    
@@ -244,7 +244,7 @@
                             <div class="col-sm-3">
                             <label>EDD/EDC</label> 
                             <div class="form-group{{ $errors->has('edd') ? ' has-error' : ''}}">
-                             <input type="text" class="form-control" readonly="true" id="edd"  value="{{ Request::old('edd') ?: '' }}"  name="edd">
+                             <input type="text" class="form-control" id="edd"  value="{{ $antenatalcharts->edd->format('d-m-Y') }}"  name="edd">
                            @if ($errors->has('edd'))
                           <span class="help-block">{{ $errors->first('edd') }}</span>
                            @endif    
@@ -253,9 +253,10 @@
 
 
                           <div class="col-sm-3">
-                            <label>Gestational Age</label> 
+                            <label>Gestational Week</label> 
                             <div class="form-group{{ $errors->has('gestation_by_date') ? ' has-error' : ''}}">
                              <select id="gestation_by_date" name="gestation_by_date" readonly="true" rows="1" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                              <option value="{{ $antenatalcharts->gestation_by_date }}">{{ $antenatalcharts->gestation_by_date }}</option>
                           <option value="">-- Not set --</option>
                           @foreach($gestationperiods as $gestationperiod)
                         <option value="{{ $gestationperiod->week }}">{{ $gestationperiod->week }}</option>
@@ -263,6 +264,20 @@
                         </select>            
                            @if ($errors->has('gestation_by_date'))
                           <span class="help-block">{{ $errors->first('gestation_by_date') }}</span>
+                           @endif    
+                          </div>
+                          </div>
+
+
+                          <div class="col-sm-3">
+                            <label>Gestational Days</label> 
+                            <div class="form-group{{ $errors->has('gestation_by_date_day') ? ' has-error' : ''}}">
+                             <select id="gestation_by_date_day" name="gestation_by_date_day" readonly="true" rows="1" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                          <option value="">-- Not set --</option>
+                          
+                        </select>            
+                           @if ($errors->has('gestation_by_date_day'))
+                          <span class="help-block">{{ $errors->first('gestation_by_date_day') }}</span>
                            @endif    
                           </div>
                           </div>
@@ -374,7 +389,13 @@
 
                            <div class="col-sm-3">
                             <label>Oedema</label> 
-                      <input type="text" class="form-control" id="oedema"  value="{{ Request::old('oedema') ?: '' }}"  name="oedema">
+                           <select id="oedema" name="oedema" rows="1" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                          <option value="">-- Not set --</option>
+                            <option value="Negative">Negative</option>
+                            <option value="None">None</option>
+                             <option value="Puffy">Puffy</option>
+                        
+                        </select>
                           @if ($errors->has('oedema'))
                           <span class="help-block">{{ $errors->first('oedema') }}</span>
                            @endif   
@@ -409,19 +430,18 @@
 
                            <div class="col-sm-3">
                             <label>Blood Type</label> 
-                      <input type="text" class="form-control" id="bloodtype"  value="{{ Request::old('bloodtype') ?: '' }}"  name="bloodtype">
+                      <input type="text" class="form-control" id="bloodtype"  value="{{ $antenatalcharts->bloodtype }}"  name="bloodtype">
                           @if ($errors->has('bloodtype'))
                           <span class="help-block">{{ $errors->first('bloodtype') }}</span>
                            @endif   
                           </div>
-
                         </div>
 
 
                         <div class="form-group pull-in clearfix">
                         <div class="col-sm-3">
                             <label>G6PD</label> 
-                          <input type="text" class="form-control" id="g6pd"  value="{{ Request::old('g6pd') ?: '' }}"  name="g6pd">
+                          <input type="text" class="form-control" id="g6pd"  value="{{ $antenatalcharts->g6pd }}"  name="g6pd">
                           @if ($errors->has('g6pd'))
                           <span class="help-block">{{ $errors->first('g6pd') }}</span>
                            @endif   
@@ -2580,6 +2600,23 @@ $(function () {
 });
 </script>
 
+<script type="text/javascript">
+$(function () {
+   $('#edd').daterangepicker({
+    "minDate": moment('2016-06-14 0'),
+     "singleDatePicker":true,
+    "timePicker": false,
+    "timePicker24Hour": true,
+    "timePickerIncrement": 15,
+    "autoApply": true,
+    "locale": {
+      "format": "DD/MM/YYYY",
+      "separator": " - ",
+    }
+  });
+});
+</script>
+
 
  <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
   <script src="{{ asset('/event_components/bootstrap.min.js')}}"></script>
@@ -2682,6 +2719,10 @@ $(document).ready(function () {
       });
 
      $('#gestation_by_date').select2({
+      tags: true
+      });
+
+      $('#gestation_by_date_day').select2({
       tags: true
       });
 
@@ -2794,7 +2835,12 @@ $(document).ready(function () {
     $('#engagement').select2({
       tags: true
       });
+    
     $('#position').select2({
+      tags: true
+      });
+
+    $('#oedema').select2({
       tags: true
       });
 
@@ -4077,7 +4123,7 @@ if($('#lmp').val()!= "" && $('#presentation').val()!="")
           "lmp" :$('#lmp').val(), 
           "patient_id": $('#patient_id').val(),
           "review_date": $('#review_date').val(),
-          "gestation_by_date": $('#gestation_by_date').val(),
+          "gestation_by_date": $('#gestation_by_date').val() + ' ' + $('#gestation_by_date_day').val(),
           "fetus":  $('#fetus').val(),
           "presentation": $('#presentation').val(),
           "engagement": $('#engagement').val(),

@@ -246,7 +246,10 @@ class CompanyController extends Controller
                            'universal'          => Input::get('universal_margin'),
                            'nationwide'         => Input::get('nationwide_margin'),
                            'metropolitan'       => Input::get('metropolitan_margin'),
-                           'acacia'             => Input::get('acacia_margin')
+                           'acacia'             => Input::get('acacia_margin'),
+                           'updated_by'         => Auth::user()->getNameOrUsername(),
+                           'updated_on'         => Carbon::now()
+
                            ));
 
             if($affectedRows > 0)

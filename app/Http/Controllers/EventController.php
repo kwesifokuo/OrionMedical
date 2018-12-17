@@ -158,6 +158,50 @@ class EventController extends Controller
          
     }
 
+    public function storeNoCustomer(Request $request)
+    {
+        // dd($request);
+
+        $this->validate($request, [
+            'name'  => 'required',
+            'title' => 'required',
+            'time'  => 'required'
+        ]);
+
+        //$appointee = Customer::where('id',$request->input('name'))->first();
+
+        $event                  = new Event;
+        $event->name            = $request->input('name');;
+        $event->mobile_number   = $request->input('phonenumber');;
+        $event->patient_id      = uniqid();
+        $event->title           = $request->input('title');
+        $event->start_time      = Carbon::createFromFormat('d/m/Y H:i:s', $request->input('time'));
+        $event->end_time        = Carbon::createFromFormat('d/m/Y H:i:s', $request->input('time'))->addMinutes(15);
+        $event->doctor          = $request->input('referal_doctor');
+        $event->created_on      = Carbon::now();
+        $event->created_by      = Auth::user()->getNameOrUsername();
+
+        if($event->save())
+        {
+
+            return redirect()
+            ->route('event-list')
+            ->with('info','The event was successfully saved!');
+
+        }
+
+        else
+        {
+             return redirect()
+            ->route('event-list')
+            ->with('info','The event failed to save!');
+
+        }
+        
+         
+    }
+
+
 
     public function NurseNote(Request $request)
     {

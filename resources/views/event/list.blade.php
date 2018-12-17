@@ -90,6 +90,10 @@
                             </ul>
             </div>
           </td>
+
+           <td> <a href="http://web.whatsapp.com//send?text=Hello {{ ucwords(strtolower($event->name)) }} you have an appointment booked with {{ ucwords(strtolower($event->doctor)) }} at {{ date("g:ia\, jS M Y", strtotime($event->start_time)) }}. Please text YES to confirm.&phone=233{{$event->mobile_number}}" target="_new" class="btn btn-s-md btn-danger btn-rounded"  data-toggle="modal" alt="edit">Send Message</a> </td>
+
+
           <td><a href="/appointment-slip/{{ $event->id }}" id="print" name="print" data-toggle="modal" alt="edit"><i class="fa fa-print" data-toggle="tooltip" data-placement="top" title="" data-original-title="Print App Slip"></i></a>
           </td>
            <td><a href="#modal_check_in" class="bootstrap-modal-form-open" id="generate_visit" onclick="getDetails('{{ $event->patient_id }}')" name="generate_visit" data-toggle="modal" alt="edit"><i class="fa fa-book" data-toggle="tooltip" data-placement="top" title="" data-original-title="Check In"></i></a>

@@ -29,7 +29,7 @@
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
                     <img src="/images/139290.svg" width="15%" class="pull-left">
-                    <a class="clear" href="/show-admitted">
+                    <a class="clear" href="/ipd-consultation">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Admissions & Dententions</small>
                     </a>

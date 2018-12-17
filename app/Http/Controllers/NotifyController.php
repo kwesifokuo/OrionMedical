@@ -25,7 +25,9 @@ class NotifyController extends Controller
     public function SendSMS()
     {
 
-    $messages = SMS::where('status','Unsent')->get();
+    $messages = SMS::where('status_sms','Unsent')->get();
+
+    //dd($messages);
 
     // Here we assume the user is using the combination of his clientId and clientSecret as credentials
     $auth = new BasicAuth("ciiihqvu", "vjhfjgrv");
@@ -42,14 +44,14 @@ class NotifyController extends Controller
     {
         // Default Approach
         $mesg = new Message();
-        $mesg->setContent($message->content);
+        $mesg->setContent($message->content_2);
         $mesg->setTo($message->mobile);
         $mesg->setFrom("Gilead");
         $mesg->setRegisteredDelivery(true);
 
         $messageResponse = $messagingApi->sendMessage($mesg);
 
-        $response_code = SMS::where('id', '=', $message->id)->update(array('status' => 'Sent'));
+        $response_code = SMS::where('id', '=', $message->id)->update(array('status_sms' => 'Sent'));
 
     
     } 

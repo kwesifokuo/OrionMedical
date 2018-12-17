@@ -30,9 +30,11 @@ use OrionMedical\Models\PatientInvestigation;
 use OrionMedical\Models\AdmissionStatus;
 use OrionMedical\Models\AdmissionLocation;
 use OrionMedical\Models\PatientHistory;
+use OrionMedical\Models\AuthorizationCode;
 use OrionMedical\Models\Branch;
 use OrionMedical\Models\Payments;
 use OrionMedical\Models\PatientStatement;
+use OrionMedical\Models\SMS;
 use OrionMedical\Http\Requests;
 use OrionMedical\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -121,6 +123,7 @@ class OPDController extends Controller
     $branches = Branch::get();
 
     $billingaccounts = AccountType::get();
+    $stickers = AuthorizationCode::where('status','Unused')->get();
 
 
     $bills              = Bill::where('patient_id', $id)->orderBy('date', 'desc')->get();
@@ -146,7 +149,7 @@ class OPDController extends Controller
        //Vital Chart Graph
         
 
-    return view('patient.profile', compact('patients','statement','payables','receivables','outstanding','branches','accounttype','billingaccounts','allergies','diagnosis','procedures','investigations','bills','visittypes','consultations','images','departments','doctors','insurers','servicetype','medications'));
+    return view('patient.profile', compact('patients','stickers','statement','payables','receivables','outstanding','branches','accounttype','billingaccounts','allergies','diagnosis','procedures','investigations','bills','visittypes','consultations','images','departments','doctors','insurers','servicetype','medications'));
 
    }
 
@@ -199,6 +202,84 @@ class OPDController extends Controller
        return view('opd.appointment');
       
     }
+
+
+    public function getStickerCount()
+    {
+
+          if(Input::get("authorization_code"))
+            {
+                    $ID = Input::get("authorization_code");
+                    $affectedRows = AuthorizationCode::where('card_number', $ID)->where('status','Unused')->count();
+
+                    $stocklevel = $affectedRows;
+
+                if($stocklevel == 1)
+                {
+                    $ini   = array('OK'=>'OK');
+                    return  Response::json($ini);
+                }
+            
+                 else
+                {
+                    $ini   = array('No Data' => $ID);
+                    return  Response::json($ini);
+                }
+            }
+                else
+               {
+                    $ini   = array('No Data'=>'No Data');
+                    return  Response::json($ini);
+                }
+    }
+
+
+
+    public function getWhatsappMessagestoSend()
+    {
+
+      $messages = SMS::where('status','Unsent')->paginate(30);
+      return view('notifications.whatsapp',compact('messages'));
+    }
+
+
+     public function getLoyaltyMessages()
+    {
+
+      $messages = AuthorizationCode::paginate(30);
+      return view('notifications.loyalty',compact('messages'));
+    }
+
+
+
+    public function updateWhatsAppStatus()
+    {
+
+
+         $id = Input::get("id");
+        
+            $affectedRows = SMS::where('id', $id)->update(array('status' => 'Sent'));
+
+          
+
+            if($affectedRows > 0)
+            {
+
+                $ini = array('OK'=>'OK');
+                return  Response::json($ini);
+               
+            }
+            else
+            {
+                $ini = array('No Data'=>'No Data');
+                return  Response::json($ini);
+            }
+
+
+
+    }
+
+
 
     public function findVisitHistory(Request $request)
     {
@@ -477,9 +558,11 @@ class OPDController extends Controller
 
 
              $affectedRows = Customer::where('patient_id',Input::get('patient_id'))->update(array('created_at' => Carbon::yesterday()));
-            
-             $category = ServiceCharge::where('type',$request->input('consultation_type'))->value('department');
 
+             $updateauthcodes = AuthorizationCode::where('card_number',Input::get('authorization_code'))->update(array('status' => 'Used','assigned_to'=>Input::get('fullname'),'created_on'=>Carbon::now(),'created_by'=>Auth::user()->getNameOrUsername(),'assigned_on'=>Carbon::now(),'reference_number'=>Input::get('patient_id')));
+            
+             
+             $category = ServiceCharge::where('type',$request->input('consultation_type'))->value('department');
              $mycopayer = Customer::where('patient_id',Input::get('patient_id'))->first();
 
             switch($request->input('accounttype')) 
@@ -576,7 +659,7 @@ class OPDController extends Controller
                      $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
                       $savecopayer =  'Private';
                       
-                case 'Non-Ghanaian':
+                case 'Gratis':
                      $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('charge');
                       $savecopayer =  'Private';
                     
@@ -641,6 +724,265 @@ class OPDController extends Controller
            {
            return redirect()
            ->route('waiting-opd')
+           ->with('info','Patient has successfully been added to OPD !');
+           }
+
+         }
+         
+         else
+         {
+           return redirect()
+           ->back()
+           ->with('error','OPD registration failed! Ensure Company name or Insurance details details have been correctly filled');
+
+         }
+       }
+
+         else
+         {
+           return redirect()
+           ->back()
+           ->with('error','OPD registration failed! Ensure Company name or Insurance details details have been correctly filled' );
+
+         }
+     }
+
+
+     public function createIPDfromOPD(Request $request)
+    {
+        
+        $provider = Customer::where('patient_id',$request->input('patient_id'))->first();
+        
+        $care_provider = '';
+        $myaccounttype = 'Private';
+
+        if($request->input('ipd_accounttype')=='Corporate') 
+        {
+          $care_provider = $provider->company; 
+          $myaccounttype = 'Corporate';
+        }
+        if($request->input('ipd_accounttype')=='Health Insurance') 
+        {
+          $care_provider = $provider->insurance_company;
+          $myaccounttype = 'Health Insurance'; 
+        }
+        if($request->input('ipd_accounttype')=='Private') 
+        {
+          $care_provider = 'Private'; 
+          $myaccounttype = 'Private';
+        }
+
+        if($request->input('ipd_accounttype')=='Walkin') 
+        {
+          $care_provider = 'Private';
+          $myaccounttype = 'Private'; 
+        }
+
+        if($request->input('ipd_accounttype')=='Gratis') 
+        {
+          $care_provider = 'Gratis';
+          $myaccounttype = 'Gratis'; 
+        }
+       
+       //dd($request->input('accounttype'));
+
+       // echo 'true';
+        if(!empty($care_provider))
+        {
+          $visit_id = $this->generateStaffID(10);
+          $transactionid = uniqid(20);
+         
+
+
+
+           $patient                    = new OPD;
+           $patient->opd_number        = $visit_id;
+           $patient->patient_id        = $request->input('patient_id');
+           $patient->name              = $request->input('fullname');
+           $patient->referal_doctor    = Auth::user()->getNameOrUsername();
+           $patient->department        = 'IPD';
+           $patient->visit_type        = $request->input('visit_type');
+           $patient->consultation_type = $request->input('consultation_type');
+           $patient->payercode         = $myaccounttype;
+           $patient->care_provider     =  $care_provider;
+           $patient->created_on        =  Carbon::now();
+           $patient->created_by        =  Auth::user()->getNameOrUsername();
+           $patient->updated_on        =  Carbon::now();
+           $patient->updated_by        =  Auth::user()->getNameOrUsername();
+           $patient->uuid              =  $transactionid;
+           $patient->branch            =  $request->input('location');
+           $patient->authorization_code =  $request->input('authorization_code');
+    
+
+           if($patient->save()) 
+          {
+
+
+             $affectedRows = Customer::where('patient_id',Input::get('patient_id'))->update(array('created_at' => Carbon::yesterday()));
+            
+             $category = ServiceCharge::where('type',$request->input('consultation_type'))->value('department');
+
+             $mycopayer = Customer::where('patient_id',Input::get('patient_id'))->first();
+
+            switch($request->input('ipd_accounttype')) 
+            {
+         
+                case 'Health Insurance':
+
+
+                    if($care_provider=='Glico Health Care')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('glico');
+                         
+                       }
+
+                     elseif($care_provider=='Glico Tpa Barclays')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('glico');
+                         
+                       }
+
+                    elseif($care_provider=='Cosmopolitan Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('cosmopolitan');
+                         
+                       }
+
+
+                     elseif($care_provider=='Premier Mutual Health')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('premier');
+                         
+                       }
+
+
+                     elseif($care_provider=='Acacia Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('acacia');
+                         
+                       }
+
+                        elseif($care_provider=='Apex Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('apex');
+                         
+                       }
+
+                      elseif($care_provider=='Metropolitan Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('metropolitan');
+                         
+                       }
+
+                       elseif($care_provider=='Nationwide Mutual Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('nationwide');
+                         
+                       }
+
+                        elseif($care_provider=='Universal Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('universal');
+                         
+                       }
+
+
+                       elseif($care_provider=='Phoenix Health Insurance')
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('phoenix');
+                         
+                       }
+
+                       else
+                       {
+                         $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('insurance');
+                          
+                       }
+
+                       $savecopayer  =  $mycopayer->insurance_company;
+                       
+                      
+                    break;
+                
+                case 'Corporate':
+                     $service_charge  = ServiceCharge::where('type',$request->input('consultation_type'))->value('corporate');
+                      $savecopayer    =  $mycopayer->company;
+                      
+                    break;
+                case 'Private':
+                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
+                      $savecopayer =  'Private';
+                       
+                    break;
+                case 'Walkin':
+                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
+                      $savecopayer =  'Private';
+                      
+                case 'Gratis':
+                     $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('charge');
+                      $savecopayer =  'Private';
+                    
+                    break;
+           }
+
+
+
+         
+          
+           $bill                       = new Bill;
+           $bill->patient_id           = $request->input('patient_id');
+           $bill->visit_id             = $visit_id;
+           $bill->fullname             = $request->input('fullname');
+           $bill->item_name            = $request->input('consultation_type');
+           $bill->quantity             = 1;
+           $bill->rate                 = $service_charge;
+           $bill->amount               = $service_charge;
+           $bill->category             = $category;
+           $bill->note                 = 'Unpaid';
+           $bill->uuid                 = $transactionid;
+           $bill->copayer              = $savecopayer;
+           $bill->payercode            = $myaccounttype;
+           $bill->created_by           = Auth::user()->getNameOrUsername();
+           $bill->date                 = Carbon::now();
+           $bill->save(); 
+
+           //
+           $affectedRows2 = Bill::where('patient_id',Input::get('patient_id'))->where('item_name','REGISTRATION OF PATIENT')->where('visit_id','0')->update(array('visit_id' => $visit_id));
+            OneSignal::sendNotificationToAll($request->input('fullname')." has been checked in for ".$request->input('consultation_type'), $url = null, $data = null, $buttons = null, $schedule = null);
+           
+
+           if($request->input('consultation_type')=="WALK-IN PHARMACY")
+           {
+             return redirect()
+           ->route('walkin-service',$visit_id)
+           ->with('info','Patient has successfully been added to OPD !');
+           }
+            
+           elseif($request->input('consultation_type')=="WALK-IN LAB")
+           {
+             return redirect()
+           ->route('walkin-service',$visit_id)
+           ->with('info','Patient has successfully been added to OPD !');
+           }
+
+           elseif($request->input('consultation_type')=="WALK-IN DIAGNOSTIC")
+           {
+             return redirect()
+           ->route('walkin-service',$visit_id)
+           ->with('info','Patient has successfully been added to OPD !');
+           }
+
+           if($request->input('consultation_type')=="WALK-IN SCAN")
+           {
+             return redirect()
+           ->route('walkin-service',$visit_id)
+           ->with('info','Patient has successfully been added to OPD !');
+           }
+
+           else
+           {
+           return redirect()
+           ->route('ipd-consultation')
            ->with('info','Patient has successfully been added to OPD !');
            }
 
@@ -824,7 +1166,7 @@ class OPDController extends Controller
                      $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
                       $savecopayer =  'Private';
                     break;
-                case 'Non-Ghanaian':
+                case 'Gratis':
                      $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('charge');
                       $savecopayer =  'Private';
                     break;
@@ -933,12 +1275,17 @@ class OPDController extends Controller
            'name'                => $request->input('fullname'),
            'referal_doctor'      => $request->input('referal_doctor'),
            'visit_type'          => $request->input('visit_type'),
+           'authorization_code'   => $request->input('authorization_code'),
            'consultation_type'   => $request->input('consultation_type'),
            'care_provider'       => $care_provider,
            'payercode'           => $request->input('accounttype')));
 
 
              $category = ServiceCharge::where('type',$request->input('consultation_type'))->value('department');
+
+            $updateauthcodes = AuthorizationCode::where('card_number',Input::get('authorization_code'))->update(array('status' => 'Used','assigned_to'=>Input::get('fullname'),'created_on'=>Carbon::now(),'created_by'=>Auth::user()->getNameOrUsername(),'assigned_on'=>Carbon::now(),'reference_number'=>Input::get('patient_id')));
+            
+             
 
              $mycopayer = Customer::where('patient_id',Input::get('patient_id'))->first();
 
@@ -1031,7 +1378,7 @@ class OPDController extends Controller
                      $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('walkin');
                       $savecopayer =  'Private';
                     break;
-                case 'Non-Ghanaian':
+                case 'Gratis':
                      $service_charge = ServiceCharge::where('type',$request->input('consultation_type'))->value('charge');
                       $savecopayer =  'Private';
                     break;
@@ -1145,7 +1492,7 @@ class OPDController extends Controller
        //  case 'Private':
        //       $service_charge = ServiceCharge::where('type',$request->input('ref_consultation_type'))->value('walkin');
        //      break;
-       //  case 'Non-Ghanaian':
+       //  case 'Gratis':
        //       $service_charge = ServiceCharge::where('type',$request->input('ref_consultation_type'))->value('charge');
        //      break;
        //     }

@@ -143,6 +143,12 @@
                       </div>  
                         </div>
 
+
+                        
+
+
+
+
                             <div class="form-group pull-in clearfix">
                           <div class="col-sm-6">
                             <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">

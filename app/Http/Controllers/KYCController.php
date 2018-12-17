@@ -432,7 +432,7 @@ public function doGenerateBulkID()
                              $savecopayer =  'Private';
                              $myaccounttype = 'Private';
                             break;
-                        case 'Non-Ghanaian':
+                        case 'Gratis':
                              $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('charge');
                              $savecopayer =  'Private';
                              $myaccounttype = 'Private';

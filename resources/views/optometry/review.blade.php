@@ -1994,7 +1994,21 @@
                            @endif    
                           </div>  
                           </div>
+
+                          <div class="col-sm-3">
+                          <div class="form-group{{ $errors->has('procedure_discount') ? ' has-error' : ''}}">
+                            <label>Discount (%)</label>
+                             <input type="number" class="form-control" class="text-success" id="procedure_discount"  value="{{ Request::old('procedure_discount') ?: '' }}"  name="procedure_discount">       
+                           @if ($errors->has('procedure_discount'))
+                          <span class="help-block">{{ $errors->first('procedure_discount') }}</span>
+                           @endif    
+                          </div>  
+                          </div>
                           </div> 
+
+                        
+                       
+
 
                         <div class="form-group pull-in clearfix">
                           <div class="col-sm-12">
@@ -2875,6 +2889,7 @@ if($('#procedure').val()!= "" && $('#procedure_quantity').val()!= "")
           "accounttype": $('#accounttype').val(),
           "procedure":  $('#procedure').val(),
           "quantity" : $('#procedure_quantity').val(),
+          "discount" : $('#procedure_discount').val(),
           "remark":      $('#procedure_remark').val(),
           "fullname":   $('#fullname').val()                      
         },

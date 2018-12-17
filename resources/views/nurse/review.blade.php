@@ -117,6 +117,9 @@
                           {{--  <li class=""><a href="#review-complaint" data-toggle="tab"><i class="fa fa-meh-o text-default"></i> Complaint </a></li>
                           <li class=""><a href="#review-diagnosis" data-toggle="tab"><i class="fa fa-gavel text-default"></i> Diagnosis </a></li>
                            --}}
+
+                            <li class=""><a href="#review-doctor-assessment" data-toggle="tab"><i class="fa fa-puzzle-piece text-default"></i> Doctor's Plan </a></li>
+
                             <li class=""><a href="#review-assessment" data-toggle="tab"><i class="fa fa-puzzle-piece text-default"></i> Nurse Plan </a></li>
                             <li class=""><a href="#review-plan" data-toggle="tab"><i class="fa fa-table text-default"></i> Nurse Notes </a></li>
                             <li class=""><a href="#review-medication" data-toggle="tab"><i class="fa fa-flask text-default"></i> Drug Administration </a></li>
@@ -281,6 +284,22 @@
 
                          
                             
+                        </div>
+
+
+
+                         <div class="form-group pull-in clearfix">
+                            <div class="col-sm-3">
+                            <label>Visual Acuity</label> 
+                            <input type="text" class="form-control" id="vr_visual_ascuity"  value="{{ Request::old('vr_visual_ascuity') ?: '' }}"  name="vr_visual_ascuity">
+                           @if ($errors->has('SpO2'))
+                          <span class="help-block">{{ $errors->first('vr_visual_ascuity') }}</span>
+                           @endif    
+                          </div> 
+
+
+
+                          
                         </div>
 
                         <div class="form-group pull-in clearfix">
@@ -1565,6 +1584,35 @@
                   </div> --}}
 
 
+
+                     <div class="tab-pane" id="review-doctor-assessment">
+                         
+                        <section class="panel panel-info">
+                                <header class="panel-heading font-bold">Doctor's Plan</header>
+                                <div class="panel-body">
+                                      <div class="panel-body text-sm">
+                          <div class="col-sm-12">
+                      
+                        
+                       <textarea id="doctorassessment" name="doctorassessment"> 
+                                 {!!$mydoctorplan->assessment!!}
+                               </textarea>
+                       
+                      </div>
+                      </div>
+
+                                </div>
+                                </section>
+
+                        <footer class="panel-footer text-right bg-light lter">
+                       
+                         
+                      </footer>
+                     
+                  </div>
+
+
+
                     <div class="tab-pane" id="review-assessment">
                          
                         <section class="panel panel-info">
@@ -1590,6 +1638,8 @@
                       </footer>
                      
                   </div>
+
+
 
 
 
@@ -1791,6 +1841,22 @@
 
 });
  </script>
+ 
+ <script>tinymce.init({
+  selector: '#doctorassessment',
+  height: 500,
+  menubar: true,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor textcolor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table contextmenu paste code help wordcount',
+    'template'
+  ],
+  toolbar: 'insert | undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help'
+  
+
+});
+ </script>
 
  <script>tinymce.init({
   selector: '#continuation_sheet',
@@ -1922,6 +1988,7 @@ $('#medication_given').select2();
           "spo2": $('#SpO2').val(),
           "fbs": $('#fbs').val(),
           "rbs": $('#rbs').val(),
+           "vr_visual_ascuity": $('#vr_visual_ascuity').val(),
           "vital_remark": $('#vital_remark').val(),
           "temperature": $('#temperature').val()                      
         },

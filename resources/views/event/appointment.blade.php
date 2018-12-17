@@ -26,7 +26,7 @@
                       </div>
                 </div>
                 <div class="step-content">
-                    <form  class="bootstrap-modal-form" method="post" action="/create-event" class="panel-body wrapper-lg">
+                    <form  class="bootstrap-modal-form" method="post" action="/create-event-new" class="panel-body wrapper-lg">
                     <div class="step-pane active" id="step1">
                       <p>Fullname</p>
                       <input type="text" name="name" id="name" class="form-control" data-trigger="change" data-required="true" data-type="url" placeholder="">

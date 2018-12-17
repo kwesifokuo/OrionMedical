@@ -8,4 +8,5 @@ class Supplier extends Model
 {
     protected $table = 'suppliers';
     public $timestamps = false;
+    protected $fillable =['name'];
 }

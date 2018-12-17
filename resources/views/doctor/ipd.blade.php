@@ -10,43 +10,42 @@
               </ul>
 
              
-             <section class="panel panel-default">
+           <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                     <img src="/images/201633.svg" width="15%">
-                    <a class="clear" href="/opd-consultation"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
-                      <span class="h3 block m-t-xs"><strong>{{$waiting->count()}}</strong></span>
-                      <small class="text-muted text-uc">Waiting Room</small>
+                     <img src="/images/801699.svg" width="15%" class="pull-left">
+                    <a class="clear" href="/opd-consultation-doctor"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
+                      <span class="h3 block m-t-xs"><strong>{{$patients->count()}}</strong></span>
+                      <small class="text-muted text-uc">Outpatient List</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                     <img src="/images/383764.svg" width="15%">
+                     <img src="/images/425837.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/review-consultation">
                       <span class="h3 block m-t-xs"><strong id="bugs">{{$reviewed->count()}}</strong></span>
-                      <small class="text-muted text-uc">Reviewed Patient</small>
+                      <small class="text-muted text-uc">Awaiting Investigations</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/119076.svg" width="15%">
+                    <img src="/images/139290.svg" width="15%" class="pull-left">
                     <a class="clear" href="/ipd-consultation">
                       <span class="h3 block m-t-xs"><strong>{{$admission->count()}}</strong></span>
-                      <small class="text-muted text-uc">Inpatient</small>
+                      <small class="text-muted text-uc">Admissions & Detentions</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                     <img src="/images/medical-scheduling.png" width="21%">
+                     <img src="/images/medical-scheduling.png" width="21%" class="pull-left">
                     </span>
-                    <a class="clear" href="/event-calendar">
-                      <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
-                      <small class="text-muted text-uc">Appointments</small>
+                    <a class="clear" href="/doctor-appointments/{{ Auth::user()->getNameOrUsername() }}">
+                      <span class="h3 block m-t-xs"><strong id="bugs">{{ $discharged->count() }}</strong></span>
+                      <small class="text-muted text-uc">Your Appointments</small>
                     </a>
                   </div>
 
                  
                 </div>
-              </section>
-
+              </section> 
 
               <div class="row">
 

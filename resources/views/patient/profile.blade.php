@@ -4,13 +4,7 @@
             <header class="header bg-white b-b b-light">
               <p>{{ $patients->fullname }}'s Facesheet</p>
 
-              @if($patients->accounttype=='Private')
-             {{--  <a href="#" class="btn btn-warning btn-s-md btn-lg pull-right">Total Charge : GHS {{ $payables }}</a>
-                      <a href="#" class="btn btn-success btn-s-md btn-lg pull-right">Paid : GHS {{ $receivables }}</a> --}}
-                      <a href="#" class="btn btn-danger btn-s-md btn-lg pull-right">Outstanding : GHS {{ number_format($outstanding, 1, '.', ',') }}</a>
-                @else
-                @endif
-
+             
                     
                    
                     
@@ -248,9 +242,14 @@
                           </div> 
 
                           <div class="col-sm-6">
-                            <label>Authorization Code</label> 
+                            <label>Authorization / Loyalty Code</label> 
                             <div class="form-group{{ $errors->has('authorization_code') ? ' has-error' : ''}}">
-                            <input type="text" rows="3" class="form-control" id="authorization_code" name="authorization_code" value="{{ Request::old('authorization_code') ?: '' }}">   
+                            <select id="authorization_code" name="authorization_code" onchange="stickerexiststatus()" rows="3" tabindex="1" data-placeholder="" style="width:100%">
+                           <option value="">-- select from here --</option>
+                          @foreach($stickers as $sticker)
+                        <option value="{{ $sticker->card_number }}"> {{ $sticker->card_number }}</option>
+                          @endforeach
+                        </select>    
                            @if ($errors->has('authorization_code'))
                           <span class="help-block">{{ $errors->first('authorization_code') }}</span>
                            @endif    
@@ -346,6 +345,32 @@
                         
                       </footer>
                       </form>
+
+                       @if($patients->accounttype=='Private')
+             {{--  <a href="#" class="btn btn-warning btn-s-md btn-lg pull-right">Total Charge : GHS {{ $payables }}</a>
+                      <a href="#" class="btn btn-success btn-s-md btn-lg pull-right">Paid : GHS {{ $receivables }}</a> --}}
+                      <a href="#" class="btn btn-danger btn-s-md btn-lg pull-left">Outstanding : GHS {{ number_format($outstanding, 1, '.', ',') }}</a>
+                      @else
+                      <li class="list-group-item">
+                       <label>Dental Usage & Limit</label>
+                        <div class="progress progress-sm m-t-sm">
+                          <div class="progress-bar progress-bar-info" data-toggle="tooltip" data-original-title="10%" style="width: 10%"></div>
+                        </div>
+                        <label>Eye Usage & Limit</label>
+                        <div class="progress progress-sm progress-striped  active">
+                          <div class="progress-bar progress-bar-success" data-toggle="tooltip" data-original-title="30%" style="width: 30%"></div>
+                        </div>
+                        <label>ODP Usage & Limit</label>
+                        <div class="progress progress-sm progress-striped">
+                          <div class="progress-bar progress-bar-warning" data-toggle="tooltip" data-original-title="20%" style="width: 20%"></div>
+                        </div>
+                        <label>IPD Usage & Limit</label>
+                        <div class="progress progress-sm progress-striped">
+                          <div class="progress-bar progress-bar-danger" data-toggle="tooltip" data-original-title="10%" style="width: 10%"></div>
+                        </div>
+                      </li>
+                      @endif
+
                   </section>
 
 
@@ -676,6 +701,9 @@ $('#consultation_type').select2();
 $('#location').select2();
 $('#visit_type').select2();
 $('#accounttype').select2();
+$('#authorization_code').select2({
+      tags: true
+      });
 
 loadVitals();
 
@@ -759,6 +787,38 @@ function getDetails(acct_no)
 
     
    }
+
+
+   function stickerexiststatus()
+    {
+
+      $.get('/get-sticker-availability',
+        {
+          "authorization_code": $('#authorization_code').val()    
+
+        },
+        function(data)
+        { 
+          
+          $.each(data, function (key, value) {
+        if(data["OK"])
+        {
+           
+         
+        }
+        else
+        {
+          $('#authorization_code').val('');
+          sweetAlert("Authorization Code "+ $('#authorization_code').val() +" is not available in the system or has been used!");
+          $('#authorization_code').val('');
+        }
+      });
+                                        
+        },'json');
+
+
+    }
+
 
 
 

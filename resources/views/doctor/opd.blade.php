@@ -17,7 +17,7 @@
                      <img src="/images/801699.svg" width="15%" class="pull-left">
                     <a class="clear" href="/opd-consultation-doctor"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>{{$patients->count()}}</strong></span>
-                      <small class="text-muted text-uc">Checked In Patient</small>
+                      <small class="text-muted text-uc">Outpatient List</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
@@ -30,9 +30,9 @@
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
                     <img src="/images/139290.svg" width="15%" class="pull-left">
-                    <a class="clear" href="/show-admitted">
+                    <a class="clear" href="/ipd-consultation">
                       <span class="h3 block m-t-xs"><strong>{{$admission->count()}}</strong></span>
-                      <small class="text-muted text-uc">Admission & Detentions</small>
+                      <small class="text-muted text-uc">Admissions & Detentions</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">

@@ -15,8 +15,8 @@
 
                    
                       
-                     <a href="#"  class="btn btn-info btn-s-md btn-lg btn-rounded">{{ $visit_details->care_provider }}</a> ||
-                     <a href="#"  class="btn btn-info btn-s-md btn-lg btn-rounded">{{ $patients[0]->company }}</span></a>
+                     <a href="#"  class="btn btn-info btn-s-md btn-lg">{{ $visit_details->care_provider }}</a> ||
+                     <a href="#"  class="btn btn-info btn-s-md btn-lg ">{{ $patients[0]->company }}</span></a>
                    
            
             </header>
@@ -88,8 +88,14 @@
                             <li class="list-group-item">
                             <span class="pull-right">{{ $patients[0]->blood_group }}</span>
                             
-                             <small class="text-muted">Blood Group</small>
+                             <small class="text-muted text-danger">Blood Group</small>
                           </li>
+                          <li class="list-group-item">
+                            <span class="pull-right">{{ $patients[0]->blood_group }}</span>
+                            
+                             <small class="text-muted text-info">G6PD</small>
+                          </li>
+
                         </ul>
                             
 
@@ -156,7 +162,7 @@
 
                          <li class=""><a href="#review-discharge" data-toggle="tab"><i class="fa fa-bars text-default"></i> Visit Summary </a></li>
                          <li class=""><a href="#review-appointment" data-toggle="tab"><i class="fa fa-calendar text-default"></i> Book & View Appointments </a></li>
-                        
+                         <li class=""><a href="#review-admission" data-toggle="tab"><i class="fa fa-bell-o text-default"></i> Admission / Detentions </a></li>
                       </ul>
                     </header>
 
@@ -1111,6 +1117,34 @@
                           @endforeach --}}
                             </select>    
                           </div>
+
+                          <div class="col-sm-3">
+                           <label class="badge bg-danger">G6PD</label> 
+                        <select name="g6pd[]" id="g6pd" style="width:100%" multiple data-placeholder=""  >
+
+                        <option value="{{ $myhistories->g6pd }}" selected > {{ $myhistories->g6pd }} </option>
+
+                         {{--  @foreach($medicationhx as $medicationhx)
+                        <option  value="{{ $medicationhx->type }}">{{ $medicationhx->type }}</option>
+                          @endforeach --}}
+                            </select>    
+                          </div>
+
+
+                          <div class="col-sm-3">
+                           <label class="badge bg-danger">Blood Group & Type</label> 
+                        <select name="blood_group[]" id="blood_group" style="width:100%" multiple data-placeholder=""  >
+
+                        <option value="{{ $myhistories->blood_group }}" selected > {{ $myhistories->blood_group }} </option>
+
+                         {{--  @foreach($medicationhx as $medicationhx)
+                        <option  value="{{ $medicationhx->type }}">{{ $medicationhx->type }}</option>
+                          @endforeach --}}
+                            </select>    
+                          </div>
+
+
+
                           </div>
 
                       </div>
@@ -1526,6 +1560,13 @@
                           @endforeach 
                             </select>    
                           </div>
+                          <div class="col-sm-3">
+                              <label class="badge bg-info">Skin</label> 
+                        <select name="pe_skin[]" id="pe_skin" style="width:100%" multiple data-placeholder="Neck"  >
+                        <option value="@foreach($mype as $val) {{ $val->pe_skin }}@endforeach" selected > @foreach($mype as $val) {{ $val->pe_skin }}@endforeach </option>
+                         
+                            </select>    
+                          </div>
                           </div>
 
                            <div class="form-group pull-in clearfix">
@@ -1926,61 +1967,108 @@
                   </div>
 
 
-                 {{--  <div class="tab-pane" id="review-assessment">
+                 <div class="tab-pane" id="review-admission">
+                  <form  class="bootstrap-modal-form" method="post" data-validate="parsley" action="/create-ipd-opd" class="panel-body wrapper-lg">
                           <section class="panel panel-default">
-                      <div class="panel-body">
-                       
-                         <div class="form-group pull-in clearfix">
-                          <div class="col-sm-12">
-                            <label class="badge bg-default">Plan</label> 
-                            <div class="form-group{{ $errors->has('assessment') ? ' has-error' : ''}}">
-                           <div id="assessment" name="assessment" class="form-control" style="overflow:scroll;height:500px;max-height:500px" contenteditable="true"> @foreach($myplan as $plan)
-
-                                 <a>{!!$plan->assessment!!}</a>
-                                 <br>
-                                <br>
-                               @endforeach</div>   
-                           @if ($errors->has('assessment'))
-                          <span class="help-block">{{ $errors->first('assessment') }}</span>
+                           <div class="panel-body">
+                      <div class="form-group pull-in clearfix">
+                          <div class="col-sm-6">
+                            <div class="form-group{{ $errors->has('accounttype') ? ' has-error' : ''}}">
+                            <label>Billing Account</label>
+                            <select id="ipd_accounttype" name="ipd_accounttype" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                           <option value="{{ $visit_details->payercode }}">{{ $visit_details->payercode }}</option>
+                          @foreach($accounttype as $accounttype)
+                        <option value="{{ $accounttype->type }}">{{ $accounttype->type }}</option>
+                          @endforeach 
+                        </select>         
+                           @if ($errors->has('accounttype'))
+                          <span class="help-block">{{ $errors->first('accounttype') }}</span>
                            @endif    
-                          </div>
-                          </div>
+                          </div>   
+                          </div> 
                         </div>
 
-                      </div>
-                      <footer class="panel-footer text-right bg-light lter">
-                        @if($visit_details->referal_doctor == Auth::user()->getNameOrUsername())
-                        <button type="button" onclick="addAssessment()" class="btn btn-success btn-s-xs">Save Plan</button>
-                        @else
-                        @endif
+
+                         <div class="form-group pull-in clearfix">
+                          <div class="col-sm-6">
+                            <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">
+                            <label>Visit Type</label>
+                            <select id="visit_type" name="visit_type" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                         
+                        <option value="Admission">Admission</option>
+                         <option value="Detention">Detention</option>
+                         
+                        </select>         
+                           @if ($errors->has('visit_type'))
+                          <span class="help-block">{{ $errors->first('visit_type') }}</span>
+                           @endif    
+                          </div>   
+                          </div>
+
+
+                          <div class="col-sm-6">
+                          <div class="form-group{{ $errors->has('consultation_type') ? ' has-error' : ''}}">
+                            <label>Admission / Serive Type</label>
+                            <select id="consultation_type" name="consultation_type" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                            <option value=""> -- Select Consultation -- </option>
+                          @foreach($ipdservices as $ipd)
+                        <option value="{{ $ipd->type }}">{{ $ipd->type }} </option>
+                          @endforeach 
+                        </select>         
+                           @if ($errors->has('consultation_type'))
+                          <span class="help-block">{{ $errors->first('consultation_type') }}</span>
+                           @endif    
+                          </div>   
+                        </div>  
+                        </div>
+
+
+                        <div class="form-group pull-in clearfix">
+                          <div class="col-sm-6">
+                            <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">
+                            <label>Ward</label>
+                            <select id="location" name="location" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                          @foreach($wards as $branch)
+                        <option value="{{ $branch->ward_type }}">{{  $branch->ward_type }}</option>
+                          @endforeach  
+                        </select>         
+                           @if ($errors->has('visit_type'))
+                          <span class="help-block">{{ $errors->first('visit_type') }}</span>
+                           @endif    
+                          </div>   
+                          </div>
+
+
+                          <div class="col-sm-6">
+                               <div class="form-group{{ $errors->has('referal_doctor') ? ' has-error' : ''}}">
+                            <label>Doctor</label>
+                            <select id="ipd_referal_doctor" name="ipd_referal_doctor" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%" >
+                          <option value="Non Assigned">Non Assigned</option>
+                          @foreach($doctors as $doctor)
+                        <option value="{{ $doctor->name }}">{{ $doctor->name }}</option>
+                          @endforeach 
+                        </select>         
+                           @if ($errors->has('referal_doctor'))
+                          <span class="help-block">{{ $errors->first('referal_doctor') }}</span>
+                           @endif    
+                          </div> 
+                          </div>   
+                        </div>
+                      </div> 
+                    </section> 
+
+                     <footer class="panel-footer text-right bg-light lter">
+                      <input type="hidden" id="patient_id" name="patient_id" value="{{ $visit_details->patient_id }}">
+                        <input type="hidden" id="fullname" name="fullname" value="{{ $visit_details->name }}">
+                          <input type="hidden" name="_token" value="{{ Session::token() }}">
+                        <button type="submit" class="btn btn-success btn-s-xs">Click to Admit Patient</button>
+                        
                       </footer>
-                    </section>
-                      <img src="/images/439190.svg" width="10%" align="right"> 
-                   
-                      {{--   <section class="panel panel-info">
-                                <header class="panel-heading font-bold">Plan History</header>
-                                <div class="panel-body">
-                                      <div class="table-responsive">
-                       <table id="assessmentTable" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
-                          <thead>
-                            <tr>
-                              <th>Plan</th>
-                              <th>Added By</th>
-                              <th>Date</th>
-                              <th></th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            
-                          </tbody>
-                        </table>
-                    </div>
-                    </div>
-                    </section>  
+                      </form>
+
                   </div>
 
- --}}
+
                     <div class="tab-pane" id="review-assessment">
                          
                         <section class="panel panel-info">
@@ -2162,11 +2250,8 @@
 
   @stop
 
-  <script src="{{ asset('/js/jquery.min.js')}}"></script>
+
    <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
-  <script src="{{ asset('/event_components/bootstrap.min.js')}}"></script>
-  <script src="{{ asset('/event_components/fullcalendar.min.js')}}"></script>
-  <script src="{{ asset('/event_components/moment.min.js')}}"></script>
 
   
 <script type="text/javascript">
@@ -2178,7 +2263,7 @@
      var doctor = $('#doctor').val();
 
    $('#calendar').fullCalendar({
-      weekends: false,
+      weekends: true,
       slotMinutes: 15,
       theme: false,
     header: false,
@@ -2310,6 +2395,15 @@ $(document).ready(function () {
                 loadPlan();
                 //loadTreatmentPlan();
 
+
+$('#referal_doctor').select2();    
+$('#consultation_type').select2();
+$('#location').select2();
+$('#visit_type').select2();
+$('#ipd_accounttype').select2();
+$('#ipd_referal_doctor').select2();
+
+
     $('#investigation').select2();  
      $('#procedure').select2();
      $('#medication').select2();
@@ -2354,6 +2448,15 @@ $(document).ready(function () {
      $('#drug_history_recent').select2({
       tags: true
       });
+
+        $('#g6pd').select2({
+      tags: true
+      });
+
+           $('#blood_group').select2({
+      tags: true
+      });
+
     $('#surgical_history').select2({
       tags: true
       });
@@ -2449,6 +2552,10 @@ $(document).ready(function () {
       });
 
       $('#pe_neck').select2({
+      tags: true
+      });
+
+      $('#pe_skin').select2({
       tags: true
       });
 
@@ -2644,6 +2751,8 @@ if($('#complaint').val()!= "")
           "vaccinations_history":  $('#vaccinations_history').val(),
           "drug_history":  $('#drug_history').val(),
           "drug_history_recent":  $('#drug_history_recent').val(),
+          "g6pd":  $('#g6pd').val(),
+          "blood_group":  $('#blood_group').val(),
           "surgical_history":  $('#surgical_history').val(),
           "reproductive_history":  $('#reproductive_history').val(),
           "allergy":  $('#allergy').val(),
@@ -2672,6 +2781,7 @@ if($('#complaint').val()!= "")
           "pe_general":  $('#pe_general').val(),
           "pe_HEENT":  $('#pe_HEENT').val(),
           "pe_neck":  $('#pe_neck').val(),
+          "pe_skin":  $('#pe_skin').val(),
           "pe_respiratory":  $('#pe_respiratory').val(),
           "pe_heart":  $('#pe_heart').val(),
           "pe_abdominal":  $('#pe_abdominal').val(),

@@ -121,6 +121,25 @@
                           </a>
                         </li>
                       </ul>
+                      <ul class="nav lt">
+                        <li >
+                          <a href="/whatsapp-messages" >  
+                          <b class="badge bg-info pull-right"></b>                                                           
+                            <i class="fa fa-angle-right"></i>
+                            <span>Whatsapp Message</span>
+                          </a>
+                        </li>
+                      </ul>
+
+                        <ul class="nav lt">
+                        <li >
+                          <a href="/loyalty-messages" >  
+                          <b class="badge bg-info pull-right"></b>                                                           
+                            <i class="fa fa-angle-right"></i>
+                            <span>Loyalty Usage</span>
+                          </a>
+                        </li>
+                      </ul>
                       @endrole
                     </li>
                     

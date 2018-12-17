@@ -778,6 +778,7 @@ class DrugController extends Controller
          $prescriptions = DB::table('prescriptions')
                      ->select(DB::raw('id,visitid,patientid,patient_name,created_by,GROUP_CONCAT(drug_name) as drug_name,created_on,status'))
                      ->where('status','<>','Dispensed')
+                     ->where('status','<>','Not Available to Dispense')
                      ->groupBy('visitid')
                      ->orderBy('created_on','desc')
                     ->paginate(30);
@@ -1639,9 +1640,10 @@ public function getStockDetails()
 
             ]); 
 
-      
+    
 
-            
+             Supplier::updateOrCreate(array('name' =>  $request->input('supplier')));
+
            // dd( $request->all());
 
            $drug = new Drug;
@@ -1658,13 +1660,10 @@ public function getStockDetails()
            $drug->drug_application_default = $request->input('drug_form'); 
            $drug->drug_quantity_default = $request->input('pack_size');  
            $drug->expiry_date = $this->change_date_format($request->input('expiry_date'));  
-           
            $drug->supplier = $request->input('supplier'); 
            $drug->brand = $request->input('brand'); 
-
            $drug->walk_margin = $request->input('walk_margin'); 
            $drug->insurance_margin = $request->input('insurance_margin'); 
-
            $drug->reorder_status = 1;    
            $drug->store_box = $request->input('store_box'); 
            $drug->created_on  = Carbon::now();
@@ -1672,6 +1671,7 @@ public function getStockDetails()
 
            if($drug->save())
           {
+
 
             return redirect()
             ->back()
