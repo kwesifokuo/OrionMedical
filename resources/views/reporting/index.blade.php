@@ -53,6 +53,10 @@
                     <i class="fa fa-fw fa-file"></i> Patient List
                   </a>
 
+                  <a href="/form-patient-visit" class="list-group-item">
+                    <i class="fa fa-fw fa-file"></i> Patient Visits
+                  </a>
+
 
                 </div>
               </section>

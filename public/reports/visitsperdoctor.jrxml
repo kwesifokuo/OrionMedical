@@ -3,16 +3,17 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="ireport.jasperserver.reportUnit" value="/orionmedical/patienttodoctor"/>
-	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/services/repository"/>
 	<style name="Crosstab Data Text" hAlign="Center"/>
-	<parameter name="consultationtype" class="java.lang.String">
+	<parameter name="consultation_type" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<parameter name="doctor" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
-	<parameter name="paystatus" class="java.lang.String">
+	<parameter name="visit_desc" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="payerstatus" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<parameter name="provider" class="java.lang.String">
@@ -54,12 +55,14 @@ FROM
 WHERE
     (admissions.`created_on` BETWEEN $P{start_date} and $P{end_date})
     and
-     ($P{consultationtype}= 'All'
-     or admissions.`consultation_type` = $P{consultationtype})
+     ($P{consultation_type}= 'All'
+     or admissions.`consultation_type` = $P{consultation_type})
      and ($P{doctor} = 'All'
      or admissions.`referal_doctor` = $P{doctor})
-     and ( $P{paystatus}= 'All'
-     or admissions.`payercode` = $P{paystatus})
+     and ($P{visit_desc} = 'All'
+     or  admissions.`visit_type`= $P{visit_desc})
+     and ( $P{payerstatus}= 'All'
+     or admissions.`payercode` = $P{payerstatus})
      and ( $P{provider}= 'All'
      or admissions.`care_provider` = $P{provider})]]>
 	</queryString>
@@ -93,7 +96,7 @@ WHERE
 		<band height="122" splitType="Stretch">
 			<image>
 				<reportElement x="549" y="21" width="189" height="71" uuid="cd06ef1e-c037-4db0-bfe6-0b6b248d49a5"/>
-				<imageExpression><![CDATA["repo:gileadlogo.png"]]></imageExpression>
+				<imageExpression><![CDATA["gileadlogo.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement x="11" y="72" width="59" height="20" uuid="94d1dc6b-27fa-4980-97fb-6922afa9fec1"/>
@@ -152,11 +155,11 @@ WHERE
 				<textFieldExpression><![CDATA[$P{doctor}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="70" y="93" width="250" height="20" uuid="53906614-8083-415e-97d6-8b2cb773e146"/>
+				<reportElement x="70" y="93" width="250" height="20" uuid="ba07a532-3a76-4cfc-8267-3c4ae1562dc4"/>
 				<textElement>
 					<font fontName="Calibri"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{paystatus}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{payerstatus}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

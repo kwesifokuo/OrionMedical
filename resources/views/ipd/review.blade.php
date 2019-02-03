@@ -3962,6 +3962,37 @@ $(function () {
 </script>
 
 
+
+<div class="modal fade" id="new-medication" style="height:600px">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Admit Patient</h4>
+        </div>
+        <div class="modal-body">
+          <p></p>
+                      <section class="vbox">
+                    <section class="scrollable">
+                      <div class="tab-content">
+                        <div class="tab-pane active" id="individual">
+                           <form  class="bootstrap-modal-form" class="panel-body wrapper-lg">
+                   {{--         @include('doctor/admit') --}}
+                        <input type="hidden" name="_token" value="{{ Session::token() }}">
+                      </form>
+                        </div>                  
+                        </div>
+                        </section>
+                </section>
+         </div>        
+        </div>
+        
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+
+
+
+
   <div class="modal fade" id="new-medication" style="height:600px">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -3989,7 +4020,7 @@ $(function () {
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 
-       <div class="modal fade" id="appointment-request" size="600px">
+  <div class="modal fade" id="appointment-request" size="600px">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">

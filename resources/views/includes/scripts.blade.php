@@ -34,7 +34,8 @@
 <script src="{{ asset('/js/jquery.ui.touch-punch.min.js')}}"></script>
 <script src="{{ asset('/js/fullcalendar/fullcalendar.min.js')}}"></script>
 <script src="{{ asset('/js/toastr/toastr.js')}}"></script> 
-
+<script src="{{ asset('/js/tinymce/js/tinymce/jquery.tinymce.min.js')}}"></script>
+<script src="{{ asset('/js/tinymce/js/tinymce/tinymce.min.js')}}"></script>
 {{-- <script src="{{ asset('/js/wysiwyg/jquery.hotkeys.js')}}"></script>
 <script src="{{ asset('/js/wysiwyg/bootstrap-wysiwyg.js')}}"></script>
 <script src="{{ asset('/js/wysiwyg/demo.js')}}"></script> --}}
@@ -42,6 +43,8 @@
 <script src="{{ asset('/js/libs/underscore-min.js')}}"></script>
 <script src="{{ asset('/js/prettyphoto/jquery.prettyPhoto.js')}}"></script>  
 <script src="{{ asset('/js/grid/jquery.grid-a-licious.min.js')}}"></script>
+
+
 
 
 <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>

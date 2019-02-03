@@ -3,7 +3,7 @@
 <html lang="en" class="app">
 <head>
   <meta charset="utf-8" />
-  <title>{{   $company->legal_name }}</title>
+  <title>{{   $mycompany->legal_name }}</title>
   <meta name="description" content="app, web app, responsive, admin dashboard, admin, flat, flat ui, ui kit, off screen nav" />
   
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>

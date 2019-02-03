@@ -8,10 +8,10 @@
               </header>
               
               <section class="scrollable wrapper" id="summaryreport">
-             <img src="/images/{{ $company->logo }}" width="15%">
+             <img src="/images/{{ $mycompany->logo }}" width="15%">
               <div class="row">
                 <div class="col-xs-8">
-                  <h6> <strong>{{$company->legal_name }} -   {{ $admission->consultation_type }}   </strong> </h6>
+                  <h6> <strong>{{$mycompany->legal_name }} -   {{ $admission->consultation_type }}   </strong> </h6>
               
                  <p>  <strong> Patient Name : </strong> {{ $patients->fullname }}</p>
                   <p>  <strong> Care Provider : </strong> {{ $admission->care_provider }}</p>
@@ -33,7 +33,7 @@
 
                <div class="line"></div>
                <p style="font-size:12px"> <strong> To whom it May Concern: </strong><br>
-                I had the privilege to see {{ $patients->fullname }} at the clinic today. @if($patients->gender=='Male') He @else She @endif is a  {{ $patients->date_of_birth->age }}-year-old {{ $patients->gender }} with no significant past medical history who presents to {{$company->legal_name }} as a participant in the <strong> {{ $admission->consultation_type }}  </strong>.
+                I had the privilege to see {{ $patients->fullname }} at the clinic today. @if($patients->gender=='Male') He @else She @endif is a  {{ $patients->date_of_birth->age }}-year-old {{ $patients->gender }} with no significant past medical history who presents to {{$mycompany->legal_name }} as a participant in the <strong> {{ $admission->consultation_type }}  </strong>.
                </p>
 
  

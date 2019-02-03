@@ -3,8 +3,6 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="ireport.jasperserver.reportUnit" value="/orionmedical/diagnosis_summary"/>
-	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/services/repository"/>
 	<style name="Crosstab Data Text" hAlign="Center"/>
 	<parameter name="start_date" class="java.util.Date">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
@@ -68,7 +66,7 @@ order by  diagnosis_summary.`date`]]>
 			</staticText>
 			<image>
 				<reportElement x="555" y="6" width="189" height="61" uuid="136a9759-8675-4721-8fa0-68919e942178"/>
-				<imageExpression><![CDATA["repo:gileadlogo.png"]]></imageExpression>
+				<imageExpression><![CDATA["gileadlogo.png"]]></imageExpression>
 			</image>
 			<textField pattern="EEEEE dd MMMMM yyyy">
 				<reportElement x="72" y="26" width="250" height="20" uuid="bc50d57e-fd54-4dc3-8a24-231cacedc5b1"/>

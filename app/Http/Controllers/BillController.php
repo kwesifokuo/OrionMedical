@@ -699,6 +699,7 @@ public function dashboard()
         $payments->PatientID =  $request->input('patient_id');
         $payments->EventID=$request->input('visit_id');
         $payments->AmountReceived =  $request->input('amountreceived');
+        $payments->Outstanding =  $request->input('outstanding');
         $payments->Currency =  'GHS';
         $payments->Narration =  'Medical Bill Payments';
         $payments->PaymentMethod= $request->input('paymentmethod');
@@ -709,22 +710,6 @@ public function dashboard()
 
      
 
-        $visitid   = $request->input('visit_id');
-        $paymentid = $this->generatePin(15);
-
-        $payments = new Payments();
-        $payments->PaymentID =  $paymentid;
-        $payments->PatientID =  $request->input('patient_id');
-        $payments->EventID=$request->input('visit_id');
-        $payments->AmountReceived =  $request->input('amountreceived');
-        $payments->Currency =  'GHS';
-        $payments->Narration =  'Medical Bill Payments';
-        $payments->PaymentMethod= $request->input('paymentmethod');
-        $payments->RefNumber= $request->input('referencenumber');
-        $payments->CreateDate= Carbon::now();
-        $payments->CreatedBy = Auth::user()->getNameOrUsername();
-        $payments->LastModifiedTime =  Carbon::now();
-        
         if($payments->save())
         {
             $item_checked = $request->input('item');   

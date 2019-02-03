@@ -96,8 +96,10 @@
 
           <td><a href="/appointment-slip/{{ $event->id }}" id="print" name="print" data-toggle="modal" alt="edit"><i class="fa fa-print" data-toggle="tooltip" data-placement="top" title="" data-original-title="Print App Slip"></i></a>
           </td>
-           <td><a href="#modal_check_in" class="bootstrap-modal-form-open" id="generate_visit" onclick="getDetails('{{ $event->patient_id }}')" name="generate_visit" data-toggle="modal" alt="edit"><i class="fa fa-book" data-toggle="tooltip" data-placement="top" title="" data-original-title="Check In"></i></a>
+
+          <td><a href="#edit-event" class="bootstrap-modal-form-open" id="editappointment" onclick="editAppointment('{{ $event->id }}')" name="editappointment" data-toggle="modal" alt="edit"><i class="fa fa-pencil" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit"></i></a>
            </td>
+
 					 <td><a href="#" class="bootstrap-modal-form-open" onclick="deleteappointment('{{ $event->id }}','{{ $event->title }}')"  id="delete" name="delete" data-toggle="modal" alt="edit"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete"></i></a>
            </td>
 				</tr>
@@ -183,27 +185,21 @@ $(function () {
 <script >
 
 var account_no = null;
-function getDetails(acct_no)
+function editAppointment(id)
 { 
-  account_no = acct_no;
-  $.get("/edit-patient",
-          {"patient_id":account_no},
+ 
+  $.get("/edit-appointment",
+          {"id":id},
           function(json)
           {
 
-                $('#modal_check_in input[name="patient_id"]').val(json.patient_id);
-                $('#modal_check_in input[name="fullname"]').val(json.fullname);
-                $('#modal_check_in select[name="accounttype"]').select2();
-                $('#modal_check_in select[name="referal_doctor"]').select2();
-                $('#modal_check_in select[name="consultation_type"]').select2();
-                $('#modal_check_in select[name="visit_type"]').select2();
-                $('#modal_check_in select[name="anaesthetist"]').select2();
-                $('#modal_check_in select[name="sponsor"]').select2();
-                $('#modal_check_in img[name="imagePreview"]').attr("src", '/images/'+json.image);
+                $('#edit-event input[name="name"]').val(json.appointmentname);
+                $('#edit-event input[name="title"]').val(json.appointmenttype);
+                $('#edit-event input[name="time"]').val(json.appointmenttime);
+                 $('#edit-event input[name="referal_doctor"]').val(json.appointmentdoctor);
+                 $('#edit-event input[name="id"]').val(json.appointmentid);
+              
 
-                getAge();
-                loadRisk();
-                loadBillState();
 
           },'json').fail(function(msg) {
           alert(msg.status + " " + msg.statusText);
@@ -391,7 +387,7 @@ $(function () {
           <h4 class="modal-title">New Appointment</h4>
         </div>
         <div class="modal-body">
-          <p></p>
+          
                       <section class="vbox">
                     
                     <section class="scrollable">
@@ -402,51 +398,40 @@ $(function () {
                         <input type="hidden" name="_token" value="{{ Session::token() }}">
                       </form>
                         </div>
-                  
-                  
                         </div>
-                      </div>
                     </section>
                   </section>
         </div>
-        
-      </div><!-- /.modal-content -->
+     
     </div><!-- /.modal-dialog -->
   </div>
+  </div>
 
-
-
-
-<div class="modal fade" id="modal_check_in" size="600">
+  <div class="modal fade" id="edit-event" size="600">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title">OPD Registration</h4>
+          <h4 class="modal-title">Edit Appointment</h4>
         </div>
         <div class="modal-body">
-          <p></p>
-                      <section class="vbox">
-                    <header class="header bg-light bg-gradient">
-                      <ul class="nav nav-tabs nav-white">
-                      </ul>
-                    </header>
+                  <section class="vbox">
                     <section class="scrollable">
                       <div class="tab-content">
                         <div class="tab-pane active" id="individual">
-                           <form  class="bootstrap-modal-form" method="post" data-validate="parsley" action="/create-opd" class="panel-body wrapper-lg">
-                          @include('opd/checkin')
-                        <input type="hidden" name="_token" value="{{ Session::token() }}">
-                      </form>
+                           <form  class="bootstrap-modal-form" method="post" action="/update-event" class="panel-body wrapper-lg">
+                              @include('event/edit')
+                              <input type="hidden" name="_token" value="{{ Session::token() }}">
+                            </form>
                         </div>
-                  
-                  
                         </div>
-                        </section>
-                        </section>
-                      </div>
-               </div><!-- /.modal-content -->
+                    </section>
+                  </section>
+        </div>
     </div><!-- /.modal-dialog -->
-    </div>
+  </div>
+  </div>
+
+
 
 

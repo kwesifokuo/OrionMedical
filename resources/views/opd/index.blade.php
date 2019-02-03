@@ -12,14 +12,14 @@
              <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/124950.svg" width="15%">
+                    <img src="/images/754554.svg" width="15%" class="pull-left">
                     <a class="clear" href="/new-opd"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>{{ $checkedin }}</strong></span>
                       <small class="text-muted text-uc">Check In List</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/489247.svg" width="15%">
+                    <img src="/images/846958.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/waiting-opd">
                       <span class="h3 block m-t-xs"><strong id="bugs">{{ $reviewing  }}</strong></span>
@@ -27,14 +27,14 @@
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/484789.svg" width="15%">
+                    <img src="/images/971609.svg" width="15%" class="pull-left">
                     <a class="clear" href="/billing-index">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Bills</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/250500.svg" width="15%">
+                    <img src="/images/188056.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/show-admitted">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>

@@ -734,8 +734,7 @@ a:hover .caret-white {
   overflow: visible;
   overflow-y: auto;
 }
-/*
- {
+/*@media print {
   html,
   body,
   .hbox,
@@ -748,15 +747,11 @@ a:hover .caret-white {
   }
 }*/
 @media print {
-      body, html, #wrapper,.page {
+      body, html, #wrapper {
           width: 100%;
-          overflow: visible;
-          display: inline-block;
-
       }
-
-     
 }
+
 
       
 .slimScrollBar {

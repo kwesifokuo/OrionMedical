@@ -48,7 +48,7 @@
                           <div class="col-sm-6">
                           <div class="form-group{{ $errors->has('accounttype') ? ' has-error' : ''}}">
                             <label>Account Type <span class="text-danger">*</span></label>
-                            <select id="accounttype" name="accounttype" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." class="form-control m-b">
+                            <select id="accounttype" name="accounttype" data-required="true" onchange="notbusiness();" rows="3" tabindex="1" data-placeholder="Select here.." class="form-control m-b">
                             <option value=""> -- Select Account Type -- </option>
                           @foreach($accounttype as $accounttype)
                         <option value="{{ $accounttype->type }}">{{ $accounttype->type }}</option>
@@ -242,22 +242,37 @@
                           </div>  
                           </div> 
 
-                          {{-- <div class="form-group pull-in clearfix">
-                          <div class="col-sm-6">
-                            <label>Parent ID</label>
-                            <input type="text" rows="3" class="form-control"  id="parent_id" name="parent_id" value="{{ Request::old('parent_id') ?: '' }}">      
-                          </div>   
-                          <div class="col-sm-6">
-                            <label>Link Type</label>
-                            <input type="text" rows="3" class="form-control" id="link_type" placeholder="Dependant" name="link_type" value="{{ Request::old('link_type') ?: '' }}">      
-                          </div>  
-                          </div>  --}}
-
+                         
                     </div>
                    </section> 
+
+
+                   <section class="panel panel-default">
+                     <header class="panel-heading font-bold">                  
+                      Communication
+                    </header>
+                      <div class="panel-body">
+                       
+                       <div class="form-group pull-in clearfix">
+                           <div class="col-sm-6">
+                            <label>Channel</label>
+                            <select id="communication_channel" name="communication_channel" rows="3" tabindex="1" data-placeholder="Select here.." class="form-control m-b">
+                          <option value="SMS">SMS</option>
+                          <option value="Phone Call">Phone Call</option>
+                        </select>    
+                          </div> 
+                          </div>
+                    </div>
+                   </section>
+
+
+
+
                     </div>
                     <div class="step-pane" id="step3">
                       
+
+                      <div id="insurancepane">
                       <section class="panel panel-default">
                      <header class="panel-heading font-bold">                  
                       Insurance Details
@@ -339,6 +354,7 @@
                     </div>
                    </section> 
 
+                  
                    <section class="panel panel-default">
                      <header class="panel-heading font-bold">                  
                       Employer Details
@@ -348,7 +364,7 @@
                               <div class="col-sm-6">
                                 <div class="form-group{{ $errors->has('company') ? ' has-error' : ''}}">
                               <label>Employer</label>
-                               <select id="company" name="company" rows="3" tabindex="1" data-placeholder="Select here.." class="form-control sm-3">
+                               <select id="company" name="company" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
                                <option value=""> -- Not Set -- </option>
                               @foreach($companies as $company)
                             <option value="{{ $company->name }}">{{ $company->name }}</option>
@@ -366,6 +382,24 @@
                               </div>  
                     </div>
                    </section> 
+
+
+
+                   </div>
+                  
+                  <div id="alertclause">
+                   <section class="panel panel-default">
+                     <header class="panel-heading font-bold">                  
+       
+                    </header>
+                      <div class="panel-body">
+                        <div class="form-group pull-in clearfix">
+                              <h3 class="m-b-none"> Please ensure information provided is true and valid before clicking save. </h3>  
+                              </div>
+                    </div>
+                   </section> 
+                   </div>
+
 
 
                    <footer>
@@ -402,6 +436,10 @@
 $(document).ready(function () {
    
     $('#insurance_cover').select2({
+      tags: true
+      });
+
+    $('#company').select2({
       tags: true
       });
         
@@ -443,6 +481,28 @@ $(function () {
 });
 </script>
 
+
+<script type="text/javascript">
+    function notbusiness()
+{
+  if($('#accounttype').val() != "Private")
+   {
+     $('#insurancepane').show();
+     
+
+
+   }
+
+   else
+   {
+     $('#insurancepane').hide();
+     
+    
+   }
+
+}
+
+</script>
 <script type="text/javascript">
 $(function () {
   $('#expiry_date').daterangepicker({

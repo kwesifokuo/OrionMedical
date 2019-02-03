@@ -98,7 +98,6 @@
     var base_url = '{{ url('/') }}';
 
    $('#calendar').fullCalendar({
-      weekends: false,
       slotMinutes: 15,
       theme: false,
     header: false,

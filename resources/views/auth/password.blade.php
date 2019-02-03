@@ -7,7 +7,7 @@
 <body>
   <section id="content" class="m-t-lg wrapper-md animated fadeInUp">    
     <div class="container aside-xxl">
-      <a class="navbar-brand block" href="#">{{ $company->name }}  Password Reset</a>
+      <a class="navbar-brand block" href="#">{{ $mycompany->name }}  Password Reset</a>
       <section class="panel panel-default bg-white m-t-lg">
         <header class="panel-heading text-center">
 

@@ -22,7 +22,8 @@ use OrionMedical\Models\ROS;
 use OrionMedical\Models\PatientPE;
 use OrionMedical\Models\PatientInvestigation;      
 use OrionMedical\Models\PatientAssessment;
-        
+use OrionMedical\Models\Bill;
+use OrionMedical\Models\Payments;
 use OrionMedical\Models\PatientDiagnosis;
 use OrionMedical\Models\PatientHistory;
 use OrionMedical\Models\Diagnosis;
@@ -69,6 +70,23 @@ class NurseController extends Controller
         $today =        Carbon::now()->format('Y-m-d').'%';
         $patients         = OPD::where('created_on', 'like', $today)->where('referal_doctor','<>','External Rx')->orderBy('created_on', 'DESC')->paginate(30);
         return view('nurse.index', compact('patients','statuses','locations','doctors'));
+       
+    }
+
+     public function nurseIPD()
+    { 
+         $waiting   =    OPD::where('status','Waiting to be seen')->get();
+        $reviewed   =    OPD::where('status','Review')->get();
+        $discharged =    OPD::where('status','Discharged')->get();
+        $admission  =    OPD::where('visit_type','Admission')->get();
+        $statuses   =   AdmissionStatus::get();
+        $locations  =   AdmissionLocation::get();
+        $doctors          = Doctor::get();
+
+        $today =        Carbon::now()->format('Y-m-d').'%';
+        $patients   = OPD::where('ward_admission_type','Admission')->orderBy('created_on', 'DESC')->paginate(30);
+       
+        return view('nurse.ipd', compact('patients','statuses','locations','doctors'));
        
     }
 
@@ -121,8 +139,8 @@ class NurseController extends Controller
 
          //Vital Chart Graph
         $views = DB::table('patient_vitals')
-             ->select(DB::raw("DATE_FORMAT(created_on,'%H:%i, %d-%M-%Y') as period"),DB::raw("visit_id,temperature,pulse_rate,respiration,sbp,dbp"))
-             ->where('visit_id',$id)
+             ->select(DB::raw("DATE_FORMAT(created_on,'%H:%i, %d-%M-%Y') as period"),DB::raw("visit_id,temperature,pulse_rate,respiration,sbp,dbp,weight"))
+             ->where('patient_id' ,'=', $visit_details->patient_id)
              //->groupBy('period')
              ->get();
 
@@ -134,6 +152,7 @@ class NurseController extends Controller
         $respiration  = array();
         $sbp  = array();
         $dbp  = array();
+        $weight  = array();
 
         foreach ($views as $view) {
 
@@ -141,7 +160,9 @@ class NurseController extends Controller
             array_push($temperature, $view->temperature);
             array_push($pulse_rate, $view->pulse_rate);
             array_push($respiration, $view->respiration);
-            array_push($sbp, $view->sbp);$mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
+            array_push($sbp, $view->sbp);
+             array_push($weight, $view->weight);
+            $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
         $myhistories = PatientHistory::where('visitid' ,'=', $id)->get();
         $myros = ROS::where('visit_id' ,'=', $id)->get();
         $mype = PatientPE::where('visit_id' ,'=', $id)->get();
@@ -220,6 +241,17 @@ class NurseController extends Controller
                 "pointHoverBackgroundColor" => "#fff",
                 "pointHoverBorderColor" => "rgba(0, 188, 212,1)",
                 'data' => $dbp,
+            ],
+             [
+                "label" => "Weight",
+                "fill" => false,
+                'backgroundColor' => "rgba(0, 188, 212, 0.31)",
+                'borderColor' => "rgba(26, 82, 118, 0.7)",
+                "pointBorderColor" => "rgba(26, 82, 118, 0.7)",
+                "pointBackgroundColor" => "rgba(26, 82, 118, 0.7)",
+                "pointHoverBackgroundColor" => "#fff",
+                "pointHoverBorderColor" => "rgba(26, 82, 118,1)",
+                'data' => $weight,
             ]
 
 
@@ -228,9 +260,30 @@ class NurseController extends Controller
         ->options([]);
 
 
+        $bills              = Bill::where('visit_id', $id)->orderBy('date', 'desc')->get();
+        $paiditems          = Payments::where('EventID', $id)->get();
+    
+        $payables = 0;
+        $receivables = 0;
+        $outstanding=0;
+
+        foreach($bills as $bill)
+       {
+            $payables += ($bill->rate * $bill->quantity);
+       }
+
+       foreach($paiditems as $paiditem)
+       {
+            $receivables += ($paiditem->AmountReceived);
+       }
+
+        $outstanding = ($payables - $receivables);
 
 
-       return view('nurse.review', compact('patients','mydoctorplan','availabledrugs','mynurseplan','mynursenotes','myplan','oldvisits','mype','mycomplaints','defaultheight','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','vitalcharts','review_skin','review_neuro','review_gynae','review_nutrition','review_cardio','review_gastro','visit_details','review_ent','review_respiratory'))
+
+
+
+       return view('nurse.review', compact('patients','payables','receivables','outstanding','mydoctorplan','availabledrugs','mynurseplan','mynursenotes','myplan','oldvisits','mype','mycomplaints','defaultheight','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','vitalcharts','review_skin','review_neuro','review_gynae','review_nutrition','review_cardio','review_gastro','visit_details','review_ent','review_respiratory'))
         ->with('doctors',$doctors)
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
@@ -431,6 +484,13 @@ class NurseController extends Controller
     }
 
 
+    public function addNurseHandingNote()
+    {
+        
+        
+    }
+
+
 
      public function newMedication()
     {
@@ -498,6 +558,8 @@ class NurseController extends Controller
         $myrequest = LabDocs::where('id',23)->get();
          return view('nurse.progress',compact('myrequest'));
     }
+
+
 
 
 

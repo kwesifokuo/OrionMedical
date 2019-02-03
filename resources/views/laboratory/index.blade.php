@@ -161,11 +161,6 @@
 
 <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
 
-<script type="text/javascript">
-setTimeout(function() {
-  location.reload();
-}, 30000);
-</script>
 
 <script type="text/javascript">
 $(document).ready(function () {

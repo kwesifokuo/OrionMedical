@@ -12,14 +12,14 @@
              <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                   <img src="/images/384493.svg" width="15%" class="pull-left">
+                   <img src="/images/1176511.svg" width="15%" class="pull-left">
                     <a class="clear" href="/insurance-claims-portal"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>{{$bills->total()}}</strong></span>
                       <small class="text-muted text-uc">Pending Vetting</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/384563.svg" width="15%" class="pull-left">
+                    <img src="/images/610406.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/vetted-claims">
                       <span class="h3 block m-t-xs"><strong id="bugs">{{ $vetted->total() }}</strong></span>
@@ -27,14 +27,14 @@
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/384561.svg" width="15%" class="pull-left">
+                    <img src="/images/628436.svg" width="15%" class="pull-left">
                     <a class="clear" href="/insurance-claims">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Rejected</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/384497.svg" width="15%" class="pull-left">
+                    <img src="/images/1425089.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/provider-claims">
                       <span class="h3 block m-t-xs"><strong id="bugs"></strong></span>

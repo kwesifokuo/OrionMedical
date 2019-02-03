@@ -1,70 +1,172 @@
 @extends('layouts.default')
 @section('content')
+
           <section class="vbox bg-white">
            <header class="header b-b b-light hidden-print">
                 <button href="#" class="btn btn-sm btn-info pull-right" onClick="window.print();">Print</button>
-                <p>Referal Letter</p>
+                <p>NOTES</p>
               </header>
-             <section class="scrollable wrapper">
-             <img src="/images/{{ $company->logo }}" width="15%">
+              
+              <section class="scrollable wrapper" id="summaryreport">
+             <img src="/images/{{ $mycompany->logo }}" width="15%">
               <div class="row">
-                <div class="col-xs-6">
-                  <h4>{{$company->legal_name }}</h4>
-                  <p><a href="#">{{ $company->email }}</a></p>
-                   <p><a href="#">{{ $company->address }}</a></p>
-                   <p><a href="#">{{ $company->phone }}</a></p>
-                   <p><a href="#">{{ $company->website }}</a></p>
-                  <br>
-                  
-                     
-                  </div>
-                  <div class="col-xs-6 text-right">
-                 <p>   <strong> OPD # : </strong> {{ $admission->opd_number }}</p>
-                  <p>  <strong> Patient Name : </strong> {{ $patients->fullname }}</p>
-                  <p>  <strong> Age : </strong> {{ $patients->date_of_birth->age }}</p>
+                <div class="col-xs-8">
+                  <h6> <strong>{{$mycompany->legal_name }} -   {{ $admission->consultation_type }}   </strong> </h6>
+              
+                 <p>  <strong> Patient Name : </strong> {{ $patients->fullname }}</p>
+                  <p>  <strong> Care Provider : </strong> {{ $admission->care_provider }}</p>
+                 <p>  <strong> Age : </strong> {{ $patients->date_of_birth->age }} year(s)</p>
                   <p>  <strong> Gender : </strong> {{ $patients->gender }}</p>
-                  <p>  <strong> Admission Time/Date : </strong> {{ date("g:ia\, jS M Y", strtotime($admission->created_on )) }}</p>
-                    
-                    <h5>{{ date('Y-m-d') }}</h5> 
-                   
-                     <img src="data:image/png;base64,{{DNS2D::getBarcodePNG($admission->name, 'QRCODE')}}" alt="barcode" /> 
+                  <p>  <strong> Contact No.: </strong> {{ $patients->mobile_number }}</p>
+                   <p>  <strong> Examination Time/Date : </strong> {{ date("g:ia\, jS M Y", strtotime($admission->created_on )) }}</p>
+                 
+                </div>
+                <div class="col-xs-4 text-right">
+                <img src="data:image/png;base64,{{DNS2D::getBarcodePNG('$admission->opd_number', 'QRCODE')}}" alt="barcode" />     
+                  <p>  <strong> Insurance # : </strong> {{ $patients->insurance_id }}</p>
+                  <p>  <strong> Examination # : </strong> {{ $admission->opd_number }}</p>
+                  <p>  <strong> Patient # : </strong> {{ $patients->patient_id }}</p>
+                  <p>  <strong> Date : </strong> {{ date("jS M Y", strtotime(date('Y-m-d')))  }}</p>  
+                     
+                </div>
+              </div>    
+
+               <div class="line"></div>
+               <p style="font-size:12px"> <strong> To whom it May Concern: </strong><br>
+                I had the privilege to see {{ $patients->fullname }} at the clinic today. @if($patients->gender=='Male') He @else She @endif is a  {{ $patients->date_of_birth->age }}-year-old {{ $patients->gender }} is being referred for further treatment.
+               </p>
+
+ 
+
+               <div class="line"></div>
+
+                <div class="row">
+                <p style="font-size:12px">
+                     <span><strong>Complaint</strong></span>
+                               <p class="text-dark"> {{  $mycomplaints->complaint}} .....................................................................................................................................................................................................................................................................................................................................................<br>........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................  </p>
+                  </p>
+
+
+                   <p style="font-size:12px">
+                     <span><strong>History of Presenting Illness</strong></span>
+                               <p class="text-dark"> {{  $mycomplaints->presenting}} .....................................................................................................................................................................................................................................................................................................................................................<br>........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................  </p>
+                  </p>
                   </div>
-                </div>    
-              <div>
 
-               <p style="font-size:12px"> <strong>Chief Complaint :</strong> @foreach($mycomplaints as $complaint)
-                               <a a href="#"> {{$complaint->complaint}} <i onclick="removecomplain('{{$complaint->id}}','{{$complaint->complaint}}')" class="fa fa-trash-o"></i></a>
-                               @endforeach 
-                            
-                        
-                               </p>
-                               <br>
+                  <div class="row">
+                  <div class="media-body">
+                  <p>
+                    <span><strong>History</strong></span>
+                               <ol>
+                                @foreach($myhistories as $history)
+                               
+                                @if($history->medical_history == '') @else <li> <small class="block m-t-xs">Past Medical History : <b> {{ strtoupper($history->medical_history)}} </b> </small> </li> @endif
+                                
+                                @if($history->family_history == '') @else <li> <small class="block m-t-xs"> Family History : <b>{{strtoupper($history->family_history)}} </b> </small> </li> @endif
+                              
+                              
+                                 @if($history->drug_history == '') @else<li> <small class="block m-t-xs"> Drug History :  <b> Takes {{strtoupper($history->drug_history)}}  </b> </small> </li> @endif
+                                
+                                @if($history->surgical_history == '') @else <li> <small class="block m-t-xs"> Surgical History : <b>{{strtoupper($history->surgical_history)}}</b> </small> </li> @endif
+                               
+                                @if($history->allergy == '') @else <li> <small class="block m-t-xs"> Allergies : <b>{{strtoupper($history->allergy)}} </b> </small> </li> @endif
 
-                  <p style="font-size:12px"> <strong>HPI :</strong> @foreach($mycomplaints as $complaint)
-                               <a a href="#"> {!!$complaint->presenting!!} <i onclick="removecomplain('{{$complaint->id}}','{{$complaint->complaint}}')" class="fa fa-trash-o"></i></a>
-                               @endforeach </p>
-                               <br>
+                                 @if($history->vaccinations_history == '') @else <li> <small class="block m-t-xs"> Vacinnations : <b>{{strtoupper($history->vaccinations_history)}} </b> </small> </li> @endif
+                              
+                               @endforeach
+                               </ol>
+                               
+                           </p>
+                           </div>
+                           </div>
+                 
+            <div class="row">
+                    <div class="col-xs-12">
+                  <p style="font-size:12px">
+                    <span><strong style="font-size:12px">Vitals</strong></span>
+                              <table>
+                               @foreach($myvitals as $vital)
+                               <tr>
+                               <td>
+                                @if($vital->weight == '') @else <li style="font-size:12px"> Weight <label class="badge bg-info"> {{strtoupper($vital->weight)}}  </label></li> @endif
+                                </td>
+                                <td>
+                                @if($vital->height == '') @else <li style="font-size:12px"> Height <label class="badge bg-info"> {{strtoupper($vital->height)}}  </label></li> @endif
+                                </td>
+                                <td>
+                                 @if($vital->bmi == '') @else <li style="font-size:12px"> BMI <label class="badge bg-info"> {{strtoupper($vital->bmi)}}  </label></li> @endif
+                                 </td>
+                                 <td>
+                                @if($vital->temperature == '') @else <li style="font-size:12px"> Temperature <label class="badge bg-info"> {{strtoupper($vital->temperature)}} ° </label></li> @endif
+                                </td>
+                                <td>
+                                @if($vital->pulse_rate == '') @else <li style="font-size:12px"> Pulse Rate <label class="badge bg-info"> {{strtoupper($vital->pulse_rate)}}  </label></li> @endif
+                                </td>
+                                <td>
+                                @if($vital->sbp == '') @else <li style="font-size:12px"> Blood Pressure <label class="badge bg-info"> {{strtoupper($vital->sbp)}} / {{$vital->dbp}}  </label></li> @endif
+                                </td>
+                                 </tr>
+                               @endforeach
+                               </table>
+                  </p>
+                  </div>
+                  </div>
 
+                  <div class="row">
+                  <div class="col-xs-12">
+                  <p style="font-size:12px">
+                     <span><strong>General Examination</strong></span>
+                                 @foreach($mype as $physical)
+                                <ol>
+                                @if($physical->pe_general == '') @else <li> <small class="block m-t-xs">General : <b> {{ strtoupper($physical->pe_general)}} </b> </small> </li> @endif
+
+                                @if($physical->pe_HEENT == '') @else  <li> <small class="block m-t-xs">HEENT : <b> {{strtoupper($physical->pe_HEENT)}} </b> </small> </li> @endif
+
+
+                                @if($physical->pe_neck == '') @else  <li> <small class="block m-t-xs">Neck : <b> {{strtoupper($physical->pe_neck)}} </b> </small> </li> @endif
+
+                                 @if($physical->pe_respiratory == '') @else  <li> <small class="block m-t-xs">Respiratory : <b> {{strtoupper($physical->pe_respiratory)}} </b> </small> </li> @endif
+
+                                @if($physical->pe_heart == '') @else  <li> <small class="block m-t-xs">Cardiovascular : <b> {{strtoupper($physical->pe_heart)}} </b> </small> </li> @endif
+
+
+                                @if($physical->pe_abdominal == '') @else  <li> <small class="block m-t-xs">Abdominal : <b> {{strtoupper($physical->pe_abdominal)}} </b> </small> </li> @endif
+
+                                @if($physical->pe_extremities == '') @else  <li> <small class="block m-t-xs">Extremities : <b> {{strtoupper($physical->pe_extremities)}} </b> </small> </li> @endif
+
+                                @if($physical->pe_cns == '') @else  <li> <small class="block m-t-xs">CNS : <b> {{strtoupper($physical->pe_cns)}} </b> </small> </li> @endif
+
+                                @if($physical->pe_musculoskeletal == '') @else  <li> <small class="block m-t-xs">Musculoskeletal : <b> {{strtoupper($physical->pe_musculoskeletal)}} </b> </small> </li> @endif
+
+
+                                @if($physical->pe_psychological == '') @else <li> <small class="block m-t-xs">Psychological : <b> {{strtoupper($physical->pe_psychological)}} </b> </small> </li> @endif
+                                 </ol>
+
+                               @endforeach
+
+                  </p>
+                  </div>
+                  </div>
 
               
+              <div class="row">
+              <div class="col-xs-12">
                   <p style="font-size:12px">
-                    <span><strong>Past Medical History :  </strong></span>
-                    <br>
-                                @foreach($myhistories as $history)
-                                <ul>
-                                @if($history->medical_history == '') @else <li>Past Medical History <label class="badge bg-default"> {{$history->medical_history}}  </label></li> @endif
-                                @if($history->family_history == '') @else <li>Family History <label class="badge bg-info"> {{$history->family_history}}  </label></li> @endif
-                                @if($history->social_history == '') @else <li> Social History <label class="badge bg-primary"> {{$history->social_history}}  </label></li> @endif
-                                 @if($history->drug_history == '') @else <li> Drug History <label class="badge bg-success">Takes {{$history->drug_history}}  </label></li> @endif
-                                @if($history->surgical_history == '') @else <li>Surgical History <label class="badge bg-warning"> {{$history->surgical_history}}  </label></li> @endif
-                                @if($history->reproductive_history == '') @else <li> Reproductive History <label class="badge bg-danger"> {{$history->reproductive_history}}  </label></li> @endif
-                                @if($history->vaccinations_history == '') @else <li>Vacinnations <label class="badge bg-default"> {{$history->vaccinations_history}}  </label></li> @endif
-                                @if($history->allergy == '') @else <li> Allergies <label class="badge bg-danger"> {{$history->allergy}}  </label></li> 
-                                @endif
-                                </ul>
-                               @endforeach 
-                              
+                      <span><strong>Investigations</strong></span>
+
+                            <div>
+                            <ul class="checkbox-grid">
+                             @foreach($mylabs as $lab)
+                              <li><span style="font-size:9px">{{$lab->investigation}}</span> - <b>{{ strtoupper($lab->remark)}} </b></li>
+                            
+                               @endforeach
+                          </ul>
+                          </div>
+
+                        
                   </p>
+                  </div>
+                  </div>
 
 
                      <div class="row">
@@ -123,11 +225,11 @@
 
                     <p style="font-size:12px">
                  <span><strong>Reason for Referal </strong></span>
-                           <p class="text-dark"> @foreach($myplan as $val) <label > {{ strtoupper($val->assessment) }}, </label> @endforeach .....................................................................................................................................................................................................................................................................................................................................................<br>........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................<br>........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................<br> </p>
+                           <p class="text-dark"> @foreach($referals as $val) <label > {{ strtoupper($val->content) }}, </label> @endforeach .....................................................................................................................................................................................................................................................................................................................................................<br>........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................<br>........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................<br> </p>
                   </p>
 
 
-                  <p class="btn btn-sm btn-default pull-right"> Referring Doctor : {{ Auth::user()->getNameOrUsername() }}</p>
+                  <p class="btn btn-sm btn-default pull-right"> Referring Doctor : {{  $admission->referal_doctor }}</p>
               <br>
               <br>
               <br>
@@ -136,7 +238,14 @@
               <br>
               <br>
                 <br>
-                
 
-               
+                  
+                  </section>
+                  
+                  </section>
+
+             
 @stop
+
+
+

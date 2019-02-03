@@ -2,18 +2,22 @@
 @section('content')
 <section class="vbox">
            <header class="header bg-white b-b b-light">
-<p><span class="label label-success">{{ $visitdetails->name}}</span></p> 
-<p class="block"><a href="#" class=""></a> <span class="label label-warning btn-rounded">{{ $visitdetails->visit_type }}</span></p>
- <p class="block"><a href="#" class=""></a> <span class="label label-success btn-rounded">{{ $visitdetails->opd_number }}</span></p>
- <p class="block"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Created : {{ Carbon\Carbon::parse($visitdetails->created_on)->diffForHumans() }}</span></p>
+                    
 
-  <div class="btn-group pull-right">
-                    <p>
-        <a href="#" class="btn btn-rounded btn-sm btn-info"><i class="fa fa-fw fa-user"></i> {{ $visitdetails->payercode }}</a>
-        <a href="#" class="btn btn-rounded btn-sm btn-primary"><i class="fa fa-fw fa-home"></i> {{ $visitdetails->care_provider }} </a>
-                    </p>
-              </div>
+                     
 
+                      <a href="#" class="btn btn-warning btn-s-md btn-lg pull-right">Total Charge : GHS {{ $payables }}</a>
+                      <a href="#" class="btn btn-success btn-s-md btn-lg pull-right">Paid : GHS {{ $receivables }}</a>
+                      <a href="#" class="btn btn-danger btn-s-md btn-lg pull-right">Outstanding : GHS {{ number_format($outstanding, 1, '.', ',') }}</a>
+
+                      ||
+
+                   
+                      
+                     <a href="#"  class="btn btn-info btn-s-md btn-lg">{{ $visitdetails->care_provider }}</a> ||
+                     <a href="#"  class="btn btn-info btn-s-md btn-lg ">{{ $patients->company }}</span></a>
+                   
+           
             </header>
             <section class="scrollable">
               <section class="hbox stretch">
@@ -235,22 +239,7 @@
                     <section class="scrollable">
                       <div class="wrapper">
                        
-                         <section class="panel clearfix bg-default lter">
-                          <div class="panel-body">
-                          
-                            <div class="clear">
-                           <p>
-                       <a href="#" class="btn btn-warning btn-s-md btn-lg pull-right"> Bill : GHS {{ $payables }}</a>
-                      </p>
-                      <p>
-                       <a href="#" class="btn btn-success btn-s-md btn-lg pull-right"> Paid : GHS {{ $receivables }}</a>
-                      </p>
-                      <p>
-                       <a href="#" class="btn btn-danger btn-s-md btn-lg pull-right"> Outstanding. : GHS {{ $outstanding }}</a>
-                      </p>
-                            </div>
-                          </div>
-                        </section>
+     
 
                          <section class="panel clearfix bg-default lter">
                           <div class="panel-body">

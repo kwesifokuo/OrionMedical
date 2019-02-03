@@ -97,6 +97,18 @@ class KYCController extends Controller
     ->with('civilstatus',$civilstatus);
 
    }
+
+
+   public function registerWithtabFull()
+   {
+
+  
+      
+    return view('patient.quick');
+   
+  
+
+   }
      
     public function activepatients()
     {
@@ -327,7 +339,7 @@ public function doGenerateBulkID()
            $patient->civil_status        = Input::get('civil_status');
            $patient->id_type             = Input::get('id_type');
            $patient->id_number           = strtoupper(Input::get('id_number'));
-           $patient->ref_code             = $patient_number;
+           $patient->ref_code            = $patient_number;
            $patient->image               = $filename;
            $patient->created_by          = Auth::user()->getNameOrUsername();
            $patient->kin_name            = Input::get('kin_name');
@@ -335,9 +347,10 @@ public function doGenerateBulkID()
            $patient->kin_relationship    = Input::get('kin_relationship');
            $patient->insurance_cover     = Input::get('insurance_cover');
            $patient->insurance_eligibility = Input::get('insurance_eligibility');
-           $patient->parent_id = Input::get('parent_id');
-           $patient->link_type = Input::get('link_type');
-           $patient->expiry_date          = Carbon::createFromFormat('d/m/Y',Input::get('expiry_date'));
+           $patient->parent_id             = Input::get('parent_id');
+           $patient->link_type             = Input::get('link_type');
+           $patient->expiry_date           = Carbon::createFromFormat('d/m/Y',Input::get('expiry_date'));
+           $patient->communication_channel = Input::get('communication_channel');
           
 
           
@@ -419,7 +432,7 @@ public function doGenerateBulkID()
                             break;
                         case 'Corporate':
                              $service_charge = ServiceCharge::where('type','REGISTRATION OF PATIENT')->value('corporate');
-                             $savecopayer =  $mycopayer->company;
+                             $savecopayer =  Input::get('company');
                              $myaccounttype = 'Corporate';
                             break;
                         case 'Private':

@@ -30,9 +30,19 @@
                         <span>Appointment</span>
                       </a>
                     </li>
+
+
+                    <li >
+                      <a href="/register-quick"  >
+                        <i class="fa fa-laptop icon">
+                          <b class="bg-primary dker"></b>
+                        </i>
+                        <span>Tab</span>
+                      </a>
+                    </li>
+
                     
                     <li>
-
                       <a href="#layout"  >
                         <i class="fa fa-wheelchair icon">
                           <b class="bg-warning"></b>
@@ -186,16 +196,18 @@
                         <span>Pharmacy</span>
                       </a>
                     </li>
-                    <li >
-                      <a href="/stores"  >
+                    @endrole
+
+                    <li>
+                      <a href="/store-requisitions"  >
                         
                         <i class="fa fa-shopping-cart icon">
                           <b class="bg-primary dker"></b>
                         </i>
-                        <span>Stores</span>
+                        <span>Store Requisitions</span>
                       </a>
                     </li>
-                    @endrole
+                   
                   
                     @role(['Billing','System Admin','Cashier','Special Admin','Pharmacist','Pharmacy Technician'])
                      <li >
@@ -260,7 +272,7 @@
                         <i class="fa fa-heart-o icon">
                           <b class="bg-primary dker"></b>
                         </i>
-                        <span>Dietian</span>
+                        <span>Dietitian</span>
                       </a>
                     </li>
                     @endrole
@@ -327,44 +339,10 @@
                         <li >
                           <a href="/medical-reports" >                                                        
                             <i class="fa fa-angle-right"></i>
-                            <span>Medical</span>
+                            <span>Dashboard</span>
                           </a>
                         </li>
 
-                        <li >
-                          <a href="/patient-reports" >                                                        
-                            <i class="fa fa-angle-right"></i>
-                            <span>Patient</span>
-                          </a>
-                        </li>
-
-                        <li >
-                          <a href="/financial-reports" >                                                        
-                            <i class="fa fa-angle-right"></i>
-                            <span>Financial</span>
-                          </a>
-                        </li>
-
-                        <li >
-                          <a href="/billing-reports" >                                                        
-                            <i class="fa fa-angle-right"></i>
-                            <span>Billing</span>
-                          </a>
-                        </li>
-
-                        <li >
-                          <a href="/purchases-reports" >                                                        
-                            <i class="fa fa-angle-right"></i>
-                            <span>Purchases</span>
-                          </a>
-                        </li>
-
-                        <li >
-                          <a href="/company-reports" >                                                        
-                            <i class="fa fa-angle-right"></i>
-                            <span>Company</span>
-                          </a>
-                        </li>
                        
                       </ul>
                     </li>
@@ -448,7 +426,7 @@
                     </header>
                     <div class="panel-body animated fadeInRight">
                       <p class="text-sm">No contacts in your lists.</p>
-                      <p><a href="#" class="btn btn-sm btn-facebook"><i class="fa fa-fw fa-facebook"></i> Invite from  {{   $company->name }} Facebook</a></p>
+                      <p><a href="#" class="btn btn-sm btn-facebook"><i class="fa fa-fw fa-facebook"></i> Invite from  {{   $mycompany->name }} Facebook</a></p>
                     </div>
                   </section>
                 </section>

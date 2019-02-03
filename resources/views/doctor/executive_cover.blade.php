@@ -6,14 +6,14 @@
                 <p>Executive Health Cover Letter</p>
               </header>
               <section class="scrollable wrapper">
-             <img src="/images/{{ $company->logo }}" width="15%">
+             <img src="/images/{{ $mycompany->logo }}" width="15%">
                <div class="row">
                 <div class="col-xs-6">
-                  <h4>{{$company->legal_name }}</h4>
-                  <p><a href="#">{{ $company->email }}</a></p>
-                   <p><a href="#">{{ $company->address }}</a></p>
-                   <p><a href="#">{{ $company->phone }}</a></p>
-                   <p><a href="#">{{ $company->website }}</a></p>
+                  <h4>{{$mycompany->legal_name }}</h4>
+                  <p><a href="#">{{ $mycompany->email }}</a></p>
+                   <p><a href="#">{{ $mycompany->address }}</a></p>
+                   <p><a href="#">{{ $mycompany->phone }}</a></p>
+                   <p><a href="#">{{ $mycompany->website }}</a></p>
                   <br>
                   
                      

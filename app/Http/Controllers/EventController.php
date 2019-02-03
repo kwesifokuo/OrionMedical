@@ -12,6 +12,7 @@ use OrionMedical\Models\VisitType;
 use OrionMedical\Models\AccountType;
 use OrionMedical\Models\AppointmentStatus;
 use OrionMedical\Models\Branch;
+use OrionMedical\Models\HandingOverNote;
 use OrionMedical\Http\Requests;
 use OrionMedical\Http\Controllers\Controller;
 use DateTime;
@@ -212,14 +213,9 @@ class EventController extends Controller
             'time'  => 'required'
         ]);
 
-        $event                  = new Event;
-        $event->name            = $request->input('referal_doctor');
-        $event->mobile_number   = 0;
-        $event->patient_id      = 0;
-        $event->title           = $request->input('title');
-        $event->start_time      = Carbon::createFromFormat('d/m/Y H:i:s', $request->input('time'));
-        $event->end_time        = Carbon::createFromFormat('d/m/Y H:i:s', $request->input('time'))->addMinutes(15);
-        $event->doctor          = $request->input('referal_doctor');
+        $event                  = new HandingOverNote;
+        $event->content         = $request->input('title');
+        $event->note_date      = Carbon::createFromFormat('d/m/Y H:i:s', $request->input('time'));
         $event->created_on      = Carbon::now();
         $event->created_by      = Auth::user()->getNameOrUsername();
 
@@ -261,41 +257,58 @@ class EventController extends Controller
         return view('event/view', $data);
     }
 
+
+
    
-    public function edit($id)
+    public function edit()
     {
+
+        $id = Input::get('id');
+
         $event = Event::findOrFail($id);
-        $event->start_time =  $this->change_date_format_fullcalendar($event->start_time);
-        $event->end_time =  $this->change_date_format_fullcalendar($event->end_time);
+       
         
         $data = [
-            'page_title'    => 'Edit '.$event->title,
-            'event'         => $event,
+
+            'appointmentid'    => $event->id,
+            'appointmenttype'    => $event->title,
+            'appointmentname'    => $event->name,
+            'appointmentdoctor'    => $event->doctor,
+            'appointmenttime'    => $event->start_time->format('d/m/Y H:s:i'),
         ];
         
-        return view('event/edit', $data);
+         return Response::json($data);
     }
 
  
-    public function update(Request $request, $id)
+    public function updateAppointmentInfo(Request $request)
     {
-        $this->validate($request, [
-            'name'  => 'required|min:5|max:15',
-            'title' => 'required|min:5|max:100',
-            'time'  => 'required|available|duration'
-        ]);
+
+          $id =  $request->input('id');
+          $affectedRows = Event::where('id', $id)
+            ->update(array(
+                          
+                           'name'           =>  $request->input('name'),
+                           'title'          => $request->input('title'),
+                           'doctor'          => $request->input('referal_doctor'),
+                           'start_time'     =>Carbon::createFromFormat('d/m/Y H:i:s', $request->input('time')),
+                           'end_time'       => Carbon::createFromFormat('d/m/Y H:i:s', $request->input('time'))));
+
+            if($affectedRows > 0)
+            {
+          
         
-        $time = explode(" - ", $request->input('time'));
-        
-        $event                  = Event::findOrFail($id);
-        $event->name            = $request->input('name');
-        $event->title           = $request->input('title');
-        $event->start_time      = $this->change_date_format($time[0]);
-        $event->end_time        = $this->change_date_format($time[1]);
-        $event->doctor          = $request->input('referal_doctor');
-        $event->save();
-        
-        return redirect('events');
+            return redirect()
+            ->route('event-list')
+            ->with('success','Patient has successfully been updated!');
+            }
+
+            else
+            {
+            return redirect()
+            ->route('event-list')
+            ->with('error','Patient failed to update!');
+            }
     }
 
 
@@ -359,7 +372,9 @@ class EventController extends Controller
     foreach($events as $event)
     {
         $service = $event->status;
-        $event->title = $event->title . ' ('.$event->doctor.') ' .' - ' .$event->name;
+        $event->title = ucwords(strtolower($event->name.' - '.$event->title. ' ( '.$event->doctor.') '));
+
+        // - '.$event->title . ' ('.$event->doctor.') ';
 
 
         if($service == 'Pending Arrival')
@@ -417,11 +432,11 @@ class EventController extends Controller
  public function appointmentNurse()
     {
 
-    $events = DB::table('appointments')->select('id', 'name', 'title', 'start_time as start', 'end_time as end','doctor')->where('doctor','like','%Nurse%')->get();
+    $events = DB::table('handing_over_notes')->select('id', 'content', 'note_date as start', 'note_date as end','created_by')->get();
     foreach($events as $event)
     {
-        $service = $event->title;
-        $event->title = $event->title . ' ('.$event->doctor.') ' .' - ' .$event->name;
+        $service = $event->content;
+        $event->title = $event->content . ' ('.$event->created_by.')';
 
 
         if($service == 'GP CONSULTATION')

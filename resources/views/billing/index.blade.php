@@ -9,18 +9,18 @@
               </ul>
 
 
-            @role(['Billing','System Admin'])                 
+            @role(['Billing','System Admin','Pharmacist'])                 
              <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                   <img src="/images/384493.svg" width="15%" class="pull-left">
+                   <img src="/images/1392052.svg" width="15%" class="pull-left">
                     <a class="clear" href="/billing-index"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>{{$bills->total()}}</strong></span>
                       <small class="text-muted text-uc">Bills</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/384563.svg" width="15%" class="pull-left">
+                    <img src="/images/138368.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/payment-index">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
@@ -28,14 +28,14 @@
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/384561.svg" width="15%" class="pull-left">
+                    <img src="/images/1414577.svg" width="15%" class="pull-left">
                     <a class="clear" href="/insurance-claims">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Corporate & Insurance Bills</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/384496.svg" width="15%" class="pull-left">
+                    <img src="/images/1136118.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/service-charges">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
@@ -108,7 +108,7 @@
 
                           
                             
-                            <td><a href="/consultation/{{ $bill->visit_id }}" class="text-danger">IN-{{ $bill->visit_id }}</a></td>
+                            <td><a href="#" class="text-danger">IN-{{ $bill->visit_id }}</a></td>
                             <td>{{ ucwords(strtolower($bill->fullname)) }}</td>
                             <td>{{ $bill->copayer }}</td>
                             <td>{{ $bill->item_name }} ...</td>

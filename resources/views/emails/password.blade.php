@@ -389,7 +389,7 @@
             <tr>
               <td class="email-masthead">
                 <a href="#" class="email-masthead_name">
-        {{ $company->legal_name }}
+        {{ $mycompany->legal_name }}
       </a>
               </td>
             </tr>

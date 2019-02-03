@@ -37,12 +37,12 @@
 
                          <div class="form-group pull-in clearfix">
                            <div class="col-sm-6">
-                            <label>Brand</label> 
+                            <label>Department</label> 
                             <div class="form-group{{ $errors->has('brand') ? ' has-error' : ''}}">
                             <select type="text" rows="3" data-required="true" style="width:100%" id="brand" name="brand" value="{{ Request::old('brand') ?: '' }}">
-                            <option value=""> -- Select Brand -- </option>
-                               @foreach($brands as $brand)
-                            <option value="{{ $brand->brand }}">{{ $brand->brand }}</option>
+                            <option value=""> -- Select Department -- </option>
+                               @foreach($brands as $department)
+                            <option value="{{ $department->name }}">{{  $department->name }}</option>
                             @endforeach 
                             </select>
                            @if ($errors->has('brand'))

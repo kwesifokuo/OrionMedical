@@ -2,7 +2,7 @@
 <html lang="en" class="bg-dark">
 <head>
   <meta charset="utf-8" />
-  <title>{{ $company->name }} | Account Manager</title>
+  <title>{{ $mycompany->name }} | Account Manager</title>
   <meta name="description" content="app, web app, responsive, admin dashboard, admin, flat, flat ui, ui kit, off screen nav" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /> 
   <link rel="stylesheet" href="{{ asset('/css/bootstrap.css')}}" type="text/css" />
@@ -23,7 +23,7 @@
 
   <section id="content" class="m-t-lg wrapper-md animated fadeInDown" >
     <div class="container aside-xxl">
-      <a class="navbar-brand block" href="{{ route('auth.signin') }}">{{ $company->name }} </a>
+      <a class="navbar-brand block" href="{{ route('auth.signin') }}">{{ $mycompany->name }} </a>
       <section class="panel panel-default m-t-lg bg-white">
         <header class="panel-heading text-center">
           <strong>Account Management</strong>

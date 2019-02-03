@@ -9,11 +9,11 @@
               @foreach($visits as $visit)
             
             <div class="page">
-             <img src="/images/{{ $company->logo }}" width="15%">
+             <img src="/images/{{ $mycompany->logo }}" width="15%">
               
               <div class="row">
                 <div class="col-xs-6">
-                   <h4>{{$company->legal_name }} </h4>
+                   <h4>{{$mycompany->legal_name }} </h4>
                  <p> <strong> Provider : </strong> {{ $visit->care_provider }} </p>  
                  <p>  <strong> Patient Name : </strong> {{ $visit->name }}</p>
                  <p>  <strong> Age : </strong> {{ $visit->patient->date_of_birth->age }}</p>

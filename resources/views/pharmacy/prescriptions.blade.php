@@ -14,14 +14,14 @@
              <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                      <img src="/images/139202.svg" width="15%">
+                      <img src="/images/898620.svg" width="15%" class="pull-left">
                     <a class="clear" href="/prescriptions-pending"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>{{ $requested }}</strong></span>
                       <small class="text-muted text-uc">Requested</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                     <img src="/images/139180.svg" width="15%">
+                     <img src="/images/822180.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/prescriptions-dispensed">
                       <span class="h3 block m-t-xs"><strong id="bugs">{{ $dispensed }}</strong></span>
@@ -29,14 +29,14 @@
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                     <img src="/images/273298.svg" width="15%">
+                     <img src="/images/146926.svg" width="15%" class="pull-left">
                     <a class="clear" href="/prescriptions-returned">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Returned</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                     <img src="/images/395537.png" width="15%">
+                     <img src="/images/191106.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/list-of-drugs-avaliable">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>

@@ -3,8 +3,6 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="ireport.jasperserver.reportUnit" value="/orionmedical/billlisting"/>
-	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/services/repository"/>
 	<style name="Crosstab Data Text" hAlign="Center"/>
 	<parameter name="provider" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
@@ -18,7 +16,10 @@
 	<parameter name="end_date" class="java.util.Date">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
-	<parameter name="consultationtype" class="java.lang.String">
+	<parameter name="visit_type" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="consultation_type" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<queryString>
@@ -28,8 +29,10 @@
      or note = $P{paystatus})
      and ( $P{provider}= 'All'
      or `care_provider` = $P{provider})
-   and ( $P{consultationtype} = 'All'
-     or `consultation_type` = $P{consultationtype})
+     and ( $P{visit_type} = 'All'
+     or `visit_type` = $P{visit_type})
+   and ( $P{consultation_type} = 'All'
+     or `consultation_type` = $P{consultation_type})
  group by visit_id]]>
 	</queryString>
 	<field name="uuid" class="java.lang.String">
@@ -110,7 +113,7 @@
 			</textField>
 			<image>
 				<reportElement x="591" y="0" width="189" height="71" uuid="00f03872-adb7-4cad-9e67-8d24ce83f03c"/>
-				<imageExpression><![CDATA["repo:gileadlogo.png"]]></imageExpression>
+				<imageExpression><![CDATA["gileadlogo.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>

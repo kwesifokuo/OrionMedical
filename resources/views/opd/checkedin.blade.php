@@ -10,34 +10,34 @@
               </ul>
 
              
-             <section class="panel panel-default">
+            <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/184697.svg" width="15%">
+                    <img src="/images/754554.svg" width="15%" class="pull-left">
                     <a class="clear" href="/new-opd"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
-                      <span class="h3 block m-t-xs"><strong>0</strong></span>
+                      <span class="h3 block m-t-xs"><strong>{{ $checkedin }}</strong></span>
                       <small class="text-muted text-uc">Check In List</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/201633.svg" width="15%">
+                    <img src="/images/846958.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/waiting-opd">
-                      <span class="h3 block m-t-xs"><strong id="bugs">{{ $patients->count() }}</strong></span>
+                      <span class="h3 block m-t-xs"><strong id="bugs">{{ $reviewing  }}</strong></span>
                       <small class="text-muted text-uc">Practitioners List</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/383764.svg" width="15%">
-                    <a class="clear" href="/review-opd">
-                      <span class="h3 block m-t-xs"><strong>{{ $reviewing }}</strong></span>
-                      <small class="text-muted text-uc">Awaiting Investigations</small>
+                    <img src="/images/971609.svg" width="15%" class="pull-left">
+                    <a class="clear" href="/billing-index">
+                      <span class="h3 block m-t-xs"><strong>0</strong></span>
+                      <small class="text-muted text-uc">Bills</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/250500.svg" width="15%">
+                    <img src="/images/188056.svg" width="15%" class="pull-left">
                     </span>
-                    <a class="clear" href="/discharged-opd">
+                    <a class="clear" href="/show-admitted">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
                       <small class="text-muted text-uc">Admissions & Dententions</small>
                     </a>
@@ -46,7 +46,6 @@
                  
                 </div>
               </section>
-
 
               <div class="row">
 
@@ -81,11 +80,15 @@
                            <th>Visit #</th>
                             <th>Time In</th>
                             <th>Patient Name</th>
-                            <th>Appointment Type</th>
+                            <th>Visit Type</th>
                              <th>Practioner</th>
                             <th>Area</th>
                              <th>Care Provider</th>
                               <th>Branch</th>
+                             {{--  <th>Total Time</th> --}}
+                              <th>Check Out Time</th>
+                              <th>Last Updated By</th>
+                              <th>Status</th>
                             <th></th>
                             <th></th>
                             <th></th>
@@ -104,8 +107,13 @@
                             <td>{{ $patient->location }}</td>
                             <td>{{$patient->payercode }}, {{ $patient->care_provider }}</td>
                             <td>{{ $patient->branch }}</td>
-
+                          {{--   <td>{{ $patient->checkout_time->diffInHours($patient->created_on) }}</td> --}}
+                           <td>{{ $patient->checkout_time }}</td>
+                             <td>{{ $patient->updated_by }}</td>
+                               <td>{{ $patient->status }}</td>
                             
+
+
                            <td><a href="#edit-visit" class="bootstrap-modal-form-open" onclick="getDetails('{{ $patient->opd_number }}')" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-pencil" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit Visit Detail"></i></a></td>
                             
 
@@ -125,6 +133,10 @@
                               <a href="#" class="active" onclick="doDelete('{{ $patient->id }}','{{ $patient->name }}')" data-toggle="class"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete"></i></a>
                             </td>
                             @endrole
+
+                             <td>
+                              <a href="#" class="active" onclick="doDischarge('{{ $patient->id }}','{{ $patient->name }}')" data-toggle="class"><i class="fa fa-power-off" data-toggle="tooltip" data-placement="top" title="" data-original-title="End Visit"></i></a>
+                            </td>
                             
                           </tr>
                          @endforeach
@@ -212,56 +224,56 @@ $(function () {
 
 <script type="text/javascript">
   
-  function doDischarge(id,name)
-  {
+//   function doDischarge(id,name)
+//   {
 
-  swal({
-  title: "Discharging " + name +"!",
-  //text: "Enter discharge comment:",
-  type: "input",
-  showCancelButton: true,
-  closeOnConfirm: false,
-  animation: "slide-from-top",
-  inputPlaceholder: "Enter discharge comment"
-},
-function(inputValue){
-  if (inputValue === false) return false;
+//   swal({
+//   title: "Discharging " + name +"!",
+//   //text: "Enter discharge comment:",
+//   type: "input",
+//   showCancelButton: true,
+//   closeOnConfirm: false,
+//   animation: "slide-from-top",
+//   inputPlaceholder: "Enter discharge comment"
+// },
+// function(inputValue){
+//   if (inputValue === false) return false;
   
-  if (inputValue === "") {
-    swal.showInputError("You need to enter discharge comment!");
-    return false
-  }
+//   if (inputValue === "") {
+//     swal.showInputError("You need to enter discharge comment!");
+//     return false
+//   }
   
-  else
-  {
-    $.get('/discharge-patient',
-          {
-             "ID": id,
-             "comment": inputValue  
-          },
-          function(data)
-          { 
+//   else
+//   {
+//     $.get('/discharge-patient',
+//           {
+//              "ID": id,
+//              "comment": inputValue  
+//           },
+//           function(data)
+//           { 
             
-            $.each(data, function (key, value) 
-            {
-            if(value == "OK")
-            {
-              swal("Discharged!", name +" was successfully discharged.", "success"); 
-              location.reload(true);
-             }
-            else
-            { 
-              swal("Failed", name +" failed to process.", "error");
+//             $.each(data, function (key, value) 
+//             {
+//             if(value == "OK")
+//             {
+//               swal("Discharged!", name +" was successfully discharged.", "success"); 
+//               location.reload(true);
+//              }
+//             else
+//             { 
+//               swal("Failed", name +" failed to process.", "error");
               
-            }
+//             }
            
-        });
+//         });
                                           
-          },'json');    
-  }
-});
+//           },'json');    
+//   }
+// });
 
-}
+// }
 
 
 function doDelete(id,name)
@@ -293,6 +305,56 @@ function doDelete(id,name)
             if(value == "OK")
             {
               swal("Deleted!", name +" was successfully deleted.", "success"); 
+              location.reload(true);
+             }
+            else
+            { 
+              swal("Cancelled", name +" failed to delete.", "error");
+              
+            }
+           
+        });
+                                          
+          },'json');    
+           
+             } 
+        else {     
+          swal("Cancelled", name +" failed to delete.", "error");   
+        } });
+
+  }
+
+
+
+  function doDischarge(id,name)
+  {
+
+         
+      swal({   
+        title: "Discharging " + name +"!",  
+        text: "Do you want to discharge "+name+" ?",   
+        type: "warning",   
+        showCancelButton: true,   
+        confirmButtonColor: "#DD6B55",   
+        confirmButtonText: "Yes, discharge!",   
+        cancelButtonText: "No, cancel !",   
+        closeOnConfirm: false,   
+        closeOnCancel: false }, 
+        function(isConfirm){   
+          if (isConfirm) 
+          { 
+          $.get('/discharge-opd',
+          {
+             "ID": id 
+          },
+          function(data)
+          { 
+            
+            $.each(data, function (key, value) 
+            {
+            if(value == "OK")
+            {
+              swal("Discharged!", name +" was successfully deleted.", "success"); 
               location.reload(true);
              }
             else

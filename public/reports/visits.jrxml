@@ -3,16 +3,17 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="ireport.jasperserver.reportUnit" value="/orionmedical/visitstat"/>
-	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/services/repository"/>
 	<style name="Crosstab Data Text" hAlign="Center"/>
-	<parameter name="consultationtype" class="java.lang.String">
+	<parameter name="consultation_type" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<parameter name="doctor" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
-	<parameter name="account_type" class="java.lang.String">
+	<parameter name="visit_desc" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="payerstatus" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<parameter name="provider" class="java.lang.String">
@@ -54,12 +55,14 @@ FROM
 WHERE
     (admissions.`created_on` BETWEEN $P{start_date} and $P{end_date})
     and
-     ($P{consultationtype}= 'All'
-     or admissions.`consultation_type` = $P{consultationtype})
+     ($P{consultation_type}= 'All'
+     or admissions.`consultation_type` = $P{consultation_type})
      and ($P{doctor} = 'All'
      or admissions.`referal_doctor` = $P{doctor})
-     and ( $P{account_type}= 'All'
-     or admissions.`payercode` = $P{account_type})
+     and ($P{visit_desc} = 'All'
+     or  admissions.`visit_type`= $P{visit_desc})
+     and ( $P{payerstatus}= 'All'
+     or admissions.`payercode` = $P{payerstatus})
      and ( $P{provider}= 'All'
      or admissions.`care_provider` = $P{provider})]]>
 	</queryString>
@@ -145,18 +148,18 @@ WHERE
 				<textFieldExpression><![CDATA[$P{end_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="70" y="73" width="250" height="20" uuid="1422cae0-8834-4861-a49f-3452e31dc70c"/>
+				<reportElement x="70" y="73" width="250" height="20" uuid="fe6d654d-36a4-42a4-8d7a-5765414e73fd"/>
 				<textElement>
-					<font size="8"/>
+					<font fontName="Calibri"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{consultationtype}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{consultation_type}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="70" y="92" width="250" height="20" uuid="0a736096-b83f-4b76-8e21-a7bc56207096"/>
+				<reportElement x="70" y="93" width="250" height="20" uuid="ba07a532-3a76-4cfc-8267-3c4ae1562dc4"/>
 				<textElement>
-					<font size="8"/>
+					<font fontName="Calibri"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{account_type}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{payerstatus}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

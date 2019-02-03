@@ -18,8 +18,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //
-        $company = Company::get()->first();
-        view()->share('company', $company);
+        $mycompany = Company::get()->first();
+        view()->share('mycompany', $mycompany);
 
         //if(Auth::check()) 
         //{

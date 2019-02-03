@@ -54,12 +54,15 @@ use OrionMedical\Models\PatientVitals;
 use OrionMedical\Models\PatientAssessment;
 use OrionMedical\Models\PatientPlan;
 use OrionMedical\Models\PatientFluids;
+use OrionMedical\Models\PatientOrtho;
 use OrionMedical\Models\OcularExamination;
 use OrionMedical\Models\PatientPE;
 use OrionMedical\Models\Payments;
 use OrionMedical\Models\Company;
+use OrionMedical\Models\ProcedureText;
 
 use OrionMedical\Models\ContinuationSheet;
+use OrionMedical\Models\ContinuationSheetOP;
 use OrionMedical\Models\NursePlan;
 use OrionMedical\Models\NurseNote;
 use OrionMedical\Models\ReferalNote;
@@ -73,6 +76,7 @@ use Input;
 use Response;
 use Datetime;
 use OneSignal;
+use Cache;
 
 
 
@@ -108,120 +112,7 @@ class DoctorController extends Controller
         }
     }
 
-    public function getPatientProfile($id)
-   {
-    $servicetype   = ServiceCharge::orderBy('type', 'ASC')->get();          
-    $departments   = Department::get();
-    $doctors       = Doctor::get();  
-    $visittypes    = VisitType::get();
-    $medications   = Prescription::where('patientid','=',$id)->orderBy('created_on', 'DESC')->get();    
-    $images        = Images::where('accountnumber','=',$id)->get();
-    $patients      = Customer::where('patient_id' ,'=', $id)->first();
-    $insurers      = InsuranceCompany::get();
-    $consultations = OPD::where('patient_id' ,'=', $id)->orderBy('created_on', 'DESC')->get();
-    $diagnosis     = PatientDiagnosis::where('patient_id' ,'=', $id)->orderBy('date', 'DESC')->get();
-    $procedures    = PatientProcedure::where('patientid' ,'=', $id)->orderBy('created_on', 'DESC')->get();
-    $investigations = PatientInvestigation::where('patientid' ,'=', $id)->orderBy('created_on', 'DESC')->get();
-    $allergies     = PatientHistory::where('patientid' ,'=', $id)->orderBy('created_on', 'DESC')->get();
-    $billingaccounts = AccountType::get();
-
-    $bills              = Bill::where('visit_id', $id)->orderBy('date', 'desc')->get();
-        $paiditems          = Payments::where('EventID', $id)->get();
-    
-        $payables = 0;
-        $receivables = 0;
-        $outstanding=0;
-
-        foreach($bills as $bill)
-       {
-            $payables += ($bill->rate * $bill->quantity);
-       }
-
-       foreach($paiditems as $paiditem)
-       {
-            $receivables += ($paiditem->AmountReceived);
-       }
-
-       $outstanding = ($payables - $receivables);
-    //dd($allergies);
-       //Vital Chart Graph
-        $views = DB::table('patient_vitals')
-             ->select(DB::raw("DATE_FORMAT(created_on,'%H:%i, %d-%M-%Y') as period"),DB::raw("visit_id,weight,height,temperature"))
-             ->where('patient_id',$id)
-             //->groupBy('period')
-             ->get();
-
-           // dd($views); 
-        
-        $labels      = array();
-        $weight      = array();
-        $height      = array();
-        $temperature = array();
-
-        foreach ($views as $view) {
-
-            array_push($labels, $view->period);
-            array_push($weight, $view->weight);
-            array_push($height, $view->height);
-            array_push($temperature, $view->temperature);
-        }
-        //dd($commentDataset);
-    
-        $vitalcharts = app()->chartjs
-        ->name('vitals')
-        ->type('line')
-        ->size(['width' => 1000, 'height' => 300])
-        ->labels($labels)
-        ->datasets([
-            [
-                "label" => "Temperature",
-                'beginAtZero' => "true",
-                 "fill" => false,
-                'backgroundColor' => "rgba(38, 185, 154, 0.31)",
-                'borderColor' => "rgba(38, 185, 154, 0.7)",
-                'strokeColor' => "#f56954",
-                'pointColor' => "#A62121",
-                'pointStrokeColor' => "#741F1F",
-                "pointBorderColor" => "rgba(38, 185, 154, 0.7)",
-                "pointBackgroundColor" => "rgba(38, 185, 154, 0.7)",
-                "pointHoverBackgroundColor" => "#fff",
-                "pointHoverBorderColor" => "rgba(220,220,220,1)",
-                'data' => $temperature,
-            ],
-            [
-                "label" => "Weight",
-                 "fill" => false,
-                'backgroundColor' => "rgba(255, 99, 132, 0.31)",
-                'borderColor' => "rgba(255, 99, 132, 0.7)",
-                "pointBorderColor" => "rgba(255, 99, 132, 0.7)",
-                "pointBackgroundColor" => "rgba(255, 99, 132, 0.7)",
-                "pointHoverBackgroundColor" => "#fff",
-                "pointHoverBorderColor" => "rgba(220,220,220,1)",
-                'data' => $weight,
-            ],
-            [
-                "label" => "Height",
-                "fill" => false,
-                'backgroundColor' => "rgba(153, 102, 255, 0.31)",
-                'borderColor' => "rgba(153, 102, 255, 0.7)",
-                "pointBorderColor" => "rgba(153, 102, 255, 0.7)",
-                "pointBackgroundColor" => "rgba(153, 102, 255, 0.7)",
-                "pointHoverBackgroundColor" => "#fff",
-                "pointHoverBorderColor" => "rgba(220,220,220,1)",
-                'data' => $height,
-            ]
-
-
-            
-        ])
-        ->options([]);
-
-        
-
-
-    return view('patient.profile', compact('patients','payables','receivables','outstanding','billingaccounts','allergies','vitalcharts','diagnosis','procedures','investigations','visittypes','consultations','images','departments','doctors','insurers','servicetype','medications'));
-
-   }
+   
 
     public function opd()
     {   
@@ -243,10 +134,24 @@ class DoctorController extends Controller
         $discharged =    OPD::where('status','Discharged')->get();
         $admission =    OPD::where('visit_type','Admission')->get();
 
-        $today =        Carbon::now()->format('Y-m-d').'%';
-        $patients         = OPD::where('visit_type','Admission')->where('referal_doctor',Auth::user()->getNameOrUsername())->where('created_on', 'like', $today)->orderBy('created_on', 'DESC')->paginate(30);
+        $today      =        Carbon::now()->format('Y-m-d').'%';
+        $patients   = OPD::where('ward_admission_type','Admission')->where('referal_doctor',Auth::user()->getNameOrUsername())->orderBy('created_on', 'DESC')->paginate(30);
         $complaintperiods = range( date("D") , 30 );
-       return view('doctor.opd', compact('patients','discharged','complaintperiods','waiting','reviewed','admission'));
+       return view('doctor.ipd', compact('patients','discharged','complaintperiods','waiting','reviewed','admission'));
+    }
+
+
+     public function ipdNurse()
+    {   
+        $waiting  =    OPD::where('status','Waiting to be seen')->get();
+        $reviewed =    OPD::where('status','Review')->get();
+        $discharged =    OPD::where('status','Discharged')->get();
+        $admission =    OPD::where('visit_type','Admission')->get();
+
+        $today      =        Carbon::now()->format('Y-m-d').'%';
+        $patients   = OPD::where('ward_admission_type','Admission')->where('referal_doctor',Auth::user()->getNameOrUsername())->orderBy('created_on', 'DESC')->paginate(30);
+        $complaintperiods = range( date("D") , 30 );
+       return view('doctor.ipd', compact('patients','discharged','complaintperiods','waiting','reviewed','admission'));
     }
 
 
@@ -776,7 +681,10 @@ class DoctorController extends Controller
         $reproductivehx  = SocialFamilyHistory::where('category','Reproductive')->orderBy('type', 'ASC')->get();
         $allergichx      = SocialFamilyHistory::where('category','Allergy')->orderBy('type', 'ASC')->get();
 
-        $diagnosis        = Diagnosis::orderBy('type', 'ASC')->get();
+       
+        $diagnosis = Cache::remember('diagnosis', 15, function () {
+                    return Diagnosis::get();
+                    });
         $doctors          = Doctor::get();
         $triage           = PatientVitals::where('patient_id' ,'=', $visit_details->patient_id)->first();
         $complaintperiods = range( date("D") , 30 );
@@ -1630,11 +1538,13 @@ class DoctorController extends Controller
         $mydrugs = Prescription::where('visitid' ,'=', $id)->get();
         $mylabs = PatientInvestigation::where('visitid' ,'=', $id)->get();
         $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
+        $myortho = PatientOrtho::where('visitid' ,'=', $id)->get();
         $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
         $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
         $referals = ReferalNote::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
         $mydoctorplan = PatientAssessment::where('visit_id' ,'=', $id)->first() ?: new PatientAssessment;
         $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->first() ?: new ContinuationSheet;
+        //$continuationop = ContinuationSheetOP::where('visit_id' ,'=', $id)->orderby('created_on','desc')->first() ?: new ContinuationSheet;
         
 
         $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
@@ -1667,7 +1577,7 @@ class DoctorController extends Controller
         $outstanding = ($payables - $receivables);
       
 
-        return view('dentist.review', compact('patients','servicetype','doctors','oldvisits','myplan','mype','myros','mydrugs','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','mylabs','pe_constitutional','referals','mydoctorplan','continuation','payables','receivables','outstanding','bills','payables','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','tooths','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
+        return view('dentist.review', compact('patients','continuationop','servicetype','myortho','doctors','oldvisits','myplan','mype','myros','mydrugs','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','mylabs','pe_constitutional','referals','mydoctorplan','continuation','payables','receivables','outstanding','bills','payables','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','tooths','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
         ->with('drugs',$drugs)
@@ -1766,6 +1676,7 @@ class DoctorController extends Controller
         $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
         $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
         $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        
         $referals = ReferalNote::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
        
 
@@ -1881,18 +1792,34 @@ class DoctorController extends Controller
         $doctors         = Doctor::get();
         $visittypes      = VisitType::get();
 
+        $mynursenotes = NurseNote::where('visit_id' ,'=', $id)->first() ?: new NurseNote;
+        $accounttype = AccountType::get();
+        $branches = Branch::get();
+         $mydoctorplan = PatientAssessment::where('visit_id' ,'=', $id)->first() ?: new PatientAssessment;
+        $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->orderby('created_on','desc')->first() ?: new ContinuationSheet;
+        $continuationop = ContinuationSheetOP::where('visit_id' ,'=', $id)->orderby('created_on','desc')->first() ?: new ContinuationSheet;
+        $wards = Ward::get();
+         $ipdservices     = ServiceCharge::orderBy('type', 'ASC')->where('department','IPD')->get();
 
-        $bills              = Bill::where('visit_id' ,'=', $id)->where('note', 'Unpaid')->orderBy('date', 'ASC')->get();
+
+        $bills              = Bill::where('visit_id', $id)->orderBy('date', 'desc')->get();
+        $paiditems          = Payments::where('EventID', $id)->get();
+    
         $payables = 0;
-
+        $receivables = 0;
+        $outstanding=0;
 
         foreach($bills as $bill)
        {
             $payables += ($bill->rate * $bill->quantity);
        }
 
-        
+       foreach($paiditems as $paiditem)
+       {
+            $receivables += ($paiditem->AmountReceived);
+       }
 
+        $outstanding = ($payables - $receivables);
 
 
 
@@ -1902,12 +1829,25 @@ class DoctorController extends Controller
         $lie              = GestationLie::get();
         $position         = GestationPostion::get();
         $antenatalcharts  = AntenatalChart::where('patient_id',$visit_details->patient_id)->orderBy('id', 'DESC')->first();
+
+
+         $defaultg6pd = 'NA';
+         $defaultbloodgroup = 'NA';
+        if ($antenatalcharts) 
+        {
+            $defaultg6pd = $antenatalcharts->g6pd;
+            $defaultbloodgroup = $antenatalcharts->bloodtype;
+        } 
+        else {
+                $defaultg6pd = 'NA';
+            $defaultbloodgroup = 'NA';
+        }
        
 
-        //dd($charts);
+        //dd($defaultg6pd);
 
 
-      return view('antenatal.reviewnew', compact('mype','referals','antenatalcharts','gestationperiods','presentations','fetus','position','lie','continuation','vitalcharts','expcomplaints','expdirectquestion','myplan','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
+      return view('antenatal.review', compact('mype','referals','defaultg6pd','continuationop','defaultbloodgroup','mynursenotes','ipdservices','accounttype','mydoctorplan','branches','wards','payables','receivables','outstanding','antenatalcharts','gestationperiods','presentations','fetus','position','lie','continuation','vitalcharts','expcomplaints','expdirectquestion','myplan','pe_constitutional','oldvisits','pe_heart','pe_neck','pe_breast','pe_psychological','pe_neuropsychiatric','pe_musculoskeletal','pe_extremities','pe_gynecology','pe_abdominal','pe_genitourinary','pe_gastro','pe_HEENT','pe_respiratory','patients','bills','payables','visittypes','servicetype','pastmedicalhx','familyhx','allergichx','reproductivehx','surgicalhx','medicationhx','vacinnationhx','socialhx','mydiagnosis','myvitals','myhistories','mylabs','mydrugs','myros','mycomplaints','triage','complaintperiods','visit_details','ros_throat','ros_eyes','ros_ears','ros_nose','ros_skin','ros_head','ros_constitutional','ros_respiratory','ros_cardiovasular','ros_gastro','ros_gynecology','ros_genitourinary','ros_endocrine','ros_musculoskeletal','ros_peripheral_vascular','ros_hematology','ros_neuropsychiatric'))
         ->with('doctors',$doctors)
         ->with('diagnosis',$diagnosis)
         ->with('treatments',$treatments)
@@ -1934,32 +1874,32 @@ class DoctorController extends Controller
 
 
             //calculate Gest Age & EDD
-            $mydate = Carbon::now();
-            $mylmp = Carbon::createFromFormat('d/m/Y', Input::get("lmp"));
-            $gestation_period = $mydate->diff($mylmp);
-            $weeks = $mydate->diffInWeeks($mylmp).' Weeks';
-            $calgp = $weeks.' '.$gestation_period->format('%d days');
-            $edddays = $mylmp->addDays(280);
-            
+            // $mydate = Carbon::now();
+            // $mylmp = Carbon::createFromFormat('d/m/Y', Input::get("lmp"));
+            // $gestation_period = $mydate->diff($mylmp);
+            // $weeks = $mydate->diffInWeeks($mylmp).' Weeks';
+            // $calgp = $weeks.' '.$gestation_period->format('%d days');
+            // $edddays = $mylmp->addDays(280);
+
             
            $record                      = new AntenatalChart;
            $record->visit_id            = Input::get("opd_number");
            $record->patient_id          = Input::get("patient_id");
-           $record->review_date         = Input::get("review_date");
+           //$record->review_date         = Carbon::now();
            $record->lmp                 = Carbon::createFromFormat('d/m/Y', Input::get("lmp"));
-           $record->gestation_by_date   = Carbon::createFromFormat('d/m/Y', Input::get("gestation_by_date"));
-           $record->fetus               = Input::get("fetus");       
+           $record->gestation_by_date   = Input::get("gestation_by_date");
+            $record->fetus               = Input::get("fetus");       
            $record->presentation        = $presentation;
            $record->engagement          = $engagement;
-           $record->fh_fm               = Input::get("fh_fm");
+            $record->fh_fm               = Input::get("fh_fm");
            $record->position            = $position;
-           $record->lie                 = $lie;
-           $record->oedema              = Input::get("oedema");
+          $record->lie                 = $lie;
+            $record->oedema              = Input::get("oedema");
            $record->urine_sugar         = Input::get("urine_sugar");       
-           $record->urine_protein       = Input::get("urine_sugar"); 
-           $record->edd                 = Carbon::createFromFormat('d/m/Y', Input::get("edd"));
-           $record->bloodtype           = Input::get("bloodtype");
-           $record->g6pd                = Input::get("g6pd"); 
+            $record->urine_protein       = Input::get("urine_protein"); 
+         $record->edd                 = Carbon::createFromFormat('d/m/Y', Input::get("edd"));
+          $record->bloodtype           = Input::get("bloodtype");
+         $record->g6pd                = Input::get("g6pd"); 
            $record->tt                  = Input::get("tt"); 
            $record->sp                  = Input::get("sp");
            $record->fetal_heart_tone    = Input::get("fetal_heart_tone");
@@ -2207,6 +2147,11 @@ public function laboratory()
    {
         $company = Company::get()->first();
         $patients = Customer::get();
+
+        $waiting  =    OPD::where('status','Waiting to be seen')->get();
+        $reviewed =    OPD::where('status','Review')->get();
+        $discharged =    OPD::where('status','Discharged')->get();
+        $admission =    OPD::where('visit_type','Admission')->get();
          
         $investigations = ServiceCharge::where('department','Laboratory')->orwhere('department','Radiology')->orderBy('type', 'ASC')->get();
         $today =        Carbon::now()->format('Y-m-d').'%';
@@ -2220,7 +2165,7 @@ public function laboratory()
 
         // $myrequests = PatientInvestigation::where('type','Laboratory')->orderby('created_on','desc')->groupby('visitid')->paginate(10);
 
-         return view('doctor.investigation',compact('myrequests','investigations','patients','company'));
+         return view('doctor.investigation',compact('myrequests','investigations','patients','company','waiting','reviewed','discharged','admission'));
    }
 
     public function getDischarged()
@@ -2572,6 +2517,8 @@ public function generateStaffID()
             break;
         case 'Private':
              $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('walkin');
+        case 'Walkin':
+             $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('walkin');
             break;
         case 'Gratis':
              $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('charge');
@@ -2725,6 +2672,8 @@ public function generateStaffID()
             break;
         case 'Private':
              $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('walkin');
+         case 'Walkin':
+             $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('walkin');
             break;
         case 'Gratis':
              $investigation_amount = ServiceCharge::where('type',Input::get("investigation"))->value('charge');
@@ -2875,7 +2824,7 @@ public function generateStaffID()
 
                        else
                        {
-                         $service_charge = ServiceCharge::where('type',$request->input('procedure'))->value('insurance');
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('insurance');
                           
                        }
             break;
@@ -2883,6 +2832,8 @@ public function generateStaffID()
              $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('corporate');
             break;
         case 'Private':
+             $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('walkin');
+             case 'Walkin':
              $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('walkin');
             break;
         case 'Gratis':
@@ -2946,6 +2897,8 @@ public function generateStaffID()
              $transactionid     = uniqid(20);
 
              $getpatientstatus = OPD::where('opd_number',Input::get("opd_number"))->first();
+              $service_charge =0;
+
 
             switch(Input::get('accounttype')) 
             {
@@ -3023,6 +2976,9 @@ public function generateStaffID()
              $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('corporate');
             break;
         case 'Private':
+             $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('walkin');
+            break;
+        case 'Walkin':
              $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('walkin');
             break;
         case 'Gratis':
@@ -3162,7 +3118,7 @@ public function generateStaffID()
 
                        else
                        {
-                         $service_charge = ServiceCharge::where('type',$request->input('procedure'))->value('insurance');
+                         $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('insurance');
                           
                        }
             break;
@@ -3170,6 +3126,9 @@ public function generateStaffID()
              $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('corporate');
             break;
         case 'Private':
+             $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('walkin');
+            break;
+        case 'Walkin':
              $service_charge = ServiceCharge::where('type',Input::get("procedure"))->value('walkin');
             break;
         case 'Gratis':
@@ -3581,6 +3540,37 @@ public function generateStaffID()
 
     }
 
+    public function addContinuationOP()
+    {     
+
+
+            $ID = Input::get("opd_number");
+            $affectedRows = ContinuationSheetOP::where('visit_id', '=', $ID)->delete();
+
+           $assessment                  = new ContinuationSheetOP;
+           $assessment->visit_id        = Input::get("opd_number");
+           $assessment->patient_id      = Input::get("patient_id");
+           $assessment->content         = Input::get("continuation_sheet");
+           $assessment->created_on      = Carbon::now();
+           $assessment->created_by      = Auth::user()->getNameOrUsername();
+
+            if($assessment->save())
+            {
+    
+              $added_response = array('OK'=>'OK');
+                return  Response::json($added_response);
+
+            }
+            else
+            {
+                $added_response = array('No Data'=>'No Data');
+                return  Response::json($added_response);
+            }
+
+    }
+
+
+
     public function addPlan()
     {     
          
@@ -3762,8 +3752,6 @@ public function generateStaffID()
             if(Input::get("gynae_history")){$gynae_history =  implode(", ", Input::get("gynae_history"));} else {$gynae_history = null;}
             if(Input::get("developmental_history")){$developmental_history =  implode(", ", Input::get("developmental_history"));} else {$developmental_history = null;}
             if(Input::get("obs_history")){$obs_history =  implode(", ", Input::get("obs_history"));} else {$obs_history = null;}
-
-
 
 
             if(Input::get("sex_history")){$sex_history =  implode(", ", Input::get("sex_history"));} else {$sex_history = null;}
@@ -4101,50 +4089,6 @@ public function addNoteForDental()
             if(Input::get("reproductive_history")){$reproduction =  implode(", ", Input::get("reproductive_history"));} else {$reproduction = null;}
             if(Input::get("allergy")){$allergy =  implode(", ", Input::get("allergy"));} else {$allergy = null;}
 
-
-            if(Input::get("ros_constitutional")){$general =  implode(", ", Input::get("ros_constitutional"));} else {$general = null;}
-            if(Input::get("ros_skin")){$skin =  implode(", ", Input::get("ros_skin"));} else {$skin = null;}
-            if(Input::get("ros_head")){$head =  implode(", ", Input::get("ros_head"));} else {$head = null;}
-            if(Input::get("ros_eyes")){$eyes =  implode(", ", Input::get("ros_eyes"));} else {$eyes = null;}
-            if(Input::get("ros_ears")){$ears =  implode(", ", Input::get("ros_ears"));} else {$ears = null;}
-            if(Input::get("ros_nose")){$nose =  implode(", ", Input::get("ros_nose"));} else {$nose = null;}
-            if(Input::get("ros_throat")){$throat =  implode(", ", Input::get("ros_throat"));} else {$throat = null;}
-            if(Input::get("ros_respiratory")){$respiratory =  implode(", ", Input::get("ros_respiratory"));} else {$respiratory = null;}
-            if(Input::get("ros_cardiovasular")){$cardiovascular =  implode(", ", Input::get("ros_cardiovasular"));} else {$cardiovascular = null;}
-             if(Input::get("ros_gastro")){$gastrointestinal =  implode(", ", Input::get("ros_gastro"));} else {$gastrointestinal = null;}
-            if(Input::get("ros_gynecology")){$gynecologic =  implode(", ", Input::get("ros_gynecology"));} else {$gynecologic = null;}
-            if(Input::get("ros_genitourinary")){$genitourinary =  implode(", ", Input::get("ros_genitourinary"));} else {$genitourinary = null;}
-            if(Input::get("ros_endocrine")){$endocrine =  implode(", ", Input::get("ros_endocrine"));} else {$endocrine = null;}
-            if(Input::get("ros_musculoskeletal")){$musculoskeletal =  implode(", ", Input::get("ros_musculoskeletal"));} else {$musculoskeletal = null;}
-            if(Input::get("ros_peripheral_vascular")){$peripheral_vascular =  implode(", ", Input::get("ros_peripheral_vascular"));} else {$peripheral_vascular = null;}
-            if(Input::get("ros_hematology")){$hematology =  implode(", ", Input::get("ros_hematology"));} else {$hematology = null;}
-            if(Input::get("ros_neuropsychiatric")){$neuro =  implode(", ", Input::get("ros_neuropsychiatric"));} else {$neuro = null;}
-
-
-
-            if(Input::get("pe_general")){$pe_general =  implode(", ", Input::get("pe_general"));} else {$pe_general = null;}
-            if(Input::get("pe_HEENT")){$pe_HEENT =  implode(", ", Input::get("pe_HEENT"));} else {$pe_HEENT = null;}
-            if(Input::get("pe_neck")){$pe_neck =  implode(", ", Input::get("pe_neck"));} else {$pe_neck = null;}
-            if(Input::get("pe_respiratory")){$pe_respiratory =  implode(", ", Input::get("pe_respiratory"));} else {$pe_respiratory = null;}
-            if(Input::get("pe_heart")){$pe_heart =  implode(", ", Input::get("pe_heart"));} else {$pe_heart = null;}
-            if(Input::get("pe_abdominal")){$pe_abdominal =  implode(", ", Input::get("pe_abdominal"));} else {$pe_abdominal = null;}
-            if(Input::get("pe_extremities")){$pe_extremities =  implode(", ", Input::get("pe_extremities"));} else {$pe_extremities = null;}
-            if(Input::get("pe_cns")){$pe_cns =  implode(", ", Input::get("pe_cns"));} else {$pe_cns = null;}
-            if(Input::get("pe_musculoskeletal")){$pe_musculoskeletal =  implode(", ", Input::get("pe_musculoskeletal"));} else {$pe_musculoskeletal = null;}
-            if(Input::get("pe_psychological")){$pe_psychological =  implode(", ", Input::get("pe_psychological"));} else {$pe_psychological = null;}
-            if(Input::get("pe_breast")){$pe_breast =  implode(", ", Input::get("pe_breast"));} else {$pe_breast = null;}
-
-
-            //Antenal Histories & Physical Exam
-            if(Input::get("pe_vulva")){$pe_vulva =  implode(", ", Input::get("pe_vulva"));} else {$pe_vulva = null;}
-            if(Input::get("pe_vagina")){$pe_vagina =  implode(", ", Input::get("pe_vagina"));} else {$pe_vagina = null;}
-            if(Input::get("pe_adnexa")){$pe_adnexa =  implode(", ", Input::get("pe_adnexa"));} else {$pe_adnexa = null;}
-            if(Input::get("pe_ext_genitalia")){$pe_ext_genitalia =  implode(", ", Input::get("pe_ext_genitalia"));} else {$pe_ext_genitalia = null;}
-            if(Input::get("pe_pelvic")){$pe_pelvic =  implode(", ", Input::get("pe_pelvic"));} else {$pe_pelvic = null;}
-
-            if(Input::get("pe_cervix")){$pe_cervix =  implode(", ", Input::get("pe_cervix"));} else {$pe_cervix = null;}
-            if(Input::get("pe_uterus")){$pe_uterus =  implode(", ", Input::get("pe_uterus"));} else {$pe_uterus = null;}
-            
             if(Input::get("gravida")){$gravida =  implode(", ", Input::get("gravida"));} else {$gravida = null;}
             if(Input::get("parity")){$parity =  implode(", ", Input::get("parity"));} else {$parity = null;}
             if(Input::get("living")){$living =  implode(", ", Input::get("living"));} else {$living = null;}
@@ -4152,6 +4096,54 @@ public function addNoteForDental()
             if(Input::get("gynae_history")){$gynae_history =  implode(", ", Input::get("gynae_history"));} else {$gynae_history = null;}
             if(Input::get("developmental_history")){$developmental_history =  implode(", ", Input::get("developmental_history"));} else {$developmental_history = null;}
             if(Input::get("obs_history")){$obs_history =  implode(", ", Input::get("obs_history"));} else {$obs_history = null;}
+
+
+
+
+            if(Input::get("skeletal_pattern")){$skeletal_pattern =  implode(", ", Input::get("skeletal_pattern"));} else {$skeletal_pattern = null;}
+            if(Input::get("soft_tissue_extraoral")){$soft_tissue_extraoral =  implode(", ", Input::get("soft_tissue_extraoral"));} else {$soft_tissue_extraoral = null;}
+            if(Input::get("smile_incisor_show")){$smile_incisor_show =  implode(", ", Input::get("smile_incisor_show"));} else {$smile_incisor_show = null;}
+            if(Input::get("oral_hygiene")){$oral_hygiene =  implode(", ", Input::get("oral_hygiene"));} else {$oral_hygiene = null;}
+            if(Input::get("soft_tissue")){$soft_tissue =  implode(", ", Input::get("soft_tissue"));} else {$soft_tissue = null;}
+            if(Input::get("stage")){$stage =  implode(", ", Input::get("stage"));} else {$stage = null;}
+            if(Input::get("teeth_present")){$teeth_present =  implode(", ", Input::get("teeth_present"));} else {$teeth_present = null;}
+            if(Input::get("tooth_quality")){$tooth_quality =  implode(", ", Input::get("tooth_quality"));} else {$tooth_quality = null;}
+            if(Input::get("tooth_anomalities")){$tooth_anomalities =  implode(", ", Input::get("tooth_anomalities"));} else {$tooth_anomalities = null;}
+            if(Input::get("trauma")){$trauma =  implode(", ", Input::get("trauma"));} else {$trauma = null;}
+
+
+            if(Input::get("lower_labial")){$lower_labial =  implode(", ", Input::get("lower_labial"));} else {$lower_labial = null;}
+            if(Input::get("lower_buccal")){$lower_buccal =  implode(", ", Input::get("lower_buccal"));} else {$lower_buccal = null;}
+            if(Input::get("upper_labial")){$upper_labial =  implode(", ", Input::get("upper_labial"));} else {$upper_labial = null;}
+            if(Input::get("upper_buccal")){$upper_buccal =  implode(", ", Input::get("upper_buccal"));} else {$upper_buccal = null;}
+            if(Input::get("arch_form")){$arch_form =  implode(", ", Input::get("arch_form"));} else {$arch_form = null;}
+            if(Input::get("stage")){$stage =  implode(", ", Input::get("stage"));} else {$stage = null;}
+            if(Input::get("overjet")){$overjet =  implode(", ", Input::get("overjet"));} else {$overjet = null;}
+            if(Input::get("centre_lines")){$centre_lines =  implode(", ", Input::get("centre_lines"));} else {$centre_lines = null;}
+            if(Input::get("overbite")){$overbite =  implode(", ", Input::get("overbite"));} else {$overbite = null;}
+            if(Input::get("diastema")){$diastema =  implode(", ", Input::get("diastema"));} else {$diastema = null;}
+
+            if(Input::get("incisor_relationship")){$incisor_relationship =  implode(", ", Input::get("incisor_relationship"));} else {$incisor_relationship = null;}
+            if(Input::get("canine_relationship")){$canine_relationship =  implode(", ", Input::get("canine_relationship"));} else {$canine_relationship = null;}
+            if(Input::get("molar_relationship")){$molar_relationship =  implode(", ", Input::get("molar_relationship"));} else {$molar_relationship = null;}
+            if(Input::get("curve_of_spee")){$curve_of_spee =  implode(", ", Input::get("curve_of_spee"));} else {$curve_of_spee = null;}
+            if(Input::get("cross_bite")){$cross_bite =  implode(", ", Input::get("cross_bite"));} else {$cross_bite = null;}
+            if(Input::get("scissors_bite")){$scissors_bite =  implode(", ", Input::get("scissors_bite"));} else {$scissors_bite = null;}
+
+            if(Input::get("occlusion")){$occlusion =  implode(", ", Input::get("occlusion"));} else {$occlusion = null;}
+            if(Input::get("sublingual_area")){$sublingual_area =  implode(", ", Input::get("sublingual_area"));} else {$sublingual_area = null;}
+            if(Input::get("oropharynx")){$oropharynx =  implode(", ", Input::get("oropharynx"));} else {$oropharynx = null;}
+            if(Input::get("edentulous_ridge")){$edentulous_ridge =  implode(", ", Input::get("edentulous_ridge"));} else {$edentulous_ridge = null;}
+
+
+            if(Input::get("periodontal_assessment")){$periodontal_assessment =  implode(", ", Input::get("periodontal_assessment"));} else {$periodontal_assessment = null;}
+            if(Input::get("lymph_node")){$lymph_node =  implode(", ", Input::get("lymph_node"));} else {$lymph_node = null;}
+            if(Input::get("tmj")){$tmj =  implode(", ", Input::get("tmj"));} else {$tmj = null;}
+            if(Input::get("muscle_of_mastication")){$muscle_of_mastication =  implode(", ", Input::get("muscle_of_mastication"));} else {$muscle_of_mastication = null;}
+
+
+
+
 
 
             
@@ -4190,59 +4182,55 @@ public function addNoteForDental()
            $history->created_by                 = Auth::user()->getNameOrUsername();
 
 
-            $ros                    = new ROS;
-            $ros->general           = $general;
-            $ros->skin              = $skin;
-            $ros->head              = $head;
-            $ros->eyes              = $eyes;
-            $ros->ears              = $ears;
-            $ros->nose              = $nose;
-            $ros->throat            = $throat;
-            $ros->respiratory       = $respiratory;
-            $ros->cardiovascular    = $cardiovascular;
-            $ros->gastrointestinal  = $gastrointestinal;
-            $ros->gynecologic       = $gynecologic;
-            $ros->genitourinary     = $genitourinary;
-            $ros->endocrine         = $endocrine;
-            $ros->musculoskeletal   = $musculoskeletal;
-            $ros->peripheral_vascular = $peripheral_vascular;
-            $ros->hematology          = $hematology;
-            $ros->neuro             = $neuro;
+           $dental                           = new PatientOrtho;
+           $dental->visitid                  = Input::get("opd_number");
+           $dental->patient_id                = Input::get("patient_id");
+           $dental->skeletal_pattern         = $skeletal_pattern; //implode(',', Input::get("medical_history"));
+           $dental->soft_tissue_extraoral    = $soft_tissue_extraoral;//implode(', ', Input::get("family_history"));
+           $dental->smile_incisor_show       = $smile_incisor_show;//implode(',', Input::get("social_history"));
+           $dental->oral_hygiene             = $oral_hygiene;//implode(',', Input::get("vaccinations_history"));
+           $dental->soft_tissue              = $soft_tissue;//implode(',', Input::get("vaccinations_history"));
+           $dental->stage                    = $stage;//implode(',', Input::get("vaccinations_history"));
+           $dental->teeth_present            = $teeth_present;//implode(',', Input::get("vaccinations_history"));
+           $dental->tooth_quality            = $tooth_quality;//implode(',', Input::get("vaccinations_history"));
 
-            $ros->visit_id          = Input::get("opd_number");
-            $ros->patient_id        = Input::get("patient_id");
-            $ros->created_by        = Auth::user()->getNameOrUsername();
-            $ros->created_on        = Carbon::now();
+           $dental->tooth_anomalities        = $tooth_anomalities;//implode(',', Input::get("social_history"));
+           $dental->trauma                   = $trauma;//implode(',', Input::get("vaccinations_history"));
+           $dental->lower_labial             = $lower_labial;//implode(',', Input::get("vaccinations_history"));
+           $dental->lower_buccal             = $lower_buccal;//implode(',', Input::get("vaccinations_history"));
+           $dental->upper_labial             = $upper_labial;//implode(',', Input::get("vaccinations_history"));
+           $dental->upper_buccal             = $upper_buccal;//implode(',', Input::get("vaccinations_history"));
+           $dental->arch_form                = $arch_form;//implode(',', Input::get("vaccinations_history"));
            
+           $dental->overjet                  = $overjet;//implode(',', Input::get("social_history"));
+           $dental->overbite                 = $overbite;//implode(',', Input::get("vaccinations_history"));
+           $dental->centre_lines             = $centre_lines;//implode(',', Input::get("vaccinations_history"));
+           $dental->diastema                 = $diastema;//implode(',', Input::get("vaccinations_history"));
+           $dental->incisor_relationship     = $incisor_relationship;//implode(',', Input::get("vaccinations_history"));
+           $dental->canine_relationship      = $canine_relationship;//implode(',', Input::get("vaccinations_history"));
+           $dental->molar_relationship       = $molar_relationship;//implode(',', I
 
-            $patientpe                      = new PatientPE;
-            $patientpe->pe_general          = $pe_general;
-            $patientpe->pe_HEENT            = $pe_HEENT;
-            $patientpe->pe_neck             = $pe_neck;
-            $patientpe->pe_respiratory      = $pe_respiratory;
-            $patientpe->pe_heart            = $pe_heart;
-            $patientpe->pe_abdominal        = $pe_abdominal;
-            $patientpe->pe_extremities      = $pe_extremities;
-            $patientpe->pe_cns              = $pe_cns;
-            $patientpe->pe_musculoskeletal  = $pe_musculoskeletal;
-            $patientpe->pe_psychological    = $pe_psychological;
-            $patientpe->pe_breast           = $pe_breast;
+           $dental->curve_of_spee            = $curve_of_spee;//implode(',', Input::get("social_history"));
+           $dental->cross_bite               = $cross_bite;//implode(',', Input::get("vaccinations_history"));
+           $dental->scissors_bite            = $scissors_bite;//implode(',', Input::get("vaccinations_history"));
+           $dental->occlusion                = $occlusion;//implode(',', Input::get("vaccinations_history"));
+           $dental->sublingual_area          = $sublingual_area;//implode(',', Input::get("vaccinations_history"));
+           $dental->oropharynx               = $oropharynx;//implode(',', Input::get("vaccinations_history"));
+           $dental->edentulous_ridge         = $edentulous_ridge;//implode(',', I
 
-            $patientpe->pe_vulva            = $pe_vulva;
-            $patientpe->pe_vagina           = $pe_vagina;
-            $patientpe->pe_adnexa           = $pe_adnexa;
-            $patientpe->pe_ext_genitalia    = $pe_ext_genitalia;
-            $patientpe->pe_pelvic           = $pe_pelvic;
-
-            $patientpe->pe_uterus           = $pe_uterus;
-             $patientpe->pe_cervix          = $pe_cervix;
+           $dental->periodontal_assessment   = $periodontal_assessment;//implode(',', Input::get("social_history"));
+           $dental->lymph_node               = $lymph_node;//implode(',', Input::get("vaccinations_history"));
+           $dental->tmj                      = $tmj;//implode(',', Input::get("vaccinations_history"));
+           $dental->muscle_of_mastication    = $muscle_of_mastication;//implode(',', Input::get("vaccinations_history"));
+          
 
 
-            $patientpe->visit_id          = Input::get("opd_number");
-            $patientpe->patient_id        = Input::get("patient_id");
-            $patientpe->created_by        = Auth::user()->getNameOrUsername();
-            $patientpe->created_on        = Carbon::now();
-           
+
+           $dental->created_on                 = Carbon::now();
+           $dental->created_by                 = Auth::user()->getNameOrUsername();
+
+
+          
 
          
 
@@ -4251,8 +4239,8 @@ public function addNoteForDental()
 
               //$vitals->save();
               $history->save();
-              $ros->save();  
-              $patientpe->save();
+              $dental->save();  
+
 
               $affectedRows = OPD::where('opd_number',Input::get("opd_number"))->update(array('chief_complaint' => $complaint,'location'=>'Consulting Room'));
 
@@ -5564,7 +5552,7 @@ public function excludeComplain()
 
         $admission   = OPD::where('opd_number' , $id)->first();
         $patients   = Customer::where('patient_id' , $admission->patient_id)->first();
-        $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->get();
+        $mycomplaints = PatientComplaint::where('visitid' ,'=', $id)->first();
         $myhistories = PatientHistory::where('visitid' ,'=', $id)->get();
         $myros = ROS::where('visit_id' ,'=', $id)->get();
         $mype = PatientPE::where('visit_id' ,'=', $id)->get();
@@ -5573,8 +5561,9 @@ public function excludeComplain()
         $mydiagnosis = PatientDiagnosis::where('visitid' ,'=', $id)->get();
          $myplan = PatientAssessment::where('visit_id' ,'=', $id)->get();
         $myvitals = PatientVitals::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
+        $referals = ReferalNote::where('visit_id' ,'=', $id)->orderby('created_on','desc')->get();
 
-        return view('doctor.referal', compact('admission','myplan','patients','mycomplaints','myhistories','myros','mype','mydrugs','mylabs','mydiagnosis','myvitals'));
+        return view('doctor.referal', compact('admission','referals','myplan','patients','mycomplaints','myhistories','myros','mype','mydrugs','mylabs','mydiagnosis','myvitals'));
         
 
     }
@@ -5631,6 +5620,16 @@ public function excludeComplain()
 
 
 
+    }
+
+
+
+        public function getProcedureText()
+    {
+        $flag           = Input::get("proceduretext");
+        $procedure    = ProcedureText::where('type', $flag)->first();
+        $added_response = array('proceduretext' => $procedure->content );
+        return  Response::json($added_response);
     }
 
 

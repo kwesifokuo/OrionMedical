@@ -68,9 +68,9 @@
                 </div>
                 <p class="text-muted">By Doctor </p>
                 <div>
-                @foreach($doctors as $doctor)
+               {{--  @foreach($doctors as $doctor)
                 <a href="/doctor-appointments/{{ $doctor->name }}"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open"> <i class="fa fa-user-md"></i>  {{ $doctor->name }} </a>
-                @endforeach
+                @endforeach --}}
                 </div>
               </div>
             </aside>
@@ -101,7 +101,6 @@
      var doctor = $('#doctor').val();
 
    $('#calendar').fullCalendar({
-      weekends: true,
       slotMinutes: 15,
       theme: false,
     header: false,

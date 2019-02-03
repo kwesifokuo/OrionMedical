@@ -13,7 +13,7 @@
              
             
             <div class="page">
-             <img src="/images/{{ $company->logo }}" width="15%">
+             <img src="/images/{{ $mycompany->logo }}" width="15%">
               
             
            <h4 align="center"> <strong>Claims Summary from {{ $datefrom }} to {{ $dateto }} </strong></h4>

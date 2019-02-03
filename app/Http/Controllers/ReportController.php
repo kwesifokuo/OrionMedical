@@ -4,8 +4,14 @@ namespace OrionMedical\Http\Controllers;
 
 use Illuminate\Http\Request;
 use JasperPHP\JasperPHP;
+
+use OrionMedical\Models\OPD;
+use OrionMedical\Models\Customer;
+
 use OrionMedical\Http\Requests;
 use OrionMedical\Http\Controllers\Controller;
+use Carbon\Carbon;
+
 
 class ReportController extends Controller
 {
@@ -21,16 +27,61 @@ class ReportController extends Controller
 
      public function patientlist()
     {
-        return view('reporting.patient.patient');
+        $providers = OPD::groupBy('care_provider')->distinct()->get();
+        return view('reporting.patient.patient_form',compact('providers'));
+    }
+
+    public function rptPatientList(Request $request)
+   {
+
+
+        $from    =  Carbon::createFromFormat('d/m/Y', $request->input('datefrom'))->format('Y-m-d');
+        $to      =  Carbon::createFromFormat('d/m/Y', $request->input('dateto'))->format('Y-m-d');
+
+        $datefrom = $from;
+        $dateto   = $to;
+
+        $customerlists = Customer::whereBetween('created_at',array($from." 00:00:00",$to." 23:59:59"))->orderBy('created_at','desc')->get();
+      //dd($bills);
+    return view('reporting.patient.patient_report', compact('customerlists','datefrom','dateto'));
+
     }
 
 
- public function patientvisits()
+    public function formPatientVisit()
     {
-        return view('reporting.patient.patient_visits');
+       $providers = OPD::groupBy('care_provider')->distinct()->get();
+        return view('reporting.patient.patient_visit_form',compact('providers'));
+
+    }
+
+
+ public function rptPatientVisit(Request $request)
+    {
+       $from    =  Carbon::createFromFormat('d/m/Y', $request->input('datefrom'))->format('Y-m-d');
+        $to      =  Carbon::createFromFormat('d/m/Y', $request->input('dateto'))->format('Y-m-d');
+
+        $provider =  $request->input('care_provider');
+        $datefrom = $from;
+        $dateto   = $to;
+
+        if($provider=="All")
+        {
+           $patients = OPD::whereBetween('created_on',array($from." 00:00:00",$to." 23:59:59"))->orderBy('created_on','desc')->get();
+        }
+        else
+        {
+          $patients = OPD::where('care_provider',$provider)->whereBetween('created_on',array($from." 00:00:00",$to." 23:59:59"))->orderBy('created_on','desc')->get(); 
+        }
+       
+        return view('reporting.patient.patient_visit_report',compact('patients','datefrom','dateto'));
     }
 
  
+
+
+
+
      public function summaryConsultation()
     {
         return view('reporting.billing.summary_consultation');

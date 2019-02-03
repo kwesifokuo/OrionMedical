@@ -72,6 +72,7 @@
                            <th>#</th>
                             <th>Item Name</th>
                             <th>Quantity Requested</th>
+                            <th>Unit Price</th>
                             <th>Quantity Approved</th>
                             <th>Cost of Requistion</th>
                              <th>Requested By</th>
@@ -91,25 +92,45 @@
                            <td>{{ ++$key }}</td>
                             <td>{{ $item->consumable }}</td>
                             <td>{{ $item->quantity }}</td>
+                             <td>{{ $item->cost }}</td>
                             <td>{{ $item->quantity_approved }}</td>
                             <td>{{ $item->quantity_approved *  $item->cost}}</td>
                             <td>{{ $item->created_by }}</td>
                             <td>{{ $item->created_at }}</td>
                             <td>{{ $item->approved_by }}</td>
-                             <td>{{ $item->status }}</td>
-                        
+                             
+                             <td>
+                              @if($item->status=='Approved')
+
+                             <a href="#" class="btn btn-s-md btn-success btn-rounded bootstrap-modal-form-open"  id="edit" name="edit" data-toggle="modal" alt="edit">{{ $item->status }}</a>
+                             @else
+                              <a href="#" class="btn btn-s-md btn-danger btn-rounded bootstrap-modal-form-open"  id="edit" name="edit" data-toggle="modal" alt="edit">{{ $item->status }}</a>
+                             @endif
+                              </td>
                             
+
+                            @if($item->status == 'Approved')
+
+                            @else
+
+                            @if($item->created_by==Auth::user()->getNameOrUsername())
+                            <td><a href="#update-requisition" class="bootstrap-modal-form-open"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-pencil"></i></a></td>
+                             <td><a href="#" class="bootstrap-modal-form-open" onclick="deleterequest('{{ $item->id }}','{{ $item->consumable }}')"  id="delete" name="delete" data-toggle="modal" alt="edit"><i class="fa fa-trash"></i></a></td>
+                             @else
+                             @endif
+
+                            @endif
                            
                             
-                            
-                            <td><a href="#update-stock" class="bootstrap-modal-form-open" onclick="approverequisition('{{ $item->id }}','{{ $item->consumable }}')"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-thumbs-up"></i></a></td>
+                            @role(['System Admin'])
+                            <td><a href="#update-stock" class="bootstrap-modal-form-open" onclick="approverequisition('{{ $item->id }}','{{ $item->consumable }}','{{ $item->consumable_id }}')"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-thumbs-up"></i></a></td>
                           
 
                             <td><a href="#" class="bootstrap-modal-form-open" onclick="deletedrug('{{ $item->id }}','{{ $item->name }}')"  id="delete" name="delete" data-toggle="modal" alt="edit"><i class="fa fa-print"></i></a></td>
 
                            
-                            <td><a href="#" class="bootstrap-modal-form-open" onclick="deleterequest('{{ $item->id }}','{{ $item->consumable }}')"  id="delete" name="delete" data-toggle="modal" alt="edit"><i class="fa fa-trash"></i></a></td>
-                          
+                           
+                            @endrole
                          
                           </tr>
                          @endforeach 
@@ -126,9 +147,7 @@
 
              <footer class="footer bg-white b-t">
                                     
-                         <a href="#add-consumable" class="bootstrap-modal-form-open float" data-toggle="modal">
-<i class="fa fa-plus my-float"></i><i class="fa fa-tasks my-float"></i>
-</a>
+
                   <div class="row text-center-xs">
                     <div class="col-md-6 hidden-sm">
                       <p class="text-muted m-t pull-center">
@@ -206,7 +225,7 @@
 
 
 
-  function approverequisition(id,name)
+  function approverequisition(id,name,consumable_id)
    {
     swal({
   title: "Are you sure?",
@@ -225,11 +244,13 @@ function(inputValue){
     return false
   }
 
-//alert(inputValue);
+alert(consumable_id);
+
   $.get('/approve-requisition',
           {
              "ID": id,
-             "approved_quantity" : inputValue
+             "approved_quantity" : inputValue,
+             "consumable_id" : consumable_id
           },
           function(data)
           { 
@@ -259,4 +280,39 @@ function(inputValue){
    }
 
 </script>
+
+
+
+
+<div class="modal fade" id="update-requisition" size="00">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Update Requisition</h4>
+        </div>
+        <div class="modal-body">
+          <p></p>
+                      <section class="vbox">
+                    <header class="header bg-light bg-gradient">
+                      <ul class="nav nav-tabs nav-white">
+                          <li class="active"><a href="#equitytab" data-toggle="tab">Assignment Details</a></li>
+                      </ul>
+                    </header>
+                    <section class="scrollable">
+                      <div class="tab-content">
+                        <div class="tab-pane active" id="individual">
+                           <form  class="bootstrap-modal-form" data-validate="parsley" method="post" action="/update-requisition" class="panel-body wrapper-lg">
+                           @include('stores/update_request')
+                        <input type="hidden" name="_token" value="{{ Session::token() }}">
+                      </form>
+                        </div>
+                      </div>
+                    </section>
+                  </section>
+        
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+</div>
 

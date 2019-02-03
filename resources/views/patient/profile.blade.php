@@ -4,7 +4,13 @@
             <header class="header bg-white b-b b-light">
               <p>{{ $patients->fullname }}'s Facesheet</p>
 
-             
+              <div class="btn-group pull-right">
+              <p>
+                <a href="/event-calendar"  class="btn btn-rounded btn-sm btn-danger"><i class="fa fa-spin fa-spinner hide show inline" id="spin"></i> Schedule Appointment  </a>
+              </p>
+
+              </div>
+
                     
                    
                     
@@ -88,14 +94,17 @@
                   <section class="vbox">
                     <header class="header bg-light bg-gradient">
                       <ul class="nav nav-tabs nav-white">
-                      <li class=""><a href="#information" data-toggle="tab">Basic Information</a></li>
-                        <li class="active"><a href="#consultations" data-toggle="tab">Encounters</a></li>
-                        
-                        {{-- <li class=""><a href="#procedures" data-toggle="tab">Vitals</a></li>
-                        <li class=""><a href="#allergy" data-toggle="tab">Allergy</a></li> --}}
-                         <li class=""><a href="#statement" data-toggle="tab">Statement</a></li>
-                       
-                        <li class=""><a href="#documents" data-toggle="tab">Documents</a></li>
+                         <li class=""><a href="#information" data-toggle="tab">Demographics</a></li>
+                         <li class="active"><a href="#consultations" data-toggle="tab">Visits</a></li>
+                         <li class=""><a href="#procedures" data-toggle="tab">Vitals</a></li>
+                         <li class=""><a href="#allergy" data-toggle="tab">Allergy</a></li> 
+                         <li class=""><a href="#allergy" data-toggle="tab">Medications</a></li> 
+                         <li class=""><a href="#statement" data-toggle="tab">Billing</a></li>
+                         <li class=""><a href="#reminder" data-toggle="tab">Patient Reminders</a></li>
+                        <li class=""><a href="#disclosure" data-toggle="tab">Disclosures</a></li>
+                        <li class=""><a href="#amendment" data-toggle="tab">Amendments</a></li>
+                         <li class=""><a href="#appointments" data-toggle="tab">Appointment</a></li>
+                        <li class=""><a href="#documents" data-toggle="tab">Documents</a></li> 
                        
                         {{-- <li class=""><a href="#images" data-toggle="tab">Images</a></li> --}}
                         <span class="hidden-sm">.</span>
@@ -134,21 +143,7 @@
                       </div>
                     </div>
                      <div class="line line-dashed line-lg pull-in"></div>
-                   <div class="form-group">
-                      <label class="col-sm-2 control-label">Works with</label>
-                      <div class="col-sm-10">
-                        <input type="text" readonly="true" value="{{ $patients->company }}" class="form-control rounded">                        
-                      </div>
-                    </div>
-                    <div class="line line-dashed line-lg pull-in"></div>
-                     <div class="form-group">
-                      <label class="col-sm-2 control-label">Insurer</label>
-                      <div class="col-sm-10">
-                        <input type="text" readonly="true" value="{{ $patients->insurance_company }}" class="form-control rounded">                        
-                      </div>
-                    </div>
-                    <div class="line line-dashed line-lg pull-in"></div>
-                     {{-- <div class="form-group">
+                <div class="form-group">
                       <label class="col-sm-2 control-label">ID Type</label>
                       <div class="col-sm-10">
                         <input type="text" readonly="true" value="{{ $patients->id_type }}" class="form-control rounded">                        
@@ -161,7 +156,7 @@
                         <input type="text" readonly="true" value="{{ $patients->id_number }}" class="form-control rounded">                        
                       </div>
                     </div>
-                    <div class="line line-dashed line-lg pull-in"></div> --}}
+                    <div class="line line-dashed line-lg pull-in"></div> 
                      <div class="form-group">
                       <label class="col-sm-2 control-label">Occupation</label>
                       <div class="col-sm-10">
@@ -202,6 +197,47 @@
                             </form>
                             </div>
                     </section>
+
+
+                    <section class="panel panel-default">
+                        <header class="panel-heading font-bold">
+                          Insurance
+                        </header>
+                        <div class="panel-body">
+                          <form class="form-horizontal" method="get">
+                            <div class="form-group">
+                              <label class="col-sm-2 control-label">Provider</label>
+                              <div class="col-sm-10">
+                                <input type="text" readonly="true" value="{{ $patients->insurance_company }}" class="form-control rounded">                        
+                              </div>
+                            </div>
+                             <div class="form-group">
+                              <label class="col-sm-2 control-label">Policy Number</label>
+                              <div class="col-sm-10">
+                                <input type="text" readonly="true" value="{{ $patients->insurance_id }}" class="form-control rounded">                        
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <label class="col-sm-2 control-label">Plan Name</label>
+                              <div class="col-sm-10">
+                                <input type="text" readonly="true" value="{{ $patients->insurance_cover }}" class="form-control rounded">                        
+                              </div>
+                            </div>
+                             <div class="form-group">
+                              <label class="col-sm-2 control-label">Eligibility</label>
+                              <div class="col-sm-10">
+                                <input type="text" readonly="true" value="{{ $patients->insurance_eligibility }}" class="form-control rounded">                        
+                              </div>
+                            </div>
+                             <div class="form-group">
+                              <label class="col-sm-2 control-label">Subscriber Employer</label>
+                              <div class="col-sm-10">
+                                <input type="text" readonly="true" value="{{ $patients->company }}" class="form-control rounded">                        
+                              </div>
+                            </div>
+                            </form>
+                            </div>
+                    </section>
                           </ul>
                         </div>
 
@@ -230,7 +266,7 @@
                             <div class="form-group{{ $errors->has('accounttype') ? ' has-error' : ''}}">
                             <label>Billing Account</label>
                             <select id="accounttype" name="accounttype" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
-                           <option value="{{ $patients->accounttype }}">{{ $patients->accounttype }}</option>
+                           <option value=""></option>
                           @foreach($accounttype as $accounttype)
                         <option value="{{ $accounttype->type }}">{{ $accounttype->type }}</option>
                           @endforeach 
@@ -263,6 +299,7 @@
                             <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">
                             <label>Visit Type</label>
                             <select id="visit_type" name="visit_type" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                             <option value=""> -- Select Visit Type -- </option>
                           @foreach($visittypes as $visittypes)
                         <option value="{{ $visittypes->type }}">{{ $visittypes->type }}</option>
                           @endforeach  
@@ -315,6 +352,40 @@
                           @foreach($doctors as $doctor)
                         <option value="{{ $doctor->name }}">{{ $doctor->name }}</option>
                           @endforeach 
+                        </select>         
+                           @if ($errors->has('referal_doctor'))
+                          <span class="help-block">{{ $errors->first('referal_doctor') }}</span>
+                           @endif    
+                          </div> 
+                          </div>   
+                        </div>
+
+
+
+                          <div class="form-group pull-in clearfix">
+                          <div class="col-sm-6">
+                            <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">
+                            <label>Sensitivity</label>
+                            <select id="sensitivity" name="sensitivity" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                         
+                        <option value="Normal">Normal</option>
+                        <option value="High">High</option>
+                        <option value="High">Low</option>
+                          
+                        </select>         
+                           @if ($errors->has('visit_type'))
+                          <span class="help-block">{{ $errors->first('visit_type') }}</span>
+                           @endif    
+                          </div>   
+                          </div>
+
+
+                          <div class="col-sm-6">
+                               <div class="form-group{{ $errors->has('referal_doctor') ? ' has-error' : ''}}">
+                            <label>Issues (Injuries/Medical/Allergy)</label>
+                            <select id="issues" name="issues" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%" >
+                          <option value="None">None</option>
+                          
                         </select>         
                            @if ($errors->has('referal_doctor'))
                           <span class="help-block">{{ $errors->first('referal_doctor') }}</span>
@@ -424,50 +495,8 @@
                             @endforeach
                           </ul>
                         </div>
-                        <div class="tab-pane" id="diagnosis">
-                          <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
-                          @foreach($diagnosis as $diagnosis)
-                             @if($diagnosis->diagnosis != null)
-                            <li class="list-group-item">
-                              <a href="#" class="thumb-sm pull-left m-r-sm">
-                                <img src="/images/{{ $patients->image }}" class="img-circle">
-                              </a>
-                              <a href="#" class="clear">
-                                <small class="pull-right">{{ $diagnosis->date }}</small>
-                                <strong class="block">{{ $diagnosis->diagnosis }}</strong>
-                                <small>{{ $consult->created_by }}</small>
-                              </a>
-                            </li>
-                            @else
-                            
-
-                            @endif
-                            @endforeach
-                          </ul>
-                        </div>
-                        <div class="tab-pane" id="medications">
-                          <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
-                          @foreach($medications as $drug)
-                          @if($drug->drug_name != null)
-                            <li class="list-group-item">
-                              <a href="#" class="thumb-sm pull-left m-r-sm">
-                                <img src="/images/{{ $patients->image }}" class="img-circle">
-                              </a>
-                              <a href="#" class="clear">
-                                <small class="pull-right">{{ $drug->drug_cost }}</small>
-                                <strong class="block">{{ $drug->drug_name }}</strong>
-                                <small>Requested by - {{ $drug->created_by }}</small>
-                                <br>
-                                <small>Remark - {{ $drug->application }}</small>
-                              </a>
-                            </li>
-                            @else
-                            
-
-                            @endif
-                            @endforeach
-                          </ul>
-                        </div>
+                     
+                       
                         <div class="tab-pane" id="documents">
                           <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
                                   <header class="panel-heading">
@@ -505,6 +534,85 @@
                     </div>
                           </ul>
                         </div>
+
+
+
+                        <div class="tab-pane" id="reminder">
+                         
+                      <section class="panel panel-default">
+                    <header class="panel-heading">Patient Reminders</header>
+                    <div class="panel-body">
+
+                    <div class="col-lg-6">
+                  <!-- .comment-list -->
+                  <section class="comment-list block">
+
+                    @foreach($reminders as $key => $memo)
+                    <article id="comment-id-{{$key++}}" class="comment-item">
+                      <a class="pull-left thumb-sm avatar">
+                        <img src="/images/avatar_default.jpg" class="img-circle">
+                      </a>
+                      <span class="arrow left"></span>
+                      <section class="comment-body panel panel-default">
+                        <header class="panel-heading bg-white">
+                          <a href="#">{{ $memo->created_by }}</a>
+                         
+                          <span class="text-muted m-l-sm pull-right">
+                            <i class="fa fa-clock-o"></i>
+                            {{ $memo->created_on }}
+                          </span>
+                        </header>
+                        <div class="panel-body">
+                          <div>{!! $memo->memo !!}</div>
+                          <div class="comment-action m-t-sm">
+                            <a href="#" data-toggle="class" class="btn btn-default btn-xs active">
+                              <i class="fa fa-star-o text-muted text"></i>
+                              <i class="fa fa-star text-danger text-active"></i> 
+                              Like
+                            </a>
+                            <a href="#comment-form" class="btn btn-default btn-xs">
+                              <i class="fa fa-mail-reply text-muted"></i> Reply
+                            </a>
+
+                            <a href="#comment-id-{{$key++}}" data-dismiss="alert" class="btn btn-default btn-xs">
+                              <i class="fa fa-trash-o text-muted"></i> 
+                              Remove
+                            </a>
+                          </div>
+                        </div>
+                      </section>
+                    </article>
+                    @endforeach
+                    <!-- .comment-reply -->
+                    
+                    <!-- / .comment-reply -->
+                  
+                    
+                    <!-- comment form -->
+                    <article class="comment-item media" id="comment-form">
+                      <a class="pull-left thumb-sm avatar"><img src="/images/avatar_default.jpg" class="img-circle"></a>
+                      <section class="media-body">
+                        <form action="" class="m-b-none">
+                          <div class="input-group">
+                            <input type="text" id="memotext" name="memotext" class="form-control" placeholder="Input your comment here">
+                            <span class="input-group-btn">
+                              <button class="btn btn-primary" type="button" onclick="savereminder()">POST</button>
+                            </span>
+                          </div>
+                        </form>
+                      </section>
+                    </article>
+                  </section>
+                  <!-- / .comment-list -->
+                </div>
+                      
+
+                    </div>
+                   
+                  </section>
+
+
+                              </div>
 
 {{--                          <div class="tab-pane" id="images">
                         <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
@@ -577,10 +685,10 @@
                               <a href="{{ $allergy->visitid }}"  class="clear">
                                 <small class="pull-right">{{ $allergy->created_on }}</small>
                                 <strong class="block"><label class="badge bg-info">{{ $allergy->allergy }}</label></strong>
-                                <strong class="block"><label class="badge bg-danger">{{ $allergy->medical_history }}</label></strong>
+                                {{-- <strong class="block"><label class="badge bg-danger">{{ $allergy->medical_history }}</label></strong>
                                  <strong class="block"><label class="badge bg-warning">{{ $allergy->family_history }}</label></strong>
                                    <strong class="block"><label class="badge bg-dark">{{ $allergy->social_history }}</label></strong>
-                                    <strong class="block"><label class="badge bg-danger">{{ $allergy->drug_history }}</label></strong>
+                                    <strong class="block"><label class="badge bg-danger">{{ $allergy->drug_history }}</label></strong> --}}
                                 <small>Examined by - {{ $allergy->created_by }}</small>
                                 <br>
                                  <small>Visit Number - {{ $allergy->visitid }}</small>
@@ -594,7 +702,7 @@
                        <div class="tab-pane" id="procedures">
                           <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
                           <img src="/images/139328.svg" width="7%" align="right"> 
-                        <section class="panel panel-info">
+        {{--                 <section class="panel panel-info">
                                 <header class="panel-heading font-bold">Vital Signs Chart</header>
                                 <div class="panel-body">
                                       <div class="table-responsive">
@@ -620,8 +728,26 @@
                     </div>
                     </div>
 
+
                      
                     </section>
+ --}}
+
+                    <div class="col-lg-12">
+                  <section class="panel panel-default">
+                    <header class="panel-heading">
+                      Vital Chart Graph
+                    </header>
+                    <div class="panel-body text-center">
+                      
+                      <small class="text-muted block"></small>
+                      <div class="inline">
+                         
+                      </div>                      
+                    </div>
+                    <div class="panel-footer"><small><a href="#" > % of change</a></small></div>
+                  </section>
+                </div>
                           </ul>
                         </div>
 
@@ -635,40 +761,63 @@
                                 <header class="panel-heading font-bold">Patient Statement of Account</header>
                                 <div class="panel-body">
                                       <div class="table-responsive">
-                       <table id="" cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
-                          <thead>
-                            <tr>
-                              <th>Visit ID</th>
-                              <th>Debit</th>
-                              <th>Receipt</th>
-                              <th>Description</th>
-                              <th>Debit Date</th>
-                              <th>Receipt Date</th>
-                              <th>Provider</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                          @foreach($statement as $keys => $bill)
-   
-                        @if($bill->note  == 'Unpaid')
-                          <tr bgcolor="#F5B7B1">
-                        @else
-                        <tr>
-                        @endif
-                           
-                            <td>{{ $bill->visit_id }}</td>
-                            <td>{{ $bill->debit }}</td>
-                            <td>{{ $bill->receipt }}</td>
+                       <table class="table table-striped m-b-none text-sm" width="100%">
+                        <thead>
+                          <tr>
+                            <th>Visit No</th>
+                            <th>Name</th>
+                            <th>Copayer</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th>Invoice</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($statements as $bill )
+                          <tr>
+
+                          
+                            
+                            <td><a href="#" class="text-danger">IN-{{ $bill->visit_id }}</a></td>
+                            <td>{{ ucwords(strtolower($bill->fullname)) }}</td>
+                            <td>{{ $bill->copayer }}</td>
                             <td>{{ $bill->item_name }}</td>
                             <td>{{ $bill->date }}</td>
-                             <td>{{ $bill->paymentdate  }}</td>
-                             <td>{{ $bill->care_provider  }}</td>
-                             </tr>
-                            @endforeach
+                            <td> {{ number_format($bill->total_cost , 1, '.', ',') }}</td>
+                             <td>{{ number_format($bill->payments->sum('AmountReceived'), 1, '.', ',') }}</td>
+                             <td>{{  number_format($bill->total_cost - $bill->payments->sum('AmountReceived') ,1, '.', ',') }}</td>
+                            <td>
+                             @if(($bill->total_cost - $bill->payments->sum('AmountReceived')) <= 1)
+                              <a href="#" class="btn btn-s-md btn-success btn-rounded bootstrap-modal-form-open"  id="edit" name="edit" data-toggle="modal" alt="edit">Paid</a>
+
+                             <td><a href="/billing-print/{{ $bill->visit_id }}" class="bootstrap-modal-form-open" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-print"></i></a></td> 
+                             @else
+                               <a href="#" class="btn btn-s-md btn-danger btn-rounded bootstrap-modal-form-open"  id="edit" name="edit" data-toggle="modal" alt="edit">Collect Payment</a>
+                                
+                                 <td>
+                                 @if($bill->payercode!='Private')
+                                 <a href="#" class="bootstrap-modal-form-open" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-print"></i></a>
+                                  @else
+                                   <a href="#" class="bootstrap-modal-form-open" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-print"></i></a>
+                                   @endif
+                                 </td> 
+
+                                  @permission('edit-bill')
+                                  <td><a href="#" onclick="excludefrombill('{{ $bill->id }}','{{ $bill->item_name }}')" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-trash"></i></a></td> 
+                                  @endpermission
+
+                            @endif
+                             </td>
                             
-                          </tbody>
-                        </table>
+                          </tr>
+                         @endforeach
+                        </tbody>
+ 
+ 
+                      </table>
                     </div>
                     </div>
 
@@ -676,6 +825,80 @@
                     </section>
                           </ul>
                         </div>
+
+
+
+                         <div class="tab-pane" id="appointments">
+                          <section class="panel panel-default">
+                    <div class="table-responsive">
+                     
+                        @if($events->count() > 0)
+      <table class="table m-b-none text-sm" width="100%">
+
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Time In</th>
+          <th>Patient</th>
+           <th>Mobile Number</th>
+          <th>Appointment</th>
+          <th>Doctor to see</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Action</th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      <?php $i = 1;?>
+      @foreach($events as $event)
+
+         
+<tr>
+          <th scope="row">{{ $i++ }}</th>
+           <td><a href="#">{{ $event->start_time->diffForHumans() }}</a></td>
+          <td><a href="#">{{ ucwords(strtolower($event->name)) }}</a></td>
+          <td><a href="#">{{ $event->mobile_number }}</a></td>
+          <td><a href="#">{{ ucwords(strtolower($event->title)) }}</a></td>
+          <td><a href="/doctor-appointments/{{ $event->doctor }}">{{ ucwords(strtolower($event->doctor)) }}</a></td>
+          <td>{{ date("g:ia\, jS M Y", strtotime($event->start_time)) }}</td>
+          <td>{{date("g:ia\, jS M Y", strtotime($event->end_time)) }}</td>
+          <td>
+           <div class="input-group-btn">
+                            
+                            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">{{ $event->status }} <span class="caret"></span>
+                             </button>
+                            <ul class="dropdown-menu pull-right">
+                           
+                            </ul>
+            </div>
+          </td>
+
+           <td> <a href="http://web.whatsapp.com//send?text=Hello {{ ucwords(strtolower($event->name)) }} you have an appointment booked with {{ ucwords(strtolower($event->doctor)) }} at {{ date("g:ia\, jS M Y", strtotime($event->start_time)) }}. Please text YES to confirm.&phone=233{{$event->mobile_number}}" target="_new" class="btn btn-s-md btn-danger btn-rounded"  data-toggle="modal" alt="edit">Send Message</a> </td>
+
+
+          <td><a href="/appointment-slip/{{ $event->id }}" id="print" name="print" data-toggle="modal" alt="edit"><i class="fa fa-print" data-toggle="tooltip" data-placement="top" title="" data-original-title="Print App Slip"></i></a>
+          </td>
+           <td><a href="#modal_check_in" class="bootstrap-modal-form-open" id="generate_visit" onclick="getDetails('{{ $event->patient_id }}')" name="generate_visit" data-toggle="modal" alt="edit"><i class="fa fa-book" data-toggle="tooltip" data-placement="top" title="" data-original-title="Check In"></i></a>
+           </td>
+           <td><a href="#" class="bootstrap-modal-form-open" onclick="deleteappointment('{{ $event->id }}','{{ $event->title }}')"  id="delete" name="delete" data-toggle="modal" alt="edit"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete"></i></a>
+           </td>
+        </tr>
+      @endforeach
+      </tbody>
+    </table>
+    @else
+      <h2>No appointment found!</h2>
+    @endif
+                    </div>
+                  </section>
+                        </div>
+
+
+
+
 
 
 
@@ -696,7 +919,9 @@
 <script type="text/javascript">
 $(document).ready(function () {
 
-$('#referal_doctor').select2();    
+$('#referal_doctor').select2();   
+$('#sensitivity').select2();    
+$('#issues').select2();     
 $('#consultation_type').select2();
 $('#location').select2();
 $('#visit_type').select2();
@@ -738,6 +963,49 @@ function getDetails(acct_no)
           alert(msg.status + " " + msg.statusText);
         });
 
+}
+
+
+
+function savereminder()
+{
+
+if($('#patient_id').val()!= "")
+{
+
+   // alert($('#liability_report').val());
+    //tinyMCE.triggerSave();
+     //alert($('#liability_report').val());
+
+    $.get('/add-reminder',
+        {
+
+          "patient_id"     :$('#patient_id').val(),
+          "memotext"       :$('#memotext').val()
+          
+        
+        },
+        function(data)
+        { 
+          
+          $.each(data, function (key, value) {
+        if(data["OK"])
+        {
+         
+         toastr.success("Reminder successfully saved!"); 
+       
+        }
+        else
+        {
+         toastr.error("Reminder failed to save!"); 
+        }
+      });
+                                        
+        },'json');
+  }
+  else
+    {sweetAlert("No patient number has been generated yet!");}
+         
 }
 
 

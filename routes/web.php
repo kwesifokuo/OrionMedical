@@ -118,6 +118,10 @@ Route::get('/update-whatsapp-status',
 	'as' => 'update-whatsapp-status', ]);
 
 
+Route::get('/add-reminder', 
+	['uses' => '\OrionMedical\Http\Controllers\OPDController@addReminder', 
+	'as' => 'add-reminder', ]);
+
 
 
 Route::get('/customer-type',
@@ -245,6 +249,9 @@ Route::get('/register-start',
 	['uses' => '\OrionMedical\Http\Controllers\KYCController@registerWithtab',
 	 'as' => 'register-start', ]);
 
+Route::get('/register-quick',
+	['uses' => '\OrionMedical\Http\Controllers\KYCController@registerWithtabFull',
+	 'as' => 'register-quick', ]);
 
 Route::get('welcome-email', 'KYCController@pushEmail');
 
@@ -364,6 +371,11 @@ Route::post('/create-opd-referral',
 Route::get('/delete-opd', 
 	['uses' => '\OrionMedical\Http\Controllers\OPDController@deleteOPD', 
 	'as' => 'delete-opd', ]);
+
+Route::get('/discharge-opd', 
+	['uses' => '\OrionMedical\Http\Controllers\OPDController@dischargeOPD', 
+	'as' => 'discharge-opd', ]);
+
 
 Route::get('/waiting-opd',
 	['uses' => '\OrionMedical\Http\Controllers\OPDController@getCheckedIn',
@@ -601,6 +613,12 @@ Route::get('/nurse-station',
 	['uses' => '\OrionMedical\Http\Controllers\NurseController@index',
 	 'as' => 'nurse-station', ]);
 
+
+Route::get('/nurse-station-ipd',
+	['uses' => '\OrionMedical\Http\Controllers\NurseController@nurseIPD',
+	 'as' => 'nurse-station-ipd', ]);
+
+
 Route::get('/ipd-medication',
 	['uses' => '\OrionMedical\Http\Controllers\NurseController@newMedication',
 	 'as' => 'ipd-medication', ]);
@@ -835,6 +853,13 @@ Route::get('/ipd-consultation',
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@ipd',
 	 'as' => 'ipd-consultation', ]);
 
+
+
+Route::get('/ipd-consultation-nurse',
+	['uses' => '\OrionMedical\Http\Controllers\DoctorController@ipdNurse',
+	 'as' => 'ipd-consultation-nurse', ]);
+
+
 Route::get('/patient-images',
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@getPatientImages',
 	 'as' => 'patient-images', ]);
@@ -856,6 +881,11 @@ Route::get('/opd-ticket/{id}',
 Route::get('/appointment-slip/{id}', 
 	['uses' => '\OrionMedical\Http\Controllers\EventController@print',
 	'as' => 'appointment-slip/',]);
+
+Route::get('/edit-appointment', 
+	['uses' => '\OrionMedical\Http\Controllers\EventController@edit',
+	'as' => 'edit-appointment',]);
+
 
 
 
@@ -972,6 +1002,10 @@ Route::get('/add-assessment',
 Route::get('/add-continuation', 
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@addContinuation',
 	'as' => 'add-continuation',]);
+
+Route::get('/add-continuation-op', 
+	['uses' => '\OrionMedical\Http\Controllers\DoctorController@addContinuationOP',
+	'as' => 'add-continuation-op',]);
 
 
 Route::get('/add-doctor-referal', 
@@ -1154,6 +1188,12 @@ Route::get('/delete-assessment',
 	['uses' => '\OrionMedical\Http\Controllers\DoctorController@excludeAssessment',
 	'as' => 'delete-assessment',]);
 
+
+Route::get('/get-procedure-text', 
+	['uses' => '\OrionMedical\Http\Controllers\DoctorController@getProcedureText',
+	'as' => 'get-procedure-text',]);
+
+
 //Events
 
 Route::get('/event-list',
@@ -1218,6 +1258,12 @@ Route::get('/find-appointment',
 	['uses' => '\OrionMedical\Http\Controllers\EventController@findAppointment', 
 	'as' => 'find-appointment', ]);
 
+Route::post('/update-event', 
+	['uses' => '\OrionMedical\Http\Controllers\EventController@updateAppointmentInfo',
+	'as' => 'update-event',]);
+
+
+
 //Pharmacy
 
 Route::get('/list-of-drugs-avaliable',
@@ -1238,9 +1284,9 @@ Route::get('/consumables-list',
 	 'as' => 'consumables-list', ]);
 
 
-Route::get('/stores',
+Route::get('/store-requisitions',
 	['uses' => '\OrionMedical\Http\Controllers\StoreController@index',
-	 'as' => 'stores', ]);
+	 'as' => 'store-requisitions', ]);
 
 
 
@@ -1514,6 +1560,13 @@ Route::get('/deactivate-drug',
 Route::get('/delete-consumable', 
 	['uses' => '\OrionMedical\Http\Controllers\DrugController@deleteconsumablefromstore',
 	'as' => 'delete-consumable',]);
+
+
+Route::get('/delete-requisition', 
+	['uses' => '\OrionMedical\Http\Controllers\StoreController@deleteRequisition',
+	'as' => 'delete-requisition',]);
+
+
 
 Route::get('/get-drug-detail', 
 	['uses' => '\OrionMedical\Http\Controllers\DrugController@getStockDetails',
@@ -1793,9 +1846,6 @@ Route::get('/medical-summary-pharmarcy',
      'as' => 'medical-summary-pharmarcy', ]);
 
 
-
-
-
 Route::get('/add-template',
 	['uses' => '\OrionMedical\Http\Controllers\LabController@newrequest',
 	 'as' => 'add-template', ]);
@@ -1803,6 +1853,33 @@ Route::get('/add-template',
 Route::get('/saved-documents',
 	['uses' => '\OrionMedical\Http\Controllers\ImageController@getSavedDocuments',
 	 'as' => 'saved-documents', ]);
+
+
+
+//reports
+
+Route::get('/rpt-patient-list', 
+	['uses' => '\OrionMedical\Http\Controllers\ReportController@rptPatientList',
+	'as' => 'rpt-patient-list',]);
+
+
+Route::get('/form-patient-visit', 
+	['uses' => '\OrionMedical\Http\Controllers\ReportController@formPatientVisit',
+	'as' => 'form-patient-visit',]);
+
+Route::get('/rpt-patient-visit', 
+	['uses' => '\OrionMedical\Http\Controllers\ReportController@rptPatientVisit',
+	'as' => 'rpt-patient-visit',]);
+
+
+Route::get('/form-prescription-issued', 
+	['uses' => '\OrionMedical\Http\Controllers\ReportController@formPatientVisit',
+	'as' => 'form-prescription-issued',]);
+
+Route::get('/rpt-prescription-issued', 
+	['uses' => '\OrionMedical\Http\Controllers\ReportController@rptPatientVisit',
+	'as' => 'rpt-prescription-issued',]);
+
 
 Route::get('/home', 'HomeController@index')->name('home');
 

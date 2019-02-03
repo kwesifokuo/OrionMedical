@@ -9,38 +9,46 @@
               </ul>
          
 
-             <section class="panel panel-default">
+              <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
+                  
+                   @role(['Pharmacist','System Admin'])
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                     <img src="/images/395537.png" width="15%">
+                     <img src="/images/1404394.svg" width="15%" class="pull-left">
                     <a class="clear" href="/list-of-drugs-avaliable"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
-                      <span class="h3 block m-t-xs"><strong>{{ $drugs->total() }}</strong></span>
+                      <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Drugs In Stock </small>
                     </a>
                   </div>
-                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                     <img src="/images/449368.svg" width="15%">
+                  @endrole
+
+                  <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
+                     <img src="/images/138268.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/consumables-list">
-                      <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
-                      <small class="text-muted text-uc">Medical Store / Consumables </small>
+                      <span class="h3 block m-t-xs"><strong id="bugs">{{ $drugs->total() }}</strong></span>
+                      <small class="text-muted text-uc">Medical Store </small>
                     </a>
                   </div>
+
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/384496.svg" width="15%">
+                    <img src="/images/1188525.svg" width="15%" class="pull-left">
                     <a class="clear" href="/drug-reports">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Reports</small>
                     </a>
                   </div>
+
+                     @role(['Pharmacist','System Admin'])
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                     <img src="/images/139315.svg" width="15%">
+                     <img src="/images/214342.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/drug-settings">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
                       <small class="text-muted text-uc">Drug Settings</small>
                     </a>
                   </div>
+                  @endrole
 
                  
                 </div>

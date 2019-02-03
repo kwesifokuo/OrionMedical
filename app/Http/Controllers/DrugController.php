@@ -24,6 +24,7 @@ use OrionMedical\Models\DrugStock;
 use OrionMedical\Models\DrugExclusions;
 use OrionMedical\Models\ConsumableRequisition;
 use OrionMedical\Models\Bill;
+use OrionMedical\Models\Department;
 use OrionMedical\Models\Payments;
 use OrionMedical\Models\User;
 use OrionMedical\Http\Requests;
@@ -136,7 +137,7 @@ class DrugController extends Controller
         $drugcategories =    DrugCategory::where('scope','Consumables')->orderBy('category', 'ASC')->get();
         $application    =    DrugDosage::get();
         $assignees =    User::get();
-        $brands      = Consumables::groupby('brand')->get();
+        $brands      = Department::get();
         $drugs      =  Consumables::where('is_Active','Active')->orderBy('name', 'ASC')->paginate(30);
         $totalcost = 0;
 
@@ -606,8 +607,8 @@ class DrugController extends Controller
             $ID = Input::get("ID");
 
            $affectedRows = DrugStock::where('invoice_number', $ID)->update(array('status' => 'Approved'));
-            $affectedRows = DrugStock::where('invoice_number', $ID)->update(array('approved_by' => Auth::user()->getNameOrUsername()));
-             $affectedRows = DrugStock::where('invoice_number', $ID)->update(array('approved_on' => Carbon::now()));
+           $affectedRows = DrugStock::where('invoice_number', $ID)->update(array('approved_by' => Auth::user()->getNameOrUsername()));
+           $affectedRows = DrugStock::where('invoice_number', $ID)->update(array('approved_on' => Carbon::now()));
 
             if($affectedRows > 0)
 
@@ -640,9 +641,11 @@ class DrugController extends Controller
         if(Input::get("ID"))
         {
             $ID = Input::get("ID");
+            $conID = Input::get("consumable_id");
+            $approvedquantity = Input::get("approved_quantity");
 
            $affectedRows = ConsumableRequisition::where('id', $ID)->update(array('status' => 'Approved','quantity_approved'=>Input::get("approved_quantity"),'approved_by'=>Auth::user()->getNameOrUsername(),'approved_on'=> Carbon::now() ));
-           
+           $stocks = Consumables::where('id', $conID)->decrement('stock',(int)$approvedquantity);
 
             if($affectedRows > 0)
 
@@ -975,13 +978,14 @@ class DrugController extends Controller
          if(Input::get('quantity_requested'))
          {
           
-            $requistion = new ConsumableRequisition;
-            $requistion->consumable = Input::get("item_requested");
-            $requistion->assigned_to = Input::get("requested_by");
-            $requistion->quantity = Input::get("quantity_requested");
-            $requistion->cost = Input::get("item_price");
-            $requistion->created_at  = Carbon::now();
-            $requistion->created_by  = Auth::user()->getNameOrUsername();
+            $requistion                = new ConsumableRequisition;
+            $requistion->consumable    = Input::get("item_requested");
+            $requistion->consumable_id = Input::get("drugid");
+            $requistion->assigned_to   = Input::get("requested_by");
+            $requistion->quantity      = Input::get("quantity_requested");
+            $requistion->cost          = Input::get("item_price");
+            $requistion->created_at    = Carbon::now();
+            $requistion->created_by    = Auth::user()->getNameOrUsername();
             $requistion->save();
 
             return redirect()
@@ -1659,7 +1663,7 @@ public function getStockDetails()
            $drug->drug_dosage_default = $request->input('drug_dosage');
            $drug->drug_application_default = $request->input('drug_form'); 
            $drug->drug_quantity_default = $request->input('pack_size');  
-           $drug->expiry_date = $this->change_date_format($request->input('expiry_date'));  
+           $drug->expiry_date = $this->change_date_format($request->input('expiry_date'));
            $drug->supplier = $request->input('supplier'); 
            $drug->brand = $request->input('brand'); 
            $drug->walk_margin = $request->input('walk_margin'); 

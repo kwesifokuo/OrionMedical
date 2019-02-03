@@ -1,18 +1,26 @@
+
+@role(['System Admin','Nurse','Nurse Assistant'])
+
 @extends('layouts.default')
 @section('content')
 <section class="vbox">
-            <header class="header bg-white b-b b-light">
-                    <p><span class="label label-success">{{ $visit_details->consultation_type }} - {{ $patients[0]->fullname }}</span></p> 
-                    <p class="block"><a href="#" class=""></a> <span class="label label-warning btn-rounded">{{ $visit_details->visit_type }}</span></p>
-                     <p class="block"><a href="#" class=""></a> <span class="label label-success btn-rounded">{{ $visit_details->opd_number }}</span></p>
-                     <p class="block"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Created : {{ Carbon\Carbon::parse($visit_details->created_on)->diffForHumans() }}</span></p>
+           <header class="header bg-white b-b b-light">
+                    
 
-                     <div class="btn-group pull-right">
-                    <p>
-                    <a href="#" class="btn btn-rounded btn-sm btn-info"><i class="fa fa-fw fa-user"></i> {{ $visit_details->payercode }}</a>
-                   <a href="#" class="btn btn-rounded btn-sm btn-primary"><i class="fa fa-fw fa-home"></i> {{ $visit_details->care_provider }} </a>
-                    </p>
-              </div>
+                     
+
+                      <a href="#" class="btn btn-warning btn-s-md btn-lg pull-right">Total Charge : GHS {{ $payables }}</a>
+                      <a href="#" class="btn btn-success btn-s-md btn-lg pull-right">Paid : GHS {{ $receivables }}</a>
+                      <a href="#" class="btn btn-danger btn-s-md btn-lg pull-right">Outstanding : GHS {{ number_format($outstanding, 1, '.', ',') }}</a>
+
+                      ||
+
+                   
+                      
+                     <a href="#"  class="btn btn-info btn-s-md btn-lg">{{ $visit_details->care_provider }}</a> ||
+                     <a href="#"  class="btn btn-info btn-s-md btn-lg ">{{ $patients[0]->company }}</span></a>
+                   
+           
             </header>
             <section class="scrollable">
               <section class="hbox stretch">
@@ -29,7 +37,10 @@
                             <br>
                             <div>
                           
-                           <p class="block"><a href="#" class="">ID # </a> <span class="label label-default">{{ $patients[0]->patient_id }}</span></p>
+                           <p class="block"><a href="#" class="">ID # </a> <span class="label label-default">{{ $patients[0]->patient_id }}</span></p><br>
+                           <p><span class="label label-success">{{ $visit_details->consultation_type }} </span></p> <br>
+                            <p class="block"><a href="#" class=""></a> <span class="label label-success btn-rounded">{{ $visit_details->opd_number }}</span></p><br>
+                     <p class="block"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Created : {{ Carbon\Carbon::parse($visit_details->created_on)->diffForHumans() }}</span></p>
                             </div>
                           </div>                
                         </div>
@@ -38,12 +49,20 @@
                             <div class="col-xs-4">
                               <a href="#">
                                 <span class="m-b-xs h4 block">{{ $patients[0]->gender }}</span>
+                                 <input type="hidden" id="accounttype" name="accounttype" value="{{ $visit_details->payercode }}">
+                                    <input type="hidden" id="opd_number" name="opd_number" value="{{ $visit_details->opd_number }}">
+                                   <input type="hidden" id="fullname" name="fullname" value="{{ $visit_details->name }}">
+                                    <input type="hidden" id="patient_id" name="patient_id" value="{{ $visit_details->patient_id }}">
                                 <small class="text-muted">Gender</small>
                               </a>
                             </div>
                             <div class="col-xs-4">
                               <a href="#">
+                                @if($patients[0]->date_of_birth->age > 1)
                                 <span class="m-b-xs h4 block">{{ $patients[0]->date_of_birth->age }}</span>
+                                @else
+                                 <span class="m-b-xs h4 block"> {{ \Carbon\Carbon::createFromTimeStamp(strtotime($patients[0]->date_of_birth))->diffForHumans() }} </span>
+                                @endif
                                 <small class="text-muted">Age</small>
                               </a>
                             </div>
@@ -61,7 +80,6 @@
                           <ul class="list-group no-radius">
                           <li class="list-group-item">
                             <span class="pull-right">{{ str_limit($patients[0]->occupation,12) }}</span>
-                             <input type="hidden" id="accounttype" name="accounttype" value="{{ $patients[0]->accounttype }}">
                              <small class="text-muted">Occupation</small>
                           </li>
                             <li class="list-group-item">
@@ -69,32 +87,55 @@
                             
                              <small class="text-muted">Nationality</small>
                           </li>
-                            <li class="list-group-item">
-                            <span class="pull-right">{{ $patients[0]->blood_group }}</span>
-                            
-                             <small class="text-muted">Blood Group</small>
-                          </li>
+
                            <li class="list-group-item">
                             <span class="pull-right">{{ $patients[0]->mobile_number }}</span>
                             
                              <small class="text-muted">Mobile Number</small>
                           </li>
+                            <li class="list-group-item">
+                            <span class="pull-right">{{ $patients[0]->blood_group }}</span>
+                            
+                             <small class="text-muted text-danger">Blood Group</small>
+                          </li>
+                          <li class="list-group-item">
+                            <span class="pull-right">{{ $patients[0]->blood_group }}</span>
+                            
+                             <small class="text-muted text-info">G6PD</small>
+                          </li>
 
-           
                         </ul>
+                            
 
+                          <ul class="list-group no-radius">
+                         <h5>
+                                <span>Vitals</span>
+                               @foreach($myvitals as $vital)
+                               <ul>
+                                <label class="badge bg-danger"> {{ $vital->created_on }} </label>
+                                @if($vital->weight == '') @else <li> Weight <label class="badge bg-info"> {{$vital->weight}}kg  </label>  </li> @endif
+                                @if($vital->height == '') @else <li> Height <label class="badge bg-info"> {{$vital->height}} m </label></li> @endif
+
+                                 @if($vital->height == '') @else <li> BMI <label class="badge bg-info"> {{ $vital->bmi }} kg/m^2  </label> {{ $vital->bmi_status }}</li> @endif
+
+                                @if($vital->temperature == '') @else <li> Temperature <label class="badge bg-info"> {{$vital->temperature}} ° </label>{{ $vital->temp_status }}</li> @endif
+                                @if($vital->pulse_rate == '') @else <li> Pulse Rate <label class="badge bg-info"> {{$vital->pulse_rate}} per min   </label></li> @endif
+                                @if($vital->bp_status == '') @else <li> Blood Pressure <label class="badge bg-info"> {{$vital->sbp }} / {{ $vital->dbp  }} mmHg</label>{{$vital->bp_status}}</li> @endif
+                                 @if($vital->spo2 == '') @else <li> SPO2 <label class="badge bg-info"> {{$vital->spo2}} %   </label></li> @endif
+                                 @if($vital->waist_circumference == '') @else <li> Waist Circumference <label class="badge bg-info"> {{$vital->waist_circumference }} cm </label></li> @endif
+                                  @if($vital->hip_circumference == '') @else <li> Hip Circumference <label class="badge bg-info"> {{$vital->hip_circumference }} cm </label></li> @endif
+
+                                  @if($vital->remarks == '') @else <li> Remarks <label class="badge bg-info"> {{$vital->remarks}}  </label></li> @endif
+                                 </ul>
+                                 <div class="line"></div>
+                               @endforeach
+                              </h5>
+
+                        </ul>
                           <br>
                      
-                          <div>
                           
-                           <input type="hidden" id="opd_number" name="opd_number" value="{{ $visit_details->opd_number }}">
-                           <input type="hidden" id="fullname" name="fullname" value="{{ $visit_details->name }}">
-                            <input type="hidden" id="patient_id" name="patient_id" value="{{ $visit_details->patient_id }}">
-
-                          <br>
-                          </div> 
-
-                          <img src="/images/387610.svg"> 
+                          <img src="/images/387610.svg" width="100%"> 
                         </div>
                       </div>
                     </section>
@@ -102,19 +143,55 @@
                 </aside>
 
 
-
+                
                 <aside class="bg-white">
                   <section class="vbox">
+
+                  <header class="header bg-white b-b b-light">
+              
+                    
+                 <a href="#" onclick="doDischarge('{{$visit_details->id }}','{{ $visit_details->name }}')"  data-toggle="modal" class="btn btn-sm btn-danger bootstrap-modal-form-open pull-right"> <i class="fa fa-power-off"></i> End Visit </a>
+
+{{--                 <a href="#new-appointment-request"  data-toggle="modal" class="btn btn-sm btn-info bootstrap-modal-form-open pull-right"> <i class="fa fa-plus"></i> Create a Follow Up Appointment</a>
+                
+                &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;
+                
+
+                <a href="#new-admission"  data-toggle="modal" class="btn btn-sm btn-warning bootstrap-modal-form-open pull-right"> <i class="fa fa-plus"></i> Admit Patient </a> --}}
+
+
+              {{--     <a href="#new-discharge"  data-toggle="modal" class="btn btn-sm btn-warning bootstrap-modal-form-open pull-right"> <i class="fa fa-plus"></i> Discharge Patient </a> --}}
+                
+
+
+                     <p class="block pull-left"><a href="#" class=""></a> <span class="label label-success btn-rounded">eSigned </span></p>
+
+                      @if($visit_details->billable=='Inpatient')
+
+                       <p class="block pull-left"><a href="#" class=""></a> <span class="label bg-dark btn-rounded">Admission Type : {{ $visit_details->ward_admission_type}} </span></p>
+
+                      <p class="block pull-left"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Ward : {{ $visit_details->ward_id}} </span></p>
+
+                      <p class="block pull-left"><a href="#" class=""></a> <span class="label bg-dark btn-rounded">Bed : {{ $visit_details->bed_id}}</span></p>
+
+                       <p class="block pull-left"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Admission Time : {{ $visit_details->ward_admission_time}}</span></p>
+                      @else
+                      <p class="block pull-left"><a href="#" class=""></a> <span class="label bg-dark btn-rounded">Admission Type : {{ $visit_details->consultation_type}} </span></p>
+                      @endif
+                     
+
+                    
+                   </header>
                     <header class="header bg-light bg-gradient">
                       <ul class="nav nav-tabs nav-white">
 
-                          {{-- <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa fa-folder text-default"></i> Notes Summary </a></li>  --}}
+                           <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa fa-folder text-default"></i> Notes Summary </a></li>  
                          <li class=""><a href="#history-summary" data-toggle="tab"><i class="fa fa-archive text-default"></i> Notes History (Old Visits) </a></li>
                           <li class=""><a href="#review-vitals" data-toggle="tab"><i class="fa fa-lightbulb-o text-default"></i> Vital Signs </a></li>
                        
                           
                        
-                          {{--  <li class=""><a href="#review-complaint" data-toggle="tab"><i class="fa fa-meh-o text-default"></i> Complaint </a></li>
+                     {{--      <li class=""><a href="#review-complaint" data-toggle="tab"><i class="fa fa-meh-o text-default"></i> Complaint </a></li>
                           <li class=""><a href="#review-diagnosis" data-toggle="tab"><i class="fa fa-gavel text-default"></i> Diagnosis </a></li>
                            --}}
 
@@ -126,7 +203,9 @@
 
                             @role(['Nurse','System Admin'])
                             <li class=""><a href="#review-investigation" data-toggle="tab"><i class="fa fa-film text-default"></i> Lab / Investigations </a></li>
-                            <li class=""><a href="#review-drug" data-toggle="tab"><i class="fa fa-flask text-default"></i> Medication </a></li>
+                            <li class=""><a href="#review-drug" data-toggle="tab"><i class="fa fa-flask text-default"></i> Prescription </a></li>
+                            </a></li>
+                          <li class=""><a href="#review-documents" data-toggle="tab"><i class="fa fa-folder text-default"></i> Documents </a></li>
                             @endrole
 
                   
@@ -1756,45 +1835,38 @@
                     </section>
                   </div> --}}
 
-                  <div class="tab-pane" id="review-documents">
+              <div class="tab-pane" id="review-documents">
                          <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
                           <header class="panel-heading">
                       <a href="#attach_document" class="bootstrap-modal-form-open" data-toggle="modal"><span class="label bg-success pull-right">Add New</span></a>
                       
                     </header>
-                          <div class="table-responsive">
-                      <table cellpadding="0" cellspacing="0" border="0" class="table table-striped m-b-none text-sm" width="100%">
-                        <thead>
-                          <tr>
-                          <th></th>
-                            <th>File</th>
-                            <th>Comment</th>
-                            <th>Added</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                        
-                        @foreach($images as $image)
-                         <tr>
-                         <td><div class="thumb-lg">
-                              <img src="{!! '/uploads/images/'.$image->filepath !!}" class="img-circle">
-                            </div>
-                          </td>
-                        <td>{{ $image->filename }}</td>
-                        <td>{{ $image->created_by }}</td>
-                        <td>{{ $image->created_on }}</td>
-                        <td>
-                            <a href="{!! '/uploads/images/'.$image->filepath !!}" class="bootstrap-modal-form-open"   id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-eye"></i></a>
-                        </td>
-                         <td>
-                            <a href="#" class="bootstrap-modal-form-open"   id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-trash"></i></a>
-                        </td>
-                          
-                        </tr>
-                        @endforeach
+                          <div class="row">
+                  
 
-                        </tbody>
-                      </table>
+                     
+                     @foreach($images as $keys => $image)
+                   
+
+                   <div class="col-md-3 col-sm-4 thumb-lg">
+  
+                    @if($image->mime == 'docx')
+                   <a href="{!! '/uploads/images/'.$image->filepath !!}" target="_blank">
+                              <img src="{!! '/images/ms_word.png' !!}" class="img-circle">
+                              </a>  {{ $image->filename }}  <a href="#" class="bootstrap-modal-form-open" onclick="deleteImage('{{  $image->id }}','{{ $image->filename }}')"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-trash"></i></a>
+                    @elseif($image->mime == 'pdf')
+                     <a href="{!! '/uploads/images/'.$image->filepath !!}" target="_blank">
+                              <img src="{!! '/images/pdf.png' !!}" class="img-circle">
+                              </a>{{ $image->filename }} <a href="#" class="bootstrap-modal-form-open" onclick="deleteImage('{{  $image->id }}','{{ $image->filename }}')"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-trash"></i></a> <span class="label label-default btn-rounded" data-toggle="tooltip" data-placement="top" title="" data-original-title="{{ $image->created_on}}">{{ $image->created_on->diffForHumans() }}</span>
+                      @else 
+                     <a href="{!! '/uploads/images/'.$image->filepath !!}" target="_blank">
+                              <img src="{!! '/uploads/images/'.$image->filepath !!}" class="img-circle">
+                              </a> {{ $image->filename }}  <a href="#" class="bootstrap-modal-form-open" onclick="deleteImage('{{  $image->id }}','{{ $image->filename }}')"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-trash"></i></a>
+                    @endif        
+                      </div>
+                    @endforeach
+
+
                     </div>
                           </ul>
                         </div>
@@ -2408,6 +2480,54 @@ if($('#investigation').val()!= "")
   else
     {sweetAlert("Please select an Investigation!");}
 }
+
+function doDischarge(id,name)
+  {
+
+         
+      swal({   
+        title: "Discharging " + name +"!",  
+        text: "Do you want to discharge "+name+" ?",   
+        type: "warning",   
+        showCancelButton: true,   
+        confirmButtonColor: "#DD6B55",   
+        confirmButtonText: "Yes, discharge!",   
+        cancelButtonText: "No, cancel !",   
+        closeOnConfirm: false,   
+        closeOnCancel: false }, 
+        function(isConfirm){   
+          if (isConfirm) 
+          { 
+          $.get('/discharge-opd',
+          {
+             "ID": id 
+          },
+          function(data)
+          { 
+            
+            $.each(data, function (key, value) 
+            {
+            if(value == "OK")
+            {
+              swal("Discharged!", name +" was successfully deleted.", "success"); 
+              location.reload(true);
+             }
+            else
+            { 
+              swal("Cancelled", name +" failed to discharge.", "error");
+              
+            }
+           
+        });
+                                          
+          },'json');    
+           
+             } 
+        else {     
+          swal("Cancelled", name +" failed to delete.", "error");   
+        } });
+
+  }
 
 
 
@@ -3368,4 +3488,4 @@ function removeprocedure(id)
       </div>
 
 
-
+@endrole

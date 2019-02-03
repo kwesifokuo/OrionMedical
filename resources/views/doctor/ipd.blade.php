@@ -8,30 +8,33 @@
                 <li><a href="index.html"><i class="fa fa-home"></i> Home </a></li>
                 <li class="active"> Doctor Station </li>
               </ul>
-
+            
+          
              
-           <section class="panel panel-default">
+            <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                     <img src="/images/801699.svg" width="15%" class="pull-left">
+                     <img src="/images/843293.svg" width="15%" class="pull-left">
                     <a class="clear" href="/opd-consultation-doctor"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>{{$patients->count()}}</strong></span>
                       <small class="text-muted text-uc">Outpatient List</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                     <img src="/images/425837.svg" width="15%" class="pull-left">
+
+                    <img src="/images/188056.svg" width="15%" class="pull-left">
+                    <a class="clear" href="/ipd-consultation">
+                      <span class="h3 block m-t-xs"><strong>{{$admission->count()}}</strong></span>
+                      <small class="text-muted text-uc">Admissions & Detentions</small>
+                    </a>
+                    
+                  </div>
+                    <div class="col-sm-6 col-md-3 padder-v b-r b-light">
+                     <img src="/images/1430487.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/review-consultation">
                       <span class="h3 block m-t-xs"><strong id="bugs">{{$reviewed->count()}}</strong></span>
                       <small class="text-muted text-uc">Awaiting Investigations</small>
-                    </a>
-                  </div>
-                    <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/139290.svg" width="15%" class="pull-left">
-                    <a class="clear" href="/ipd-consultation">
-                      <span class="h3 block m-t-xs"><strong>{{$admission->count()}}</strong></span>
-                      <small class="text-muted text-uc">Admissions & Detentions</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
@@ -47,6 +50,8 @@
                 </div>
               </section> 
 
+
+
               <div class="row">
 
                 <div class="col-md-12">
@@ -54,12 +59,25 @@
                   <section class="panel panel-default">
                   <header class="panel-heading">
                     <form action="/find-patient-folder" method="GET">
+
+
                       <div class="input-group text-ms">
+                        
+                        <div class="col-md-8">
                         <input type="text" name='search' id='search' class="input-sm form-control" placeholder="Search by patient, test, status">
+                        </div>
+                       
+                         <div class="col-md-4">
+                        <input type="text" name='review_period' id='review_period' class="input-sm form-control" placeholder="Search by patient, test, status">
+                        </div>
+
                         <div class="input-group-btn">
-                           <button class="btn btn-sm btn-success" type="submit">Search!</button>
+                           <button class="btn btn-sm btn-success" type="submit">Search Case!</button>
                         </div>
                       </div>
+
+
+
                       </form>
                     </header>
                     <div class="table-responsive">
@@ -67,19 +85,19 @@
                       <table class="table table-striped m-b-none text-sm" width="100%">
                          <thead>
                           <tr>                        
-                          
-                             <th>Visit # </th>
-                            <th>Patient #</th>
+                            <th>Visit #</th>
+                            <th>Time In</th>
                             <th>Patient Name</th>
-                            <th>Visit Date</th>
-                            <th>Doctor-In-Charge</th>
-                            <th>Visit Type</th>
-                            <th>Consultation Type</th>
-                            <th>Ward</th>
-                            <th>Room</th>
+                            <th>Chief Complaint</th>
+                            <th>Appointment Type</th>
+                             <th>Practioner</th>
+                             <th>Care Provider</th>
+                            <th> Type</th>
+                             <th>Ward</th>
+                             <th>Bed</th>
                             <th width="30"></th>
-                            <th width="30"></th>
-                            <th width="30"></th>
+                            
+                            
                           </tr>
                         </thead>
                         <tbody>
@@ -87,27 +105,74 @@
                           <tr>
                        
                              <td><a href="/patient-profile/{{ $patient->patient_id }}"  id="edit" name="edit" data-toggle="modal" alt="edit">{{ $patient->opd_number }}</a></td>
-                            <td>{{ $patient->patient_id }}</td>
-                            <td>{{ $patient->name }}</td>
-                            <td>{{ $patient->created_on }}</td>
-                             <td>{{ $patient->referal_doctor }}</td>
-                             <td>{{ $patient->visit_type }}</td>
-                              <td>{{ $patient->consultation_type }}</td>
-                               <td>{{ $patient->ward_id }}</td>
-                                 <td>{{ $patient->bed_id }}</td>
+                            <td>{{ $patient->created_on->format('H:i:s - jS M Y') }}</td>
+                            <td>{{ ucwords(strtolower($patient->name)) }}</td>
+                             <td>{{ $patient->chief_complaint }}</td>
+                             <td>{{ $patient->consultation_type }}</td>
+                            <td>{{ $patient->referal_doctor }}</td>
+                              <td>{{$patient->payercode }} , {{ $patient->care_provider }}</td>
+                              <td>{{ $patient->ward_admission_type }}</td>
+                              <td>{{ $patient->ward_id }}</td>
+                              <td>{{ $patient->bed_id }}</td>
+
                               
                               @role(['Doctor','System Admin'])
-                             
+                              @if($patient->consultation_type=='DENTAL CONSULTATION')
+                              <td><a href="/dental-review/{{ $patient->opd_number }}" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+                              @elseif($patient->consultation_type=='OPTOMETRIST CONSULTATION')
+                              <td><a href="/ophthalmology-review/{{ $patient->opd_number }}" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+                               @elseif($patient->consultation_type=='OPHTHALMOLOGY CONSULTATION')
+                              <td><a href="/ophthalmology-review/{{ $patient->opd_number }}" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+
+                               @elseif($patient->consultation_type=='CLINICAL PSYCHOLOGY CONSULTATION')
+                              <td><a href="/psycho-review/{{ $patient->opd_number }}" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+
+
+
+
+                              @elseif($patient->consultation_type=='DIETETIC CONSULTATION')
+                              <td><a href="/dietetic-review/{{ $patient->opd_number }}" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+                              @elseif($patient->consultation_type=='DIETETIC FOLLOW UP CONSULTATION')
+                              <td><a href="/dietetic-review/{{ $patient->opd_number }}" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+
+                              @elseif($patient->consultation_type=='OPHTHALMOLOGY CONSULTATION')
+                              <td><a href="/ophthalmology-review/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
                               
-                              @if($patient->visit_type=='Admission')
-                              <td><a href="/consultation-ipd/{{ $patient->opd_number }}" onclick="getDetails('{{ $patient->id }}','{{ $patient->patient_id }}')" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+                              @elseif($patient->consultation_type=='ANTENATAL CONSULTATION')
+                              <td><a href="/antenatal-review/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+                              @elseif($patient->consultation_type=='ANTENATAL CONSULTATION REVIEW')
+                              <td><a href="/antenatal-review/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+                              
+
+                              @elseif($patient->consultation_type=='GYNAE CONSULTATION')
+                              <td><a href="/antenatal-review/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+                               @elseif($patient->consultation_type=='GYNAE CONSULTATION FOLLOW-UP')
+                              <td><a href="/antenatal-review/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+                              
+
+                              @elseif($patient->consultation_type=='OBSTETRICS CONSULTATION')
+                              <td><a href="/antenatal-review/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+
+
+
+                              @elseif($patient->visit_type=='Admission')
+                              <td><a href="/consultation-ipd/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
 
                               @else
-                              <td><a href="/consultation/{{ $patient->opd_number }}" onclick="getDetails('{{ $patient->id }}','{{ $patient->patient_id }}')" class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
+                              <td><a href="/consultation/{{ $patient->opd_number }}"  class="btn btn-rounded btn-sm btn-info" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Review </a></td>
                               @endif
 
+                              
 
-                              <td><a href="#" onclick="doDischarge('{{ $patient->id }}','{{ $patient->fullname }}')" class="btn btn-rounded btn-sm btn-gplus" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope" data-toggle="tooltip" data-placement="top" title="" data-original-title="Consult"> </i> Discharge </a></td>
                             @endrole
 
 
@@ -150,47 +215,45 @@
 
 
 
+<script src="{{ asset('/event_components/jquery.min.js')}}"></script>
+
+<script type="text/javascript">
+  
+setTimeout(function() {
+  location.reload();
+}, 30000);
+</script>
+<script type="text/javascript">
+$(function() {
+
+    var start = moment().subtract(29, 'days');
+    var end = moment();
+
+    function cb(start, end) {
+        $('#review_period span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+
+    $('#review_period').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+           'Today': [moment(), moment()],
+           'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        }
+    }, cb);
+
+    cb(start, end);
+    
+});
 
 
+</script>
 
 
-<div class="modal fade" id="review-patient" size="600">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title">OPD Patient Information<span id="selectedName"></span></h4>
-        </div>
-        <div class="modal-body">
-          <p></p>
-                      <section class="vbox">
-                    <header class="header bg-light bg-gradient">
-                      <ul class="nav nav-tabs nav-white">
-
-                        <li class="active"><a href="#details" data-toggle="tab">Patient Details</a></li>
-                        <li><a href="#imaging" data-toggle="tab"> Images & Documents</a></li>
-                      </ul>
-                    </header>
-                    <section class="scrollable">
-                      <div class="tab-content">
-                        <div class="tab-pane active" id="details">
-                            <form  class="bootstrap-modal-form" method="post" action="/process-consultation" class="panel-body wrapper-lg">
-                          @include('doctor/OPDconsult')
-                        <input type="hidden" name="_token" value="{{ Session::token() }}">
-                      </form>
-                        </div>
-                          <div class="tab-pane" id="imaging">
-                          
-                        </div>
-                    
-                      </div>
-                    </section>
-                  </section>
-        </div>
-        
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-  </div>
 
 
    

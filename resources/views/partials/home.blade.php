@@ -3,10 +3,10 @@
             <section class="scrollable padder">
               <ul class="breadcrumb no-border no-radius b-b b-light pull-in">
                 <li><a href="index.html"><i class="fa fa-home"></i> Home</a></li>
-                <li class="active">{{   $company->legal_name }}</li>   
+                <li class="active">{{   $mycompany->legal_name }}</li>   
               </ul>
               <div class="m-b-md">
-                <h3 class="m-b-none">{{   $company->legal_name }}</h3>
+                <h3 class="m-b-none">{{   $mycompany->legal_name }}</h3>
                  @if(Auth::check())
                 <small>Welcome back,  {{ Auth::user()->getNameOrUsername() }}</small>
                  @endif
@@ -16,14 +16,14 @@
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
 
-                    <img src="/images/448908.svg" width="15%">
+                    <img src="/images/437553.svg" width="15%" class="pull-left">
                     <a class="clear" href="/active-patients">
                       <span class="h3 block m-t-xs"><strong>{{ $customercount }}</strong></span>
                       <small class="text-muted text-uc">Patients</small>
                     </a>
                   </div>
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                      <img src="/images/273301.svg" width="15%">
+                      <img src="/images/1040214.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/event-calendar">
                       <span class="h3 block m-t-xs"><strong id="bugs">{{ $events->count() }}</strong></span>
@@ -31,19 +31,19 @@
                     </a>
                   </div>
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">                     
-                         <img src="/images/387582.svg" width="15%">
+                         <img src="/images/754554.svg" width="15%" class="pull-left">
                     </span>
-                    <a class="clear" href="#">
+                    <a class="clear" href="/waiting-opd">
                       <span class="h3 block m-t-xs"><strong id="firers">{{ $visits }}</strong></span>
                       <small class="text-muted text-uc">Today's Visits</small>
                     </a>
                   </div>
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/384496.svg" width="15%">
+                    <img src="/images/138361.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/service-charges">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
-                      <small class="text-muted text-uc">Services</small>
+                      <small class="text-muted text-uc">Service Charges</small>
                     </a>
                   </div>
                 </div>
@@ -74,8 +74,8 @@
                     <header class="panel-heading font-bold">Data graph</header>
                     <div class="bg-light dk wrapper">
                       <span class="pull-right">{{ date('D')}}</span>
-                      <span class="h4">GHS{{ $bills }}<br>
-                        <small class="text-muted">+1.05(2.15%)</small>
+                      <span class="h4">GHS{{ $payments }}<br>
+                        
                       </span>
                       <div class="text-center m-b-n m-t-sm">
                           <div class="sparkline" data-type="line" data-height="65" data-width="100%" data-line-width="2" data-line-color="#dddddd" data-spot-color="#bbbbbb" data-fill-color="" data-highlight-line-color="#fff" data-spot-radius="3" data-resize="true" values="280,320,220,385,450,320,345,250,250,250,400,380"></div>
@@ -84,9 +84,15 @@
                     </div>
                     <div class="panel-body">
                       <div>
-                        <span class="text-muted">Total for today:</span>
+                        <span class="text-muted">Total collections today:</span>
+                        <span class="h3 block"><a href="/charts" >GHS{{ $payments }}</a></span>
+                      </div>
+
+                       <div>
+                        <span class="text-muted">Total bills generated today:</span>
                         <span class="h3 block"><a href="/charts" >GHS{{ $bills }}</a></span>
                       </div>
+
                       <div class="line pull-in"></div>
                       <div class="row m-t-sm">
                         <div class="col-xs-3">
@@ -105,7 +111,7 @@
                           <small class="text-muted block">Imaging</small>
                           <span class="badge bg-success">GHS{{ $imagingbills }}</span>
                         </div>
-                      </div>
+                      </div> 
                     </div>
                   </section>
                 </div>
@@ -117,7 +123,7 @@
             <div class="col-lg-12">
                   <section class="panel panel-default">
                     <header class="panel-heading">
-                      Patient bills within 90 days trend
+                      Patient bills within 30 days trend
                     </header>
                     <div class="panel-body text-center">
                       
@@ -130,6 +136,10 @@
                   </section>
                 </div>  
               </div>
+
+
+             
+
 
 
            {{--    <div class="row">
@@ -169,6 +179,47 @@
                   </section>
                 </div>  
               </div>
+
+                <div class="row">
+
+            <div class="col-lg-12">
+                  <section class="panel panel-default">
+                    <header class="panel-heading">
+                      Source revenue - monthly trend
+                    </header>
+                    <div class="panel-body text-center">
+                      
+                      <small class="text-muted block"></small>
+                      <div class="inline">
+                          @include('charts/businesssource') 
+                      </div>                      
+                    </div>
+                    <div class="panel-footer"><small><a href="#" > % of Bills</a></small></div>
+                  </section>
+                </div>  
+              </div>
+
+
+                <div class="row">
+
+            <div class="col-lg-12">
+                  <section class="panel panel-default">
+                    <header class="panel-heading">
+                      Payment Received - monthly trend
+                    </header>
+                    <div class="panel-body text-center">
+                      
+                      <small class="text-muted block"></small>
+                      <div class="inline">
+                          @include('charts/paymentsource') 
+                      </div>                      
+                    </div>
+                    <div class="panel-footer"><small><a href="#" > % of Payments</a></small></div>
+                  </section>
+                </div>  
+              </div>
+
+
 
               @endrole
 
@@ -212,7 +263,24 @@
                   </section>                  
                 </div> --}}
               </div>
+
+                 <div class="row">
+
+             <div class="col-md-12">
+              <section class="panel b-light">
+                    <header class="panel-heading bg-dark dker no-border"><strong>Appointments</strong></header>
+                  <div class="panel-body text-center">
+                       <div class="calendar" id="calendar">                 
+                    </div>
+                  </section> 
+                </div>
+               
+              </div>
 @role('System Admin')
+
+
+         
+            <!-- /.aside -->
 
               <div class="row">
              
@@ -252,20 +320,25 @@
 
 
 
+  <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
+  <script src="{{ asset('/event_components/bootstrap.min.js')}}"></script>
+  <script src="{{ asset('/event_components/fullcalendar.min.js')}}"></script>
+  <script src="{{ asset('/event_components/moment.min.js')}}"></script>
+
+
 <script type="text/javascript">
   $(document).ready(function() {
-
-       var base_url = '{{ url('/') }}';
+    
+    var base_url = '{{ url('/') }}';
 
     $('#calendar').fullCalendar({
-    //   weekends: false,
-    //   slotMinutes: 15,
-    //   theme: false,
-    // header: false,
-    //    minTime: 7,
-    // maxTime: 20,
-    // height: 800,
-    // slotEventOverlap: true,
+      slotMinutes: 15,
+      theme: false,
+    header: false,
+       minTime: 7,
+    maxTime: 20,
+    height: 800,
+    slotEventOverlap: true,
 
       header: {
         left: 'prev,next today,prevYear,nextYear',
@@ -273,7 +346,7 @@
         right: 'listDay,month,agendaWeek,agendaDay'
       },
       //weekends : false,
-     defaultView: 'month',
+     defaultView: 'agendaWeek',
       weekNumberTitle : "Week",
       allDayDefault: false,
       weekNumbers : true,
@@ -286,6 +359,7 @@
         }
       }
     });
+  
   });
 </script>
 

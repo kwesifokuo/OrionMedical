@@ -3,7 +3,7 @@
         <a class="btn btn-link visible-xs" data-toggle="class:nav-off-screen,open" data-target="#nav,html">
           <i class="fa fa-bars"></i>
         </a>
-        <a href="#" class="navbar-brand" data-toggle="fullscreen"><img src="/images/glogo.png" class="m-r-sm">{{   $company->name }}</a>
+        <a href="#" class="navbar-brand" data-toggle="fullscreen"><img src="/images/glogo.png" class="m-r-sm">{{ $mycompany->name }}</a>
         <a class="btn btn-link visible-xs" data-toggle="dropdown" data-target=".nav-user">
           <i class="fa fa-cog"></i>
         </a>
@@ -32,7 +32,7 @@
          <li class="dropdown">
           <a href="#" class="dropdown-toggle dker" data-toggle="dropdown">
             <i class="fa fa-shopping-cart"></i> 
-            <span class="font-bold">Stores</span>
+            <span class="font-bold">Make Store Requisition</span>
           </a>
           <section class="dropdown-menu aside-xl on animated fadeInLeft no-borders lt">
             <div class="wrapper lter m-t-n-xs">
@@ -43,6 +43,26 @@
                 <a href="/consumables-list"><span class="text-white font-bold"></span></a>
                 <small class="block"></small>
                 <a href="/consumables-list" class="btn btn-xs btn-success m-t-xs">Make Requisition</a>
+              </div>
+            </div>
+           
+          </section>
+        </li>
+
+         <li class="dropdown">
+          <a href="#" class="dropdown-toggle dker" data-toggle="dropdown">
+            <i class="fa fa-gavel"></i> 
+            <span class="font-bold">Rx Claims</span>
+          </a>
+          <section class="dropdown-menu aside-xl on animated fadeInLeft no-borders lt">
+            <div class="wrapper lter m-t-n-xs">
+              <a href="#" class="thumb pull-left m-r">
+                <img src="/images/avatar_default.jpg" class="img-circle">
+              </a>
+              <div class="clear">
+                <a href="192.168.100.41:85/rxclaim_client" target="_new"><span class="text-white font-bold"></span></a>
+                <small class="block"></small>
+                <a href="/192.168.100.41:85/rxclaim_client" target="_new" class="btn btn-xs btn-success m-t-xs">Connect</a>
               </div>
             </div>
            

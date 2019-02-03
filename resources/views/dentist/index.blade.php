@@ -13,14 +13,14 @@
              <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                   <img src="/images/139216.svg" width="15%">
+                   <img src="/images/1060888.svg" width="15%" class="pull-left">
                     <a class="clear" href="/dental"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>{{$patients->count()}}</strong></span>
                       <small class="text-muted text-uc">Patient List</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                 <img src="/images/435240.svg" width="15%">
+                 <img src="/images/893868.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/dental-reviewed">
                       <span class="h3 block m-t-xs"><strong id="bugs">{{$reviewed->count()}}</strong></span>
@@ -28,18 +28,18 @@
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/139284.svg" width="15%">
-                    <a class="clear" href="#">
+                    <img src="/images/1060913.svg" width="15%" class="pull-left">
+                    <a class="clear" href="/doctor-appointments/{{ Auth::user()->getNameOrUsername() }}">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Follow Ups</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                     <img src="/images/139237.svg" width="15%">
+                     <img src="/images/1040214.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/doctor-appointments/{{ Auth::user()->getNameOrUsername() }}">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
-                      <small class="text-muted text-uc">Appointments</small>
+                      <small class="text-muted text-uc">My Appointments</small>
                     </a>
                   </div>
 

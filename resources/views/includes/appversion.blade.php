@@ -1,1 +1,1 @@
-<div> {{   $company->legal_name }} <br>&copy;  {{ date('Y') }} | Made with <i class="fa fa-heart made-with-love text-danger"></i> in Accra </div>
+<div> {{   $mycompany->legal_name }} <br>&copy;  {{ date('Y') }} | Made with <i class="fa fa-heart made-with-love text-danger"></i> in Accra </div>

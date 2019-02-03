@@ -2,9 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="visitbills" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="7deb7677-9674-48a3-a6d5-81aedec2152d">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
-	<property name="ireport.jasperserver.reportUnit" value="/orionmedical/consultrevenue"/>
-	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/services/repository"/>
+	<property name="ireport.y" value="179"/>
 	<style name="Crosstab Data Text" hAlign="Center"/>
 	<parameter name="start_date" class="java.util.Date">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
@@ -87,11 +85,11 @@
 				<textElement>
 					<font fontName="Calibri" size="14" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Bills Summary By Consultation Type]]></text>
+				<text><![CDATA[Bills Summary]]></text>
 			</staticText>
 			<image>
 				<reportElement x="593" y="0" width="189" height="71" uuid="2372fb30-5058-424e-b07e-3796354411f6"/>
-				<imageExpression><![CDATA["repo:gileadlogo.png"]]></imageExpression>
+				<imageExpression><![CDATA["gileadlogo.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement x="12" y="50" width="28" height="20" uuid="6f82c781-9cb0-4add-bb2c-a70767d88d68"/>

@@ -6,14 +6,14 @@
                 <p>REFUSAL OF TREATMENT AGAINST MEDICAL ADVICE</p>
               </header>
              <section class="scrollable wrapper">
-             <img src="/images/{{ $company->logo }}" width="15%">
+             <img src="/images/{{ $mycompany->logo }}" width="15%">
               <div class="row">
                 <div class="col-xs-6">
-                  <h4>{{$company->legal_name }}</h4>
-                  <p><a href="#">{{ $company->email }}</a></p>
-                   <p><a href="#">{{ $company->address }}</a></p>
-                   <p><a href="#">{{ $company->phone }}</a></p>
-                   <p><a href="#">{{ $company->website }}</a></p>
+                  <h4>{{$mycompany->legal_name }}</h4>
+                  <p><a href="#">{{ $mycompany->email }}</a></p>
+                   <p><a href="#">{{ $mycompany->address }}</a></p>
+                   <p><a href="#">{{ $mycompany->phone }}</a></p>
+                   <p><a href="#">{{ $mycompany->website }}</a></p>
                   <br>
                   <br>
                   <br>
@@ -29,7 +29,7 @@
                 </div>    
               <div>
                 <h3 align="center"> <strong> REFUSAL OF TREATMENT AGAINST MEDICAL ADVICE </strong> </h3>
-                <p style="font-size:18px"> It is the policy of {{$company->legal_name}} to give our patients enough information about the purpose, importance, benefits, risks and possible costs associated with proposed tests, referrals or treatments, to enable patients and their families to make informed decisions about their health.</p>
+                <p style="font-size:18px"> It is the policy of {{$mycompany->legal_name}} to give our patients enough information about the purpose, importance, benefits, risks and possible costs associated with proposed tests, referrals or treatments, to enable patients and their families to make informed decisions about their health.</p>
                 <p style="font-size:18px">
                 However, patients have the right to seek a second opinion or refuse recommended medical advice or treatment. If you choose to refuse the recommended medical advice or treatment of our medical practitioners, we are required to record your decision.</p>
                 <br>
@@ -61,7 +61,7 @@
             
 
             <ul class="bg-primary">      
-            <li style="font-size:18px">  I declare that I am refusing the advised treatment of <strong > {{$company->legal_name}} </strong>. </li>
+            <li style="font-size:18px">  I declare that I am refusing the advised treatment of <strong > {{$mycompany->legal_name}} </strong>. </li>
             <li style="font-size:18px">  I understand that the consequences of failing to follow the medical advice given to me might result in significant disability or even death.</li>
             <li style="font-size:18px"> I understand I can change my mind at any time and return for treatment. </li>
             </ul>

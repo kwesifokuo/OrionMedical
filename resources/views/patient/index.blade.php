@@ -12,14 +12,14 @@
              <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/448908.svg" width="15%">
+                    <img src="/images/437553.svg" width="15%" class="pull-left">
                     <a class="clear" href="/active-patients"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>{{ $customerlists->total() }}</strong></span>
                       <small class="text-muted text-uc">Active Patient</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/249205.svg" width="15%">
+                    <img src="/images/942779.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/inactive-patients">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
@@ -27,14 +27,14 @@
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/426363.svg" width="15%">
+                    <img src="/images/1138013.svg" width="15%" class="pull-left">
                     <a class="clear" href="/registered-companies">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Registered Companies</small>
                     </a>
                   </div>
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/212298.svg" width="15%">
+                    <img src="/images/1040214.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/event-calendar">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>

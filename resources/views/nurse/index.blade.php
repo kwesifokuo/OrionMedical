@@ -13,35 +13,40 @@
              <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                     <img src="/images/801699.svg" width="15%" class="pull-left">
+                     <img src="/images/846958.svg" width="15%" class="pull-left">
                     <a class="clear" href="/nurse-station"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
-                      <small class="text-muted text-uc">Checked In</small>
-                    </a>
-                  </div>
-                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/816721.svg" width="15%" class="pull-left">
-                    </span>
-                    <a class="clear" href="#">
-                      <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
                       <small class="text-muted text-uc">Practitioners List</small>
                     </a>
+                  
                   </div>
-                    <div class="col-sm-6 col-md-3 padder-v b-r b-light">
-                    <img src="/images/139290.svg" width="15%" class="pull-left">
-                    <a class="clear" href="/ipd-consultation">
+
+
+                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
+                    <img src="/images/188056.svg" width="15%" class="pull-left">
+                    <a class="clear" href="/nurse-station-ipd">
                       <span class="h3 block m-t-xs"><strong>0</strong></span>
                       <small class="text-muted text-uc">Admissions & Dententions</small>
                     </a>
                   </div>
+                   
                    <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
-                    <img src="/images/845102.svg" width="15%" class="pull-left">
+                    <img src="/images/971609.svg" width="15%" class="pull-left">
                     </span>
                     <a class="clear" href="/nurse-calendar">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
                       <small class="text-muted text-uc">Handing Notes</small>
                     </a>
                   </div>
+
+                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
+                    <img src="/images/1283771.svg" width="15%" class="pull-left">
+                    <a class="clear" href="/laboratory">
+                      <span class="h3 block m-t-xs"><strong>0</strong></span>
+                      <small class="text-muted text-uc">Laboratory</small>
+                    </a>
+                  </div>
+
 
                  
                 </div>

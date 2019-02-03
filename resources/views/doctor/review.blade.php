@@ -36,9 +36,7 @@
                             <div>
                           
                            <p class="block"><a href="#" class="">ID # </a> <span class="label label-default">{{ $patients[0]->patient_id }}</span></p><br>
-                           <p><span class="label label-success">{{ $visit_details->consultation_type }} </span></p> <br>
-                            <p class="block"><a href="#" class=""></a> <span class="label label-success btn-rounded">{{ $visit_details->opd_number }}</span></p><br>
-                     <p class="block"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Created : {{ Carbon\Carbon::parse($visit_details->created_on)->diffForHumans() }}</span></p>
+                          
                             </div>
                           </div>                
                         </div>
@@ -105,19 +103,20 @@
                                @foreach($myvitals as $vital)
                                <ul>
                                 <label class="badge bg-danger"> {{ $vital->created_on }} </label>
-                                @if($vital->weight == '') @else <li> Weight <label class="badge bg-info"> {{$vital->weight}}  </label></li> @endif
-                                @if($vital->height == '') @else <li> Height <label class="badge bg-info"> {{$vital->height}}  </label></li> @endif
+                                @if($vital->weight == '') @else <li> Weight <label class="badge bg-info"> {{$vital->weight}}kg  </label>  </li> @endif
+                                @if($vital->height == '') @else <li> Height <label class="badge bg-info"> {{$vital->height}} m </label></li> @endif
 
-                                 @if($vital->height == '') @else <li> BMI <label class="badge bg-info"> {{ $vital->bmi }}  </label> {{ $vital->bmi_status }}</li> @endif
+                                 @if($vital->height == '') @else <li> BMI <label class="badge bg-info"> {{ $vital->bmi }} kg/m^2  </label> {{ $vital->bmi_status }}</li> @endif
 
                                 @if($vital->temperature == '') @else <li> Temperature <label class="badge bg-info"> {{$vital->temperature}} ° </label>{{ $vital->temp_status }}</li> @endif
-                                @if($vital->pulse_rate == '') @else <li> Pulse Rate <label class="badge bg-info"> {{$vital->pulse_rate}}  </label></li> @endif
-                                @if($vital->bp_status == '') @else <li> Blood Pressure <label class="badge bg-info"> {{$vital->sbp }} / {{ $vital->dbp  }} </label>{{$vital->bp_status}}</li> @endif
-                                 @if($vital->spo2 == '') @else <li> SPO2 <label class="badge bg-info"> {{$vital->spo2}}  </label></li> @endif
-                                 @if($vital->waist_circumference == '') @else <li> Waist Circumference <label class="badge bg-info"> {{$vital->waist_circumference }} </label></li> @endif
-                                  @if($vital->hip_circumference == '') @else <li> Hip Circumference <label class="badge bg-info"> {{$vital->hip_circumference }} </label></li> @endif
+                                @if($vital->pulse_rate == '') @else <li> Pulse Rate <label class="badge bg-info"> {{$vital->pulse_rate}} per min   </label></li> @endif
+                                @if($vital->bp_status == '') @else <li> Blood Pressure <label class="badge bg-info"> {{$vital->sbp }} / {{ $vital->dbp  }} mmHg</label>{{$vital->bp_status}}</li> @endif
+                                 @if($vital->spo2 == '') @else <li> SPO2 <label class="badge bg-info"> {{$vital->spo2}} %   </label></li> @endif
+                                 @if($vital->waist_circumference == '') @else <li> Waist Circumference <label class="badge bg-info"> {{$vital->waist_circumference }} cm </label></li> @endif
+                                  @if($vital->hip_circumference == '') @else <li> Hip Circumference <label class="badge bg-info"> {{$vital->hip_circumference }} cm </label></li> @endif
 
                                   @if($vital->remarks == '') @else <li> Remarks <label class="badge bg-info"> {{$vital->remarks}}  </label></li> @endif
+                                   @if($vital->vr_visual_ascuity == '') @else <li> Visual Ascuity <label class="badge bg-info"> {{$vital->vr_visual_ascuity}}  </label></li> @endif
                                  </ul>
                                  <div class="line"></div>
                                @endforeach
@@ -138,6 +137,49 @@
                 
                 <aside class="bg-white">
                   <section class="vbox">
+
+                  <header class="header bg-white b-b b-light">
+              
+                    
+                @if($visit_details->status!='Discharged')
+                 <a href="#" onclick="doDischarge('{{$visit_details->id }}','{{ $visit_details->name }}')"  data-toggle="modal" class="btn btn-sm btn-danger bootstrap-modal-form-open pull-right"> <i class="fa fa-power-off"></i> @if($visit_details->billable=='Inpatient') Discharge from Inpatient @else End Visit @endif </a>
+                 @else
+
+                 @endif
+
+                <a href="#new-appointment-request"  data-toggle="modal" class="btn btn-sm btn-info bootstrap-modal-form-open pull-right"> <i class="fa fa-plus"></i> Create a Follow Up Appointment</a>
+                
+                &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;
+                
+                @if($visit_details->billable!='Inpatient')
+                <a href="#new-admission"  data-toggle="modal" class="btn btn-sm btn-warning bootstrap-modal-form-open pull-right"> <i class="fa fa-plus"></i> Admit Patient </a>
+                @else
+
+                @endif
+
+
+              {{--     <a href="#new-discharge"  data-toggle="modal" class="btn btn-sm btn-warning bootstrap-modal-form-open pull-right"> <i class="fa fa-plus"></i> Discharge Patient </a> --}}
+                
+
+
+                     <p class="block pull-left"><a href="#" class=""></a> <span class="label label-success btn-rounded">{{ $visit_details->status }} </span></p>
+
+                      @if($visit_details->billable=='Inpatient')
+
+                       <p class="block pull-left"><a href="#" class=""></a> <span class="label bg-dark btn-rounded">Admission Type : {{ $visit_details->ward_admission_type}} </span></p>
+
+                      <p class="block pull-left"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Ward : {{ $visit_details->ward_id}} </span></p>
+
+                      <p class="block pull-left"><a href="#" class=""></a> <span class="label bg-dark btn-rounded">Bed : {{ $visit_details->bed_id}}</span></p>
+
+                       <p class="block pull-left"><a href="#" class=""></a> <span class="label label-danger btn-rounded">Admission Time : {{ $visit_details->ward_admission_time}}</span></p>
+                      @else
+                      <p class="block pull-left"><a href="#" class=""></a> <span class="label bg-dark btn-rounded">Admission Type : {{ $visit_details->consultation_type}} </span></p>
+                      @endif
+                     
+
+                    
+                   </header>
                     <header class="header bg-light bg-gradient">
                       <ul class="nav nav-tabs nav-white">
                     
@@ -247,7 +289,7 @@
                           <div class="col-sm-12">
                       
                         
-                       <textarea id="continuation_sheet" name="continuation_sheet"> 
+                       <textarea id="continuation_sheet_nurse" name="continuation_sheet_nurse"> 
                                  {!!$mynursenotes->content!!}
                                </textarea>
                        
@@ -296,37 +338,6 @@
                         </div>
 
 
-                        <section class="panel panel-info">
-                                
-                                <div class="panel-body">
-                                      <div class="table-responsive">
-                       <table width="100%">
-                          
-                          <tbody>
-                            <tr>
-                            <td>
-                            <a href="/doctor-appointments/{{ $visit_details->referal_doctor}}" class="btn btn-info rounded" data-toggle="modal">Appointment Request</a>
-                            </td>
-                            <td>
-                             <a href="#internal-referral" class="btn btn-info rounded bootstrap-modal-form-open" onclick="getDetails('{{ $patients[0]->id }}')" data-toggle="modal">Create Internal Referral</a>
-                            </td>
-                            <td>
-                            <a href="/print-referal-note/{{ $visit_details->opd_number }}" class="btn btn-info rounded" data-toggle="modal">Print Referral Letter</a>
-                            </td>
-                            </tr>
-                            <tr>
-                            <td>
-                           <a href="/print-excuse-duty/{{ $visit_details->opd_number }}" class="btn btn-info rounded" data-toggle="modal">Print Excuse Duty</a>
-                            </td>
-                            <td>
-                          <a href="/print-refusal-treatment/{{ $visit_details->opd_number }}" class="btn btn-info rounded" data-toggle="modal">Print Refusal of Treatment</a>
-                            </td>
-                        </tr>
-                          </tbody>
-                        </table>
-                    </div>
-                    </div>
-                    </section>
 
 
                       </div>
@@ -471,6 +482,7 @@
               </section>
               </div>
 
+
                   <div class="tab-pane @if($visit_details->doctor!= Auth::user()->getNameOrUsername()) active @else @endif" id="review-summary">
                     
                     <section class="panel panel-info">
@@ -495,6 +507,14 @@
                                 <a href="/print-visit-summary/{{ $visit_details->opd_number  }}"><button class="btn btn-sm btn-default btn-bg"><i class="fa fa-check"></i> Print this note </button></a>
 
                                 <a href="/print-executive-cover/{{ $visit_details->opd_number  }}"><button class="btn btn-sm btn-default btn-bg"><i class="fa fa-check"></i> Exec Cover Note </button></a>
+
+                                 <a href="/doctor-appointments/{{ $visit_details->referal_doctor}}" class="btn btn-default rounded" data-toggle="modal">Appointment Request</a>
+
+                                   <a href="/print-referal-note/{{ $visit_details->opd_number }}" class="btn btn-default rounded" data-toggle="modal">Print Referral Letter</a>
+
+                                   <a href="/print-excuse-duty/{{ $visit_details->opd_number }}" class="btn btn-default rounded" data-toggle="modal">Print Excuse Duty</a>
+
+                                    <a href="/print-refusal-treatment/{{ $visit_details->opd_number }}" class="btn btn-default rounded" data-toggle="modal">Print Refusal of Treatment</a>
                               </div>
                             </div>
                           </div>
@@ -1968,7 +1988,7 @@
 
 
                  <div class="tab-pane" id="review-admission">
-                  <form  class="bootstrap-modal-form" method="post" data-validate="parsley" action="/create-ipd-opd" class="panel-body wrapper-lg">
+                  {{-- <form  class="bootstrap-modal-form" method="post" data-validate="parsley" action="/create-ipd-opd" class="panel-body wrapper-lg">
                           <section class="panel panel-default">
                            <div class="panel-body">
                       <div class="form-group pull-in clearfix">
@@ -2065,7 +2085,7 @@
                         
                       </footer>
                       </form>
-
+ --}}
                   </div>
 
 
@@ -2104,22 +2124,7 @@
               <section class="vbox">
                 <section class="scrollable wrapper">
                   <section class="panel panel-default">
-                    <header class="panel-heading bg-light clearfix">
-                      <div class="btn-group pull-right" data-toggle="buttons">
-                        <label class="btn btn-sm btn-bg btn-default active" id="monthview">
-                          <input type="radio" name="options">Month
-                        </label>
-                        <label class="btn btn-sm btn-bg btn-default" id="weekview">
-                          <input type="radio" name="options">Week
-                        </label>
-                        <label class="btn btn-sm btn-bg btn-default" id="dayview">
-                          <input type="radio" name="options">Day
-                        </label>
-                      </div>
-                      <span class="m-t-xs inline">
-                        Fullcalendar - {{ $visit_details->referal_doctor }}
-                      </span>
-                    </header>
+                    
                     <div class="calendar" id="calendar">
 
                     </div>
@@ -2252,13 +2257,15 @@
 
 
    <script src="{{ asset('/event_components/jquery.min.js')}}"></script>
-
+<script type="text/javascript">
+    $('#new-appointment-request select[name="title"]').select2();
+  $('#new-appointment-request select[name="name"]').select2();
+  $('#new-appointment-request select[name="referal_doctor"]').select2();
+</script>
   
 <script type="text/javascript">
   $(document).ready(function() {
 
-  
-       
     var base_url = '{{ url('/') }}';
      var doctor = $('#doctor').val();
 
@@ -2266,11 +2273,11 @@
       weekends: true,
       slotMinutes: 15,
       theme: false,
-    header: false,
-       minTime: 7,
-    maxTime: 20,
-    height: 800,
-    slotEventOverlap: true,
+      header: false,
+      minTime: 7,
+      maxTime: 20,
+      height: 800,
+      slotEventOverlap: true,
 
       header: {
         left: 'prev,next today,prevYear,nextYear',
@@ -2278,7 +2285,7 @@
         right: 'listDay,month,agendaWeek,agendaDay'
       },
       //weekends : false,
-     defaultView: 'month',
+     defaultView: 'agendaDay',
       weekNumberTitle : "Week",
       allDayDefault: false,
       weekNumbers : true,
@@ -2292,14 +2299,11 @@
       }
     });
 
+  //$('#new-appointment-request select[name="name"]').select2();
 
-
-  
-  $('#new-appointment-request select[name="title"]').select2();
+    $('#new-appointment-request select[name="title"]').select2();
   $('#new-appointment-request select[name="name"]').select2();
   $('#new-appointment-request select[name="referal_doctor"]').select2();
-
-  //$('#new-appointment-request select[name="name"]').select2();
 
   });
 </script>
@@ -2323,6 +2327,23 @@
 
  <script>tinymce.init({
   selector: '#continuation_sheet',
+  height: 500,
+  menubar: true,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor textcolor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table contextmenu paste code help wordcount',
+    'template'
+  ],
+  toolbar: 'insert | undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help'
+
+  
+
+});
+ </script>
+
+  <script>tinymce.init({
+  selector: '#continuation_sheet_nurse',
   height: 500,
   menubar: true,
   plugins: [
@@ -2401,7 +2422,9 @@ $('#consultation_type').select2();
 $('#location').select2();
 $('#visit_type').select2();
 $('#ipd_accounttype').select2();
-$('#ipd_referal_doctor').select2();
+$('#ipd_referal_doctor').select2({
+      tags: true
+      });
 
 
     $('#investigation').select2();  
@@ -2675,6 +2698,56 @@ if($('#weight').val()!= "" && $('#height').val()!="")
         });
 
 }
+
+
+function doDischarge(id,name)
+  {
+
+         
+      swal({   
+        title: "Discharging " + name +"!",  
+        text: "Do you want to discharge "+name+" ?",   
+        type: "warning",   
+        showCancelButton: true,   
+        confirmButtonColor: "#DD6B55",   
+        confirmButtonText: "Yes, discharge!",   
+        cancelButtonText: "No, cancel !",   
+        closeOnConfirm: false,   
+        closeOnCancel: false }, 
+        function(isConfirm){   
+          if (isConfirm) 
+          { 
+          $.get('/discharge-opd',
+          {
+             "ID": id 
+          },
+          function(data)
+          { 
+            
+            $.each(data, function (key, value) 
+            {
+            if(value == "OK")
+            {
+              swal("Discharged!", name +" was successfully deleted.", "success"); 
+              location.reload(true);
+             }
+            else
+            { 
+              swal("Cancelled", name +" failed to discharge.", "error");
+              
+            }
+           
+        });
+                                          
+          },'json');    
+           
+             } 
+        else {     
+          swal("Cancelled", name +" failed to delete.", "error");   
+        } });
+
+  }
+
 
   function deletedrug(id,name)
    {
@@ -4021,6 +4094,52 @@ $(function () {
   });
 });
 </script>
+
+
+<script type="text/javascript">
+$(function () {
+  $('#visit_date').daterangepicker({
+     "minDate": moment('2017-02-01'),
+     "maxDate": moment(),
+    "singleDatePicker":true,
+    "autoApply": true,
+    "showDropdowns": true,
+    "locale": {
+      "format": "DD/MM/YYYY",
+      "separator": " - ",
+    }
+  });
+});
+</script>
+
+
+
+<div class="modal fade" id="new-admission" style="height:600px">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Admit Patient</h4>
+        </div>
+        <div class="modal-body">
+          <p></p>
+                      <section class="vbox">
+                    <section class="scrollable">
+                      <div class="tab-content">
+                        <div class="tab-pane active" id="individual">
+                           
+                            @include('doctor/admit') 
+                      
+                        </div>                  
+                        </div>
+                        </section>
+                </section>
+         </div>        
+        </div>
+        
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+
 
 
   <div class="modal fade" id="new-medication" style="height:600px">

@@ -9,14 +9,14 @@
               <p>STORE RECEIVED VOUCHER</p>
             </header>
              <section class="scrollable wrapper">
-             <img src="/images/{{ $company->logo }}" width="15%">
+             <img src="/images/{{ $mycompany->logo }}" width="15%">
               <div class="row">
                 <div class="col-xs-6">
-                  <h4 style="font-size:12px">{{$company->legal_name }}</h4>
-                  <p style="font-size:12px"><a href="#">{{ $company->email }}</a></p>
-                   <p style="font-size:12px"><a href="#">{{ $company->address }}</a></p>
-                   <p style="font-size:12px"><a href="#">{{ $company->phone }}</a></p>
-                   <p style="font-size:12px"><a href="#">{{ $company->website }}</a></p>
+                  <h4 style="font-size:12px">{{$mycompany->legal_name }}</h4>
+                  <p style="font-size:12px"><a href="#">{{ $mycompany->email }}</a></p>
+                   <p style="font-size:12px"><a href="#">{{ $mycompany->address }}</a></p>
+                   <p style="font-size:12px"><a href="#">{{ $mycompany->phone }}</a></p>
+                   <p style="font-size:12px"><a href="#">{{ $mycompany->website }}</a></p>
                 </div>
                 <div class="col-xs-6 text-right">
                      <p>  <strong> SUPPLIER : </strong> {{ $items[0]->supplier }} </p>
