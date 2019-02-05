@@ -2269,7 +2269,7 @@ if($('#treament_plan').val()!= "")
 
 function addTreatementPlan()
 {
-if($('#medication').val()!= "")
+if($('#medication_given').val()!= "")
 {
 
   //alert($('#complaint').val());

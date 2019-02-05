@@ -80,6 +80,8 @@ use Cache;
 
 
 
+
+
 class DoctorController extends Controller
 {
     
