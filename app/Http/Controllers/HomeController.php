@@ -866,7 +866,7 @@ class HomeController extends Controller
     
         $businesssourcecharts = app()->chartjs
         ->name('sourceamount1')
-        ->type('bar')
+        ->type('line')
         ->size(['width' => 900, 'height' => 300])
         ->labels($sourcelabels1)
         ->datasets([
@@ -982,7 +982,7 @@ class HomeController extends Controller
     
         $paymentsourcecharts = app()->chartjs
         ->name('paymentamount1')
-        ->type('bar')
+        ->type('line')
         ->size(['width' => 900, 'height' => 300])
         ->labels($paymentlabels1)
         ->datasets([
@@ -1117,7 +1117,10 @@ class HomeController extends Controller
         $assignees =    User::get();
         $drugs      =  Consumables::where('is_Active','Active')->orderBy('name', 'ASC')->get();
 
-        return View('pages.dashboard', compact('assignees','payments','paymentsourcecharts','businesssourcecharts','drugs','categorychartsutilization','categorycharts','billscharts','myvisits','company','bills','opdbills','chartjs','dayscharts','diagnosischartjs','medicalchartjs','imagingbills','customercount','events','patients','visits','visitrate','pharmacybills','labbills'));
+
+        $birthdays = Customer::where('accounttype','Private')->whereRaw('DAYOFYEAR(curdate()) <= DAYOFYEAR(date_of_birth) AND DAYOFYEAR(curdate()) >=  dayofyear(date_of_birth)')->get();
+
+        return View('pages.dashboard', compact('assignees','birthdays','payments','paymentsourcecharts','businesssourcecharts','drugs','categorychartsutilization','categorycharts','billscharts','myvisits','company','bills','opdbills','chartjs','dayscharts','diagnosischartjs','medicalchartjs','imagingbills','customercount','events','patients','visits','visitrate','pharmacybills','labbills'));
     }
 
 

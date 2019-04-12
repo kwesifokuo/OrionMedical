@@ -199,6 +199,10 @@ Route::get('/signin',
 	 'as' => 'auth.signin', ]);
 
 
+Route::get('/find-user',
+	['uses' => '\OrionMedical\Http\Controllers\AuthController@searchUser',
+	 'as' => 'find-user',  
+	 ]);
 
 
 Route::get('/edit-user/{id}',

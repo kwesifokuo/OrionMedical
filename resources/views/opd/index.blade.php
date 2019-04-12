@@ -9,7 +9,7 @@
               </ul>
 
              
-             <section class="panel panel-default">
+           {{--   <section class="panel panel-default">
                 <div class="row m-l-none m-r-none bg-light lter">
                   <div class="col-sm-6 col-md-3 padder-v b-r b-light">
                     <img src="/images/754554.svg" width="15%" class="pull-left">
@@ -45,7 +45,7 @@
                  
                 </div>
               </section>
-
+ --}}
 
               <div class="row">
 
@@ -55,13 +55,21 @@
                   <header class="panel-heading">
                     <form action="/find-patient-opd" method="GET">
                       <div class="input-group text-ms">
-                        <input type="text" name='search' id='search' class="input-sm form-control" placeholder="Search by patient, company, status, phone number">
+                        <input type="text" name='search' id='search' class="form-control input-lgx m-b" placeholder="Search using ID ...">
                         <div class="input-group-btn">
-                           <button class="btn btn-sm btn-success" type="submit">Search!</button>
+                           <button class="btn btn-sm btn-success" type="submit"></button>
                         </div>
                       </div>
                       </form>
                     </header>
+                    <br>
+                     <br>
+                      <br>
+                       <br>
+                        <br>
+
+
+                    @if($patients->isNotEmpty())
                     <div class="table-responsive">
 
                       <table class="table table-striped m-b-none text-sm" width="100%">
@@ -98,7 +106,7 @@
                               @endif</td>
                             <td>
                               
-                                 <a href="/patient-profile-limited/{{ $patient->patient_id }}" class="btn btn-s-sm btn-primary btn-rounded"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-stethoscope"> </i> Check In </a>
+                                 <a href="/patient-profile-limited/{{ $patient->patient_id }}" class="btn btn-s-sm btn-primary btn-rounded"  id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-folder"> </i> View </a>
                                
                             </td>
                             
@@ -108,6 +116,12 @@
  
                       </table>
                     </div>
+                    @else
+
+                    @endif
+
+
+
                   </section>
          
                 </div>

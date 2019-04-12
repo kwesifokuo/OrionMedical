@@ -1,7 +1,7 @@
   @role(['Receptionist','System Admin','Billing','Doctor','Imaging','Nurse','Medical Records Manager','Medical Records Assistant','Medical Assistant','Cashier','Marketing','Purchases','Laboratory','Pharmacy Technician','Pharmacist','Dentist','Ophthalmologist','Dietian','Specialist','Dental Nurse','Dental Receptionist','Nurse Assistant','Special Admin','Claims Manager'])
  <aside class="bg-dark lter aside-md hidden-print" id="nav">          
           <section class="vbox">
-            <header class="header lter text-center clearfix" style="background-color:#1ABC9C">
+            <header class="header lter text-center clearfix" style="background-color:#FFC300">
               <div class="btn-group">
                
               </div>
@@ -21,7 +21,7 @@
                       </a>
                     </li>
 
-                   <li >
+                  {{--  <li >
                       <a href="/event-calendar"  >
                         
                         <i class="fa fa-calendar icon">
@@ -30,7 +30,7 @@
                         <span>Appointment</span>
                       </a>
                     </li>
-
+ --}}
 
                     <li >
                       <a href="/register-quick"  >
@@ -59,7 +59,7 @@
                           <a href="/active-patients" >  
                           <b class="badge bg-info pull-right"></b>                                                           
                             <i class="fa fa-angle-right"></i>
-                            <span>Patient List</span>
+                            <span>Membership List</span>
                           </a>
                         </li>
                        
@@ -95,7 +95,7 @@
                           </a>
                         </li>
                       </ul>
-                      <ul class="nav lt">
+                      {{-- <ul class="nav lt">
                         <li >
                           <a href="/saved-documents" >  
                           <b class="badge bg-info pull-right"></b>                                                           
@@ -149,11 +149,11 @@
                             <span>Loyalty Usage</span>
                           </a>
                         </li>
-                      </ul>
+                      </ul> --}}
                       @endrole
                     </li>
                     
-                    @role(['Nurse','System Admin','Nurse Assistant','Special Admin'])
+{{--                     @role(['Nurse','System Admin','Nurse Assistant','Special Admin'])
                     <li >
                       <a href="/nurse-station"  >
                         
@@ -163,7 +163,7 @@
                         <span>Nurse Station</span>
                       </a>
                     </li>
-                    @endrole
+                    @endrole --}}
                     @role(['Doctor','System Admin'])
                      <li >
                       <a href="/opd-consultation"  >
@@ -171,67 +171,11 @@
                         <i class="fa fa-user-md  icon">
                           <b class="bg-primary dker"></b>
                         </i>
-                        <span>Doctor Station</span>
-                      </a>
-                    </li>
-                    @endrole
-                    @role(['Nurse','System Admin'])
-                     <li >
-                      <a href="/available-rooms"  >
-                        
-                        <i class="fa fa-hospital-o icon">
-                          <b class="bg-primary dker"></b>
-                        </i>
-                        <span>Room Mgt.</span>
-                      </a>
-                    </li>
-                    @endrole
-                    @role(['Pharmacist','System Admin','Pharmacy Technician','Special Admin'])
-                    <li >
-                      <a href="/prescriptions-pending"  >
-                        
-                        <i class="fa fa-medkit icon">
-                          <b class="bg-primary dker"></b>
-                        </i>
-                        <span>Pharmacy</span>
+                        <span>Medical</span>
                       </a>
                     </li>
                     @endrole
 
-                    <li>
-                      <a href="/store-requisitions"  >
-                        
-                        <i class="fa fa-shopping-cart icon">
-                          <b class="bg-primary dker"></b>
-                        </i>
-                        <span>Store Requisitions</span>
-                      </a>
-                    </li>
-                   
-                  
-                    @role(['Billing','System Admin','Cashier','Special Admin','Pharmacist','Pharmacy Technician'])
-                     <li >
-                      <a href="/billing-index"  >
-                       
-                        <i class="fa fa-money icon">
-                          <b class="bg-primary dker"></b>
-                        </i>
-                        <span>Billing</span>
-                      </a>
-                    </li>
-                    @endrole
-
-                     @role(['Billing','System Admin','Cashier','Claims Manager'])
-                     <li >
-                      <a href="/insurance-claims-portal"  >
-                       
-                        <i class="fa fa-gavel icon">
-                          <b class="bg-primary dker"></b>
-                        </i>
-                        <span>Claims</span>
-                      </a>
-                    </li>
-                    @endrole
                     @role(['Ophthalmologist','System Admin'])
                     <li >
                       <a href="/ophthalmology"  >
@@ -254,6 +198,69 @@
                       </a>
                     </li>
                     @endrole
+                   {{--  @role(['Nurse','System Admin'])
+                     <li >
+                      <a href="/available-rooms"  >
+                        
+                        <i class="fa fa-hospital-o icon">
+                          <b class="bg-primary dker"></b>
+                        </i>
+                        <span>Room Mgt.</span>
+                      </a>
+                    </li>
+
+                    @endrole
+                     --}}
+
+                    @role(['Pharmacist','System Admin','Pharmacy Technician','Special Admin'])
+                    <li >
+                      <a href="/prescriptions-pending"  >
+                        
+                        <i class="fa fa-medkit icon">
+                          <b class="bg-primary dker"></b>
+                        </i>
+                        <span>Pharmacy</span>
+                      </a>
+                    </li>
+                    @endrole
+
+                   {{--  <li>
+                      <a href="/store-requisitions"  >
+                        
+                        <i class="fa fa-shopping-cart icon">
+                          <b class="bg-primary dker"></b>
+                        </i>
+                        <span>Store Requisitions</span>
+                      </a>
+                    </li>
+                   
+                  
+                    @role(['Billing','System Admin','Cashier','Special Admin','Pharmacist','Pharmacy Technician'])
+                     <li >
+                      <a href="/billing-index"  >
+                       
+                        <i class="fa fa-money icon">
+                          <b class="bg-primary dker"></b>
+                        </i>
+                        <span>Billing</span>
+                      </a>
+                    </li>
+                    @endrole --}}
+
+                     @role(['Billing','System Admin','Cashier','Claims Manager'])
+                     <li >
+                      <a href="/insurance-claims-portal"  >
+                       
+                        <i class="fa fa-gavel icon">
+                          <b class="bg-primary dker"></b>
+                        </i>
+                        <span>Claims</span>
+                      </a>
+                    </li>
+                    @endrole
+                  
+
+                      {{-- 
                     @role(['Laboratory','System Admin'])
                     <li >
                       <a href="/laboratory"  >
@@ -275,8 +282,8 @@
                         <span>Dietitian</span>
                       </a>
                     </li>
-                    @endrole
-                     @role(['System Admin'])
+                    @endrole --}}
+                    {{--  @role(['System Admin'])
                      <li >
                       <a href="mail.html"  >
                         
@@ -318,7 +325,7 @@
                         </i>
                         <span>Documents</span>
                       </a>
-                    </li>
+                    </li> --}}
 
                     
 

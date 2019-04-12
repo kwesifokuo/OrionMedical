@@ -5,9 +5,7 @@
               <p>{{ $patients->fullname }}'s Facesheet</p>
 
               <div class="btn-group pull-right">
-              <p>
-                <a href="/event-calendar"  class="btn btn-rounded btn-sm btn-danger"><i class="fa fa-spin fa-spinner hide show inline" id="spin"></i> Schedule Appointment  </a>
-              </p>
+            
 
               </div>
 
@@ -22,10 +20,19 @@
                     <section class="scrollable">
                       <div class="wrapper">
                         <div class="clearfix m-b">
-                          <a href="/images/{{ $patients->image }}" class="pull-left thumb m-r">
+                         <div class="thumb-lg">
+                          <a href="/images/{{ $patients->image }}" class="pull-left thumb-lg">
                             <img src="/images/{{ $patients->image }}" class="img-circle">
-                          </a>
+                          </a> 
+                          </div>
+
+                  {{--         <div class="thumb-lg">
+                              <img src="/images/{{ $patients->image }}" class="img-circle">
+                            </div> --}}
+
+                           <br>
                           <div class="clear">
+
                             <div class="h3 m-t-xs m-b-xs">{{ $patients->fullname }}</div>
                             <small class="text-muted"><i class="fa fa-map-marker"></i>ID :{{ $patients->patient_id }}</small>
                              <input type="hidden" id="get_patient_id" name="get_patient_id" value="{{ $patients->patient_id }}">
@@ -62,8 +69,8 @@
                               <i class="fa fa-eye-slash"></i> Call
                             </span>
                           </a>
-                          <a href="tel:+23351448708" class="btn btn-dark btn-rounded" data-loading-text="Connecting">
-                            <i class="fa fa-comment-o"></i> SMS
+                          <a href="#new-appointment-request" data-toggle="modal" class="btn btn-dark btn-rounded bootstrap-modal-form-open" data-loading-text="Connecting">
+                            <i class="fa fa-comment-o"></i> Schedule Appointment
                           </a>
                         </div>
                         <div>
@@ -96,14 +103,14 @@
                       <ul class="nav nav-tabs nav-white">
                          <li class=""><a href="#information" data-toggle="tab">Demographics</a></li>
                          <li class="active"><a href="#consultations" data-toggle="tab">Visits</a></li>
-                         <li class=""><a href="#procedures" data-toggle="tab">Vitals</a></li>
+                         <li class=""><a href="#benefits" data-toggle="tab">Benefit Manager</a></li>
                          <li class=""><a href="#allergy" data-toggle="tab">Allergy</a></li> 
                          <li class=""><a href="#allergy" data-toggle="tab">Medications</a></li> 
                          <li class=""><a href="#statement" data-toggle="tab">Billing</a></li>
                          <li class=""><a href="#reminder" data-toggle="tab">Patient Reminders</a></li>
-                        <li class=""><a href="#disclosure" data-toggle="tab">Disclosures</a></li>
+                       
                         <li class=""><a href="#amendment" data-toggle="tab">Amendments</a></li>
-                         <li class=""><a href="#appointments" data-toggle="tab">Appointment</a></li>
+                        
                         <li class=""><a href="#documents" data-toggle="tab">Documents</a></li> 
                        
                         {{-- <li class=""><a href="#images" data-toggle="tab">Images</a></li> --}}
@@ -244,6 +251,10 @@
 
                         <div class="tab-pane active" id="consultations">
                         
+
+                         @if(Auth::user()->usertype=='Patient')
+
+                         @else
                         <section class="panel panel-default">
                       <form  class="bootstrap-modal-form" method="post" data-validate="parsley" action="/create-opd" class="panel-body wrapper-lg">
 
@@ -278,9 +289,9 @@
                           </div> 
 
                           <div class="col-sm-6">
-                            <label>Authorization / Loyalty Code</label> 
+                            <label>Authorization Code</label> 
                             <div class="form-group{{ $errors->has('authorization_code') ? ' has-error' : ''}}">
-                            <select id="authorization_code" name="authorization_code" onchange="stickerexiststatus()" rows="3" tabindex="1" data-placeholder="" style="width:100%">
+                            <select id="authorization_code" name="authorization_code" data-required="true" onchange="stickerexiststatus()" rows="3" tabindex="1" data-placeholder="" style="width:100%">
                            <option value="">-- select from here --</option>
                           @foreach($stickers as $sticker)
                         <option value="{{ $sticker->card_number }}"> {{ $sticker->card_number }}</option>
@@ -331,10 +342,10 @@
                         <div class="form-group pull-in clearfix">
                           <div class="col-sm-6">
                             <div class="form-group{{ $errors->has('visit_type') ? ' has-error' : ''}}">
-                            <label>Location</label>
+                            <label>Location / Provider</label>
                             <select id="location" name="location" data-required="true" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
                           @foreach($branches as $branch)
-                        <option value="{{ $branch->location }}">{{ $branch->location }}</option>
+                        <option value="{{ $branch->name }}">{{ $branch->name }} </option>
                           @endforeach  
                         </select>         
                            @if ($errors->has('visit_type'))
@@ -439,10 +450,33 @@
                         <div class="progress progress-sm progress-striped">
                           <div class="progress-bar progress-bar-danger" data-toggle="tooltip" data-original-title="10%" style="width: 10%"></div>
                         </div>
+
+
+                         <label>Critical Illness Limit</label>
+                        <div class="progress progress-sm progress-striped">
+                           <div class="progress-bar progress-bar-danger" data-toggle="tooltip" data-original-title="0%" style="width: 0%"></div>
+                        </div>
+
+                         <label>Funeral</label>
+                        <div class="progress progress-sm progress-striped">
+                           <div class="progress-bar progress-bar-danger" data-toggle="tooltip" data-original-title="0%" style="width: 0%"></div>
+                        </div>
+
+                         <label>Investments Contributions</label>
+                        <div class="progress progress-sm progress-striped">
+                           <div class="progress-bar progress-bar-danger" data-toggle="tooltip" data-original-title="0%" style="width: 0%"></div>
+                        </div>
+
+                         <label>Personl Accident Benefit</label>
+                        <div class="progress progress-sm progress-striped">
+                          <div class="progress-bar progress-bar-danger" data-toggle="tooltip" data-original-title="0%" style="width: 0%"></div>
+                        </div>
                       </li>
                       @endif
 
                   </section>
+
+                  @endif
 
 
                           <ul class="list-group no-radius m-b-none m-t-n-xxs list-group-lg no-border">
@@ -485,7 +519,7 @@
                                  <br>
                                 <small>Visit Number -  {{ $consult->opd_number }}</small>
                                  <br>
-                                <small>Co Payer -  {{ $consult->care_provider }}</small>
+                                <small>Facility / Provider -  {{ $consult->care_provider }}</small>
                               </a>
                             </li>
                             @else
@@ -799,9 +833,9 @@
                                 
                                  <td>
                                  @if($bill->payercode!='Private')
-                                 <a href="#" class="bootstrap-modal-form-open" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-print"></i></a>
+                                 <a href="/claim-form/{{ $bill->visit_id }}" class="bootstrap-modal-form-open" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-print"></i></a>
                                   @else
-                                   <a href="#" class="bootstrap-modal-form-open" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-print"></i></a>
+                                   <a href="/claim-form/{{ $bill->visit_id }}" class="bootstrap-modal-form-open" id="edit" name="edit" data-toggle="modal" alt="edit"><i class="fa fa-print"></i></a>
                                    @endif
                                  </td> 
 
@@ -1155,6 +1189,40 @@ if($('#patient_id').val()!= "")
       </div>
       </div>
       </div>
+
+
+
+<div class="modal fade" id="new-appointment-request" size="600">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">New Appointment</h4>
+        </div>
+        <div class="modal-body">
+          <p></p>
+                      <section class="vbox">
+                    
+                    <section class="scrollable">
+                      <div class="tab-content">
+                        <div class="tab-pane active" id="individual">
+                           <form  class="bootstrap-modal-form" data-validate="parsley" method="post" action="/create-event" class="panel-body wrapper-lg">
+  {{--                         @include('event/create') --}}
+                        <input type="hidden" name="_token" value="{{ Session::token() }}">
+                      </form>
+                        </div>
+                  
+                  
+                        </div>
+                      </div>
+                    </section>
+                  </section>
+        </div>
+        
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div>
+
 
 {{-- 
 <div class="modal fade" id="modal_check_in" size="600">

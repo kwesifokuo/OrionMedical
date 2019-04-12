@@ -7,11 +7,11 @@
               <ul class="breadcrumb no-border no-radius b-b b-light pull-in">
                 <li><a href="index.html"><i class="fa fa-home"></i> Home</a></li>
                 <li><a href="#">Records</a></li>
-                <li><a href="#">Manage Customer</a></li>
+                <li><a href="#">Manage Member</a></li>
                 <li class="active">New</li>
               </ul>
               <div class="m-b-md">
-                <h3 class="m-b-none">New Customer</h3>
+                <h3 class="m-b-none">New Member</h3>
               </div>
               <div class="panel panel-default">
                 <div class="wizard clearfix" id="form-wizard">
@@ -36,7 +36,7 @@
                         
                         <div class="form-group pull-in clearfix">
                           <div class="col-sm-6">
-                            <label>Patient Number</label> 
+                            <label>Account Number</label> 
                             <div class="form-group{{ $errors->has('patient_id') ? ' has-error' : ''}}">
                             <input type="text" rows="3" class="form-control" id="patient_id" readonly="true" name="patient_id" value="{{ Request::old('patient_id') ?: '' }}">   
                            @if ($errors->has('patient_id'))
@@ -48,7 +48,7 @@
                           <div class="col-sm-6">
                           <div class="form-group{{ $errors->has('accounttype') ? ' has-error' : ''}}">
                             <label>Account Type <span class="text-danger">*</span></label>
-                            <select id="accounttype" name="accounttype" data-required="true" onchange="notbusiness();" rows="3" tabindex="1" data-placeholder="Select here.." class="form-control m-b">
+                            <select id="accounttype" name="accounttype" data-required="true"  rows="3" tabindex="1" data-placeholder="Select here.." class="form-control m-b">
                             <option value=""> -- Select Account Type -- </option>
                           @foreach($accounttype as $accounttype)
                         <option value="{{ $accounttype->type }}">{{ $accounttype->type }}</option>
@@ -150,7 +150,7 @@
 
                     <div class="step-pane" id="step2">
                        <div class="form-group pull-in clearfix">
-                          <div class="col-sm-12">
+                          <div class="col-sm-6">
                         <div class="form-group{{ $errors->has('email') ? ' has-error' : ''}}">
                           <label>Email</label>
                           <input type="text" class="form-control" data-type="email" id="email" name="email" value="{{ Request::old('email') ?: '' }}"> 
@@ -159,10 +159,8 @@
                            @endif                            
                         </div>
                         </div>
-                        </div>
 
-                         <div class="form-group pull-in clearfix">
-                          <div class="col-sm-12">
+                        <div class="col-sm-6">
                           <label>Mobile Number <span class="text-danger">*</span></label>
                           <div class="form-group{{ $errors->has('mobile_number') ? ' has-error' : ''}}">
                           <input type="text" class="form-control" id="mobile_number" data-type="phone" data-required="true" name="mobile_number" value="{{ Request::old('mobile_number') ?: '' }}">   
@@ -172,6 +170,8 @@
                         </div>
                         </div>
                         </div>
+
+                         
 
                         
                         <div class="form-group pull-in clearfix">
@@ -282,12 +282,14 @@
                            <div class="form-group pull-in clearfix">
                               <div class="col-sm-6">
                                 <div class="form-group{{ $errors->has('insurance_company') ? ' has-error' : ''}}">
-                              <label>Insurer</label>
+                              <label>Membership Type</label>
                                <select id="insurance_company" name="insurance_company" rows="3" tabindex="1" data-placeholder="Select here.." class="form-control sm-3">
                                <option value=""> -- Not Set -- </option>
-                              @foreach($insurers as $insurer)
-                            <option value="{{ $insurer->name }}">{{ $insurer->name }}</option>
-                              @endforeach
+                              
+                            <option value="Corporate">Corporate</option>
+                            <option value="Individual">Individual</option>
+                            <option value="Family">Family</option>
+                              
                             </select>                         
                               @if ($errors->has('insurance_company'))
                               <span class="help-block">{{ $errors->first('insurance_company') }}</span>
@@ -303,15 +305,15 @@
                               <div class="form-group pull-in clearfix">
                               <div class="col-sm-6">
                                 <div class="form-group{{ $errors->has('insurance_cover') ? ' has-error' : ''}}">
-                              <label>Group Plan</label>
+                              <label>Cover / Plan</label>
                                <select id="insurance_cover" name="insurance_cover" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
                                <option value=""> -- Not Set -- </option>
                                <option value="Comprehensive"> Comprehensive </option>
                                <option value="Standard"> Standard </option>
                                <option value="Platinum"> Platinum </option>
-                               <option value="Mercury"> Mercury </option>
-                                <option value="Emerald"> Emerald </option> 
-                                <option value="Diamond"> Diamond </option> 
+                               <option value="Adom"> Adom </option>
+                                <option value="Unique"> Unique </option> 
+                                <option value="Wisdom"> Wisdom </option> 
                                        
                             </select>                         
                               @if ($errors->has('insurance_cover'))
@@ -384,6 +386,66 @@
                    </section> 
 
 
+                    <section class="panel panel-default">
+                     <header class="panel-heading font-bold">                  
+                    NHIS Status
+                    </header>
+                      <div class="panel-body">
+                        <div class="form-group pull-in clearfix">
+                              <div class="col-sm-6">
+                                <div class="form-group{{ $errors->has('company') ? ' has-error' : ''}}">
+                              <label>Status</label>
+                               <select id="nhia_status" name="nhia_status" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                               <option value=""> -- Not Set -- </option>
+                             
+                            <option value="Yes">Yes</option>
+                              <option value="No">No</option>
+                             
+                            </select>                         
+                              @if ($errors->has('company'))
+                              <span class="help-block">{{ $errors->first('company') }}</span>
+                               @endif           
+                            </div>
+                             </div>
+                              <div class="col-sm-6">
+                                <label>Scheme Code & number</label>
+                                <input type="text" rows="3" class="form-control" id="staff_id" name="staff_id" value="{{ Request::old('staff_id') ?: '' }}">      
+                              </div> 
+                              </div>  
+
+
+                    </div>
+                   </section> 
+
+                    <section class="panel panel-default">
+                     <header class="panel-heading font-bold">                  
+                    Other Private Health Insurance Details
+                    </header>
+                      <div class="panel-body">
+                        <div class="form-group pull-in clearfix">
+                              <div class="col-sm-6">
+                                <div class="form-group{{ $errors->has('company') ? ' has-error' : ''}}">
+                              <label>Insurer</label>
+                               <select id="other_insurance" name="other_insurance" rows="3" tabindex="1" data-placeholder="Select here.." style="width:100%">
+                               <option value=""> -- Not Set -- </option>
+                              @foreach($insurers as $insurer)
+                            <option value="{{ $insurer->name }}">{{ $insurer->name }}</option>
+                              @endforeach
+                            </select>                         
+                              @if ($errors->has('company'))
+                              <span class="help-block">{{ $errors->first('company') }}</span>
+                               @endif           
+                            </div>
+                             </div>
+                              <div class="col-sm-6">
+                                <label>Policy #</label>
+                                <input type="text" rows="3" class="form-control" id="staff_id" name="staff_id" value="{{ Request::old('staff_id') ?: '' }}">      
+                              </div> 
+                              </div>  
+                    </div>
+                   </section> 
+
+
 
                    </div>
                   
@@ -440,6 +502,10 @@ $(document).ready(function () {
       });
 
     $('#company').select2({
+      tags: true
+      });
+
+     $('#other_insurance').select2({
       tags: true
       });
         

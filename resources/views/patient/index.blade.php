@@ -5,7 +5,7 @@
             <section class="scrollable padder">
               <ul class="breadcrumb no-border no-radius b-b b-light pull-in">
                 <li><a href="index.html"><i class="fa fa-home"></i> Home </a></li>
-                <li class="active"> Manage Patient </li>
+                <li class="active"> Manage Members </li>
               </ul>
 
              
@@ -15,7 +15,7 @@
                     <img src="/images/437553.svg" width="15%" class="pull-left">
                     <a class="clear" href="/active-patients"  data-toggle="modal" class="btn btn-sm btn-default bootstrap-modal-form-open">
                       <span class="h3 block m-t-xs"><strong>{{ $customerlists->total() }}</strong></span>
-                      <small class="text-muted text-uc">Active Patient</small>
+                      <small class="text-muted text-uc">Active Members</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light lt">
@@ -23,7 +23,7 @@
                     </span>
                     <a class="clear" href="/inactive-patients">
                       <span class="h3 block m-t-xs"><strong id="bugs">0</strong></span>
-                      <small class="text-muted text-uc">Inactive Patient</small>
+                      <small class="text-muted text-uc">Inactive Members</small>
                     </a>
                   </div>
                     <div class="col-sm-6 col-md-3 padder-v b-r b-light">
@@ -146,7 +146,7 @@
                   <div class="row text-center-xs">
                     <div class="col-md-6 hidden-sm">
                       <p class="text-muted m-t pull-center">
-                      <span class="badge badge-info">Record(s) Found : {{ $customerlists->total() }} {{ str_plural('Patient', $customerlists->total()) }}</span>
+                      <span class="badge badge-info">Record(s) Found : {{ $customerlists->total() }} {{ str_plural('Member', $customerlists->total()) }}</span>
                       </p>
                     </div>
                     <div class="col-md-6 col-sm-12 text-center text-center-xs">                

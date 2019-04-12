@@ -114,6 +114,8 @@
                       </div> 
                     </div>
                   </section>
+
+                 
                 </div>
               </div>
 
@@ -226,6 +228,8 @@
 
               <div class="row">
                 <div class="col-md-12">
+
+
                   <h4 class="m-t-none">Today's Visits</h4>
                   <ul class="list-group gutter list-group-lg list-group-sp sortable">
                   @foreach($myvisits as $visit)
@@ -267,6 +271,19 @@
                  <div class="row">
 
              <div class="col-md-12">
+              <section class="panel b-light">
+                    <header class="panel-heading bg-danger dker no-border"><strong>{{ date("F") }} Birthdays</strong></header>
+                     <div class="list-group">
+                     @foreach( $birthdays as $birthday )
+                      <a href="/patient-profile-limited/{{ $birthday->patient_id }}" class="list-group-item text-ellipsis">
+                        <span class="badge bg-default">{{ $birthday->date_of_birth->age }}</span> 
+                        <span class="pull-left thumb-sm">
+                        <img src="/images/{{ $birthday->image }}" class="img-circle"> {{ $birthday->fullname }} - {{ $birthday->date_of_birth->age }} years old </span> 
+                        
+                      </a>
+                      @endforeach
+                    </div>
+                  </section> 
               <section class="panel b-light">
                     <header class="panel-heading bg-dark dker no-border"><strong>Appointments</strong></header>
                   <div class="panel-body text-center">

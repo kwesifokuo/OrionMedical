@@ -126,7 +126,7 @@
                           <br>
                      
                           
-                          <img src="/images/188062.svg" width="100%"> 
+                           <img src="/images/188062.svg" width="100%"> 
                         </div>
                       </div>
                     </section>
@@ -142,27 +142,19 @@
               
                     
                 @if($visit_details->status!='Discharged')
-                 <a href="#" onclick="doDischarge('{{$visit_details->id }}','{{ $visit_details->name }}')"  data-toggle="modal" class="btn btn-sm btn-danger bootstrap-modal-form-open pull-right"> <i class="fa fa-power-off"></i> @if($visit_details->billable=='Inpatient') Discharge from Inpatient @else End Visit @endif </a>
+                 <a href="#" onclick="doDischarge('{{$visit_details->id }}','{{ $visit_details->name }}')"  data-toggle="modal" class="btn btn-sm btn-danger bootstrap-modal-form-open pull-right"> <i class="fa fa-forward"></i> @if($visit_details->billable=='Inpatient') Discharge from Inpatient @else Forward Claim @endif </a>
                  @else
 
                  @endif
 
-                <a href="#new-appointment-request"  data-toggle="modal" class="btn btn-sm btn-info bootstrap-modal-form-open pull-right"> <i class="fa fa-plus"></i> Create a Follow Up Appointment</a>
-                
-                &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;
-                
-                @if($visit_details->billable!='Inpatient')
-                <a href="#new-admission"  data-toggle="modal" class="btn btn-sm btn-warning bootstrap-modal-form-open pull-right"> <i class="fa fa-plus"></i> Admit Patient </a>
-                @else
-
-                @endif
+              
 
 
               {{--     <a href="#new-discharge"  data-toggle="modal" class="btn btn-sm btn-warning bootstrap-modal-form-open pull-right"> <i class="fa fa-plus"></i> Discharge Patient </a> --}}
                 
 
 
-                     <p class="block pull-left"><a href="#" class=""></a> <span class="label label-success btn-rounded">{{ $visit_details->status }} </span></p>
+                    
 
                       @if($visit_details->billable=='Inpatient')
 
@@ -184,17 +176,17 @@
                       <ul class="nav nav-tabs nav-white">
                     
                      
-                          <li class=""><a href="#review-complaint" data-toggle="tab"><i class="fa fa-meh-o text-default"></i> Chart Notes </a></li>
+                          <li class=""><a href="#review-complaint" data-toggle="tab"><i class="fa fa-meh-o text-default"></i> Chart Notes </a></li> 
                         <li class=""><a href="#review-diagnosis" data-toggle="tab"><i class="fa fa fa-legal (alias) text-default"></i> Provisional Diagnosis / Assesment </a></li> 
-                         <li class=""><a href="#review-assessment" data-toggle="tab"><i class="fa fa-puzzle-piece text-default"></i> Plan </a></li>
+                         {{-- <li class=""><a href="#review-assessment" data-toggle="tab"><i class="fa fa-puzzle-piece text-default"></i> Plan </a></li> --}}
                          <li class=""><a href="#review-investigation" data-toggle="tab"><i class="fa fa-film text-default"></i> Lab / Investigations </a></li>
                         <li class=""><a href="#review-procedure" data-toggle="tab"><i class="fa fa-gears (alias) text-default"></i> Procedures </a></li>
                         <li class=""><a href="#review-medication" data-toggle="tab"><i class="fa fa-flask text-default"></i> Medication </a></li>
                         
-                         <li class=""><a href="#review-documents" data-toggle="tab"><i class="fa fa-folder text-default"></i> Documents </a></li> 
-                         <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa  fa-code-fork text-default"></i> Notes Summary </a></li> 
-                         <li class=""><a href="#history-summary" data-toggle="tab"><i class="fa fa-archive text-default"></i> Notes History (Old Visits) </a></li> 
-                         <li class=""><a href="#review-referal" data-toggle="tab"><i class="fa fa-briefcase text-default"></i> Referal Note </a></li> 
+                        {{--  <li class=""><a href="#review-documents" data-toggle="tab"><i class="fa fa-folder text-default"></i> Documents </a></li>  --}}
+                         <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa  fa-code-fork text-default"></i> Visit Summary </a></li> 
+                         <li class=""><a href="#history-summary" data-toggle="tab"><i class="fa fa-archive text-default"></i> Visit History (Old Visits) </a></li> 
+                        {{--  <li class=""><a href="#review-referal" data-toggle="tab"><i class="fa fa-briefcase text-default"></i> Referal Note </a></li> 
                          <li class=""><a href="#review-continuation" data-toggle="tab"><i class="fa fa-file text-default"></i> Continuation Note for Ward Review </a></li> 
 
                           <li class=""><a href="#review-vitals" data-toggle="tab"><i class="fa fa-tint text-default"></i> Intake / Output Chart </a></li>  
@@ -204,7 +196,7 @@
 
                          <li class=""><a href="#review-discharge" data-toggle="tab"><i class="fa fa-bars text-default"></i> Visit Summary </a></li>
                          <li class=""><a href="#review-appointment" data-toggle="tab"><i class="fa fa-calendar text-default"></i> Book & View Appointments </a></li>
-                         <li class=""><a href="#review-admission" data-toggle="tab"><i class="fa fa-bell-o text-default"></i> Admission / Detentions </a></li>
+                         <li class=""><a href="#review-admission" data-toggle="tab"><i class="fa fa-bell-o text-default"></i> Admission / Detentions </a></li> --}}
                       </ul>
                     </header>
 
@@ -388,6 +380,7 @@
                       <a href="/consultation/{{$visits->opd_number}}" class="h4">{{$visits->consultation_type}}</a>
                       <small class="block"><a href="#" class="">{{$visits->referal_doctor}}</a> <span class="label label-success">Click to view</span></small>
                       <small class="block m-t-sm">{{$visits->chief_complaint}}</small>
+                       <small class="block m-t-sm">{{$visits->branch}}</small>
                     </div>
                   </article>
                   <div class="line"></div>

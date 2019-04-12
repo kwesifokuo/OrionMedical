@@ -1815,6 +1815,23 @@ select[multiple].input-sm {
   line-height: 1.33;
   border-radius: 6px;
 }
+
+
+.input-lgx {
+  border: none;
+        position: absolute;
+        top: 40px;
+        bottom: 40px;
+        margin: 0;
+        padding: 10%;
+        width: 100%;
+        text-align: center;
+        font-family: Helvetica;
+        font-size: 92px;
+        outline: none;
+}
+
+
 select.input-lg {
   height: 46px;
   line-height: 46px;

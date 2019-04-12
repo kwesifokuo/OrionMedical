@@ -147,13 +147,13 @@
                      {{--  
                         
                         --}}
-                        <li class=""><a href="#review-complaint" data-toggle="tab"> <i class="fa fa-folder-o text-default"></i>  Clerking Notes </a></li>
+                       {{--  <li class=""><a href="#review-complaint" data-toggle="tab"> <i class="fa fa-folder-o text-default"></i>  Clerking Notes </a></li>
 
                          <li class=""><a href="#review-assessment" data-toggle="tab"> <i class="fa fa-align-justify text-default"></i>  Examination Findings </a></li>
 
 
                         <li class=""><a href="#review-continuation" data-toggle="tab"> <i class="fa fa-list-ul text-default"></i>  Summary Notes </a></li>
-
+ --}}
 
                         <li class=""><a href="#review-diagnosis" data-toggle="tab"> <i class="fa fa-gavel text-default"></i>   Diagnosis  </a></li> 
                         
@@ -161,8 +161,10 @@
                         
                         <li class=""><a href="#review-procedure" data-toggle="tab"> <i class="fa fa-fire text-default"></i>  Procedures </a></li>
                         <li class=""><a href="#review-medication" data-toggle="tab"> <i class="fa fa-flask text-default"></i>  Medication </a></li>
+{{-- 
+                        
                         <li class=""><a href="#review-documents" data-toggle="tab"><i class="fa fa-folder text-default"></i> Documents </a></li> 
-                        <li class=""><a href="#review-history" data-toggle="tab"> <i class="fa fa-tasks text-default"></i>  Treatment Plan  </a></li>
+                        <li class=""><a href="#review-history" data-toggle="tab"> <i class="fa fa-tasks text-default"></i>  Treatment Plan  </a></li> --}}
                          <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa  fa-code-fork text-default"></i> Visit Summary </a></li> 
                          <li class=""><a href="#history-summary" data-toggle="tab"><i class="fa fa-archive text-default"></i> Notes History (Old Visits) </a></li> 
                          {{-- <li class=""><a href="#review-referal" data-toggle="tab"><i class="fa fa-briefcase text-default"></i> Referal Note </a></li> 

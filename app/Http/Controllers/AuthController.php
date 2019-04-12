@@ -166,6 +166,14 @@ class AuthController extends Controller
                     ->with('info','You are now signed in');
 
                 }
+               else if(Auth::user()->usertype == 'Patient')
+                {
+                    return redirect()
+                    ->route('patient-profile-limited',Auth::user()->username)
+                    ->with('info','You are now signed in');
+
+                }
+
                 else
                 {
                     return redirect()
@@ -225,6 +233,27 @@ class AuthController extends Controller
     
 
 
+     public function searchUser(Request $request)
+    {
+
+
+        $search = $request->get('search');
+       
+
+           $users = User::where('fullname', 'like', "%$search%")
+                     ->orWhere('location', 'like', "%$search%")
+                     ->orWhere('usertype', 'like', "%$search%")
+                     ->orderBy('fullname','desc')
+                      ->paginate(30)
+                      ->appends(['search' => $search]);
+   
+ 
+       
+         return view('auth.user', compact('users'));
+
+
+
+    }
 
 
      public function getUsers()

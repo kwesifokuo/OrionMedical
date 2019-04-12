@@ -629,7 +629,7 @@ class DoctorController extends Controller
 
         //dd($vitalcharts);
 
-        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->orderby('created_on','desc')->get();
+        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->orderby('created_on','asc')->get();
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
         $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Radiology')->orwhere('department','Laboratory')->get();
         $departments     = Department::get();
@@ -845,7 +845,7 @@ class DoctorController extends Controller
 
         //dd($vitalcharts);
 
-        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
+        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->orderby('created_on','desc')->get();
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
         $ipdservices     = ServiceCharge::orderBy('type', 'ASC')->where('department','IPD')->get();
         $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Radiology')->orwhere('department','Laboratory')->get();
@@ -1549,7 +1549,7 @@ class DoctorController extends Controller
         //$continuationop = ContinuationSheetOP::where('visit_id' ,'=', $id)->orderby('created_on','desc')->first() ?: new ContinuationSheet;
         
 
-        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
+        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->orderby('created_on','asc')->get();
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
         $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
         $departments     = Department::get();
@@ -2046,7 +2046,7 @@ class DoctorController extends Controller
         $continuation = ContinuationSheet::where('visit_id' ,'=', $id)->orderby('created_on','desc')->first() ?: new ContinuationSheet;
         $referals = ReferalNote::where('visit_id' ,'=', $id)->first() ?: new ReferalNote;
 
-        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->get();
+        $oldvisits  =   OPD::where('patient_id' ,'=', $visit_details->patient_id)->orderby('created_on','asc')->get();
         $servicetype     = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->get();
         $generalservices = ServiceCharge::orderBy('type', 'ASC')->where('department','OPD')->orwhere('department','Radiology')->orwhere('department','Laboratory')->get();
         $departments     = Department::get();

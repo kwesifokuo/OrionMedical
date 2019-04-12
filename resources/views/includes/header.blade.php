@@ -29,7 +29,7 @@
           </section>
         </li>
 
-         <li class="dropdown">
+         {{-- <li class="dropdown">
           <a href="#" class="dropdown-toggle dker" data-toggle="dropdown">
             <i class="fa fa-shopping-cart"></i> 
             <span class="font-bold">Make Store Requisition</span>
@@ -68,7 +68,7 @@
            
           </section>
         </li>
-        
+         --}}
       </ul>      
       <ul class="nav navbar-nav navbar-right m-n hidden-xs nav-user">
       <li class="hidden-xs">

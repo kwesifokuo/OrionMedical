@@ -136,11 +136,11 @@
                         --}}
                         <li class=""><a href="#review-complaint" data-toggle="tab"> <i class="fa fa-folder-o text-default"></i>  Clerking Notes </a></li>
 
-                         <li class=""><a href="#review-ocular" data-toggle="tab"> <i class="fa fa-fire text-default"></i>  Ocular Examination </a></li>
+                        {{--  <li class=""><a href="#review-ocular" data-toggle="tab"> <i class="fa fa-fire text-default"></i>  Ocular Examination </a></li>
                         <li class=""><a href="#review-procedure" data-toggle="tab"> <i class="fa fa-fire text-default"></i>  Refraction Finding </a></li>
 
                         <li class=""><a href="#review-assessment" data-toggle="tab"> <i class="fa fa-pencil text-default"></i>  Examination Findings </a></li>
-
+ --}}
                          <li class=""><a href="#review-billing" data-toggle="tab"> <i class="fa fa-money text-default"></i>  Lens / Frame Billing </a></li>
 
                         <li class=""><a href="#review-investigation" data-toggle="tab"> <i class="fa fa-code-fork text-default"></i>  Labs / Investigation </a></li>
@@ -150,13 +150,13 @@
                   
                          <li class=""><a href="#review-summary" data-toggle="tab"><i class="fa  fa-code-fork text-default"></i> Notes Summary </a></li> 
                          <li class=""><a href="#history-summary" data-toggle="tab"><i class="fa fa-archive text-default"></i> Notes History (Old Visits) </a></li> 
-                         <li class=""><a href="#review-referal" data-toggle="tab"><i class="fa fa-briefcase text-default"></i> Referal Note </a></li> 
+                       {{--   <li class=""><a href="#review-referal" data-toggle="tab"><i class="fa fa-briefcase text-default"></i> Referal Note </a></li> 
                          <li class=""><a href="#review-continuation" data-toggle="tab"><i class="fa fa-file text-default"></i> Continuation Note for Review </a></li> 
 
                         
                          <li class=""><a href="#review-discharge" data-toggle="tab"><i class="fa fa-bars text-default"></i> Visit Summary </a></li>
                          <li class=""><a href="#review-appointment" data-toggle="tab"><i class="fa fa-calendar text-default"></i> Book & View Appointments </a></li>
-                         
+                          --}}
                         <span class="hidden-sm">.</span>
                       </ul>
                     </header>
